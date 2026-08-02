@@ -36,3 +36,20 @@
 
 - เอกสารเขียนเป็นภาษาไทย ให้ใช้ภาษาเดียวกันเมื่อเพิ่มเนื้อหาในเอกสารที่มีอยู่
 - ไฟล์ตั้งค่าเฉพาะของ Obsidian (`.obsidian/app.json`, `appearance.json`, `core-plugins.json`) เป็นการตั้งค่า vault ไม่ใช่การตั้งค่าแอปพลิเคชัน — อย่าไปแก้ไข เว้นแต่ผู้ใช้จะขอให้เปลี่ยนพฤติกรรมของ vault
+
+## ทีม Agent สำหรับโปรเจกต์นี้
+
+โปรเจกต์นี้อยู่ในสเตจ `01-requirements` ยังไม่มีโค้ด ทีม agent ที่ใช้ได้มีทั้งแบบ project-scoped (เฉพาะโปรเจกต์นี้) และแบบ global (ของบริษัท ใช้ได้ทุกโปรเจกต์):
+
+| Agent | สเตจที่รับผิดชอบ | ที่อยู่ |
+|-------|------------------|--------|
+| **XAVIER** (เอ็กซาเวียร์) | `01-requirements` — วิเคราะห์ requirement, เขียน user story/business rule, จัดลำดับ product backlog | `.claude/agents/xavier.md` (project) |
+| **COULSON** (โควสัน) | `02-design` — architecture, DB schema, API design ต่อจาก backlog ที่ XAVIER ส่งมอบ | global |
+| **SHURI** (ชูริ) | `02-design/01-prototypes` + frontend build (รายงานต่อ COULSON) | global |
+| **BANNER** (แบนเนอร์) | backend/API/DB ของระบบสั่งอาหาร (รายงานต่อ COULSON) | global |
+| **OKOYE** (โอโคเย) | `03-testing` — test plan/test result, ด่านสุดท้ายก่อน deploy (รายงานต่อ COULSON) | global |
+| **JARVIS** (จาร์วิส) | ผู้ประสานงานข้ามทีมเมื่องานสเปน ≥2 แผนก | global |
+
+ลำดับการส่งงาน: **XAVIER** ปิด backlog ใน `01-requirements` ก่อน → ส่งต่อ **COULSON** เริ่ม `02-design` → ทีม SHURI/BANNER ทำตาม scope ที่ COULSON แตกให้ → **OKOYE** เป็นด่านสุดท้ายก่อนขึ้นจริง
+
+ใช้ Skill `.claude/skills/product-backlog/SKILL.md` (หรือ `/product-backlog`) เมื่อมี requirement ใหม่ที่ต้องแตกเป็น user story + backlog ก่อนส่งเข้า `01-spec` / `02-plan` / `03-task`
