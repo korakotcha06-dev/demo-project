@@ -1,38 +1,38 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+ไฟล์นี้ให้คำแนะนำแก่ Claude Code (claude.ai/code) เมื่อทำงานกับโค้ดในโปรเจกต์นี้
 
-## Project status
+## สถานะโปรเจกต์
 
-This repository currently contains **no application code** — it is an Obsidian documentation vault scaffolding the SDLC for a product that has not been built yet. There is no `package.json`, build tool, linter, or test runner. Do not invent or assume build/lint/test commands; when real application code is added to this repo, this file should be updated with the actual commands.
+โปรเจกต์นี้ยังไม่มี **โค้ดแอปพลิเคชัน** ใด ๆ — เป็นเพียง Obsidian vault สำหรับเก็บเอกสารตามโครงสร้าง SDLC ของผลิตภัณฑ์ที่ยังไม่ได้ลงมือสร้างจริง ไม่มี `package.json`, build tool, linter หรือ test runner อย่าสมมติหรือคิดคำสั่ง build/lint/test ขึ้นเอง เมื่อมีการเพิ่มโค้ดแอปพลิเคชันจริงเข้ามาในโปรเจกต์ ให้อัปเดตไฟล์นี้ด้วยคำสั่งที่ใช้งานได้จริง
 
-## Product brief
+## โจทย์ของโปรเจกต์ (Product brief)
 
-The entrepreneur (ผู้ประกอบการ) running this repo is opening a coffee shop and wants a **QR-code self-order system**: customers scan a QR code at their table and place their own order without staff taking it manually. This is the founding brief behind `docs/01-requirements` — treat it as the source of truth when drafting specs, plans, or tasks in that folder, unless a doc there has since overridden it.
+ผู้ประกอบการที่เป็นเจ้าของโปรเจกต์นี้กำลังจะเปิดร้านกาแฟ และต้องการ **ระบบสั่งอาหาร/เครื่องดื่มด้วย QR code**: ลูกค้าสแกน QR code ที่โต๊ะแล้วสั่งเองได้โดยไม่ต้องให้พนักงานมารับออเดอร์ นี่คือโจทย์ตั้งต้นที่อยู่เบื้องหลัง `docs/01-requirements` — ให้ถือว่าเป็นต้นทาง (source of truth) เวลาเขียนสเปค แผนงาน หรืองานย่อยในโฟลเดอร์นั้น เว้นแต่จะมีเอกสารในโฟลเดอร์นั้นที่เขียนทับความต้องการนี้ไว้แล้ว
 
-## Documentation architecture
+## โครงสร้างเอกสาร (Documentation architecture)
 
-The repo is an Obsidian vault (`.obsidian/`) using a fixed SDLC pipeline under `docs/`, where each stage's output feeds the next. Every folder has its own `index.md` that explains its purpose and links to the folders immediately before/after it via Obsidian wikilinks (`[[../path/index|label]]`) — **keep these links intact and update them when you add or move docs.**
+โปรเจกต์นี้เป็น Obsidian vault (`.obsidian/`) ที่ใช้ pipeline แบบ SDLC ตายตัวภายใต้ `docs/` โดยผลลัพธ์ของแต่ละขั้นตอนจะถูกส่งต่อไปยังขั้นตอนถัดไป แต่ละโฟลเดอร์จะมี `index.md` ของตัวเองที่อธิบายจุดประสงค์และลิงก์ไปยังโฟลเดอร์ก่อนหน้า/ถัดไปด้วย Obsidian wikilink (`[[../path/index|label]]`) — **ห้ามทำลิงก์เหล่านี้ขาด และต้องอัปเดตทุกครั้งที่เพิ่มหรือย้ายเอกสาร**
 
-Pipeline order:
+ลำดับ pipeline:
 
-1. **`01-requirements`** — what to build
-   - `01-spec` — feature requirements, user stories, business rules, scope (source of truth for requirements)
-   - `02-plan` — roadmap, phases/milestones, priority
-   - `03-task` — concrete to-do breakdown from the plan
-2. **`02-design`** — how it looks and how it's built, derived from requirements
-   - `01-prototypes` — wireframes/mockups, user flow, design system basics
-   - `02-technical` — architecture, database schema, API design, tech/library choices
-3. **`03-testing`** — verification, derived from design
-   - `01-test-plan` — test cases/scenarios, test data, in/out of scope
-   - `02-test-result` — pass/fail results, bugs found, fix status
-4. **`04-retrospectives`** — lessons learned per phase/sprint, drawing on `03-testing/02-test-result` and `05-log`
-5. **`05-log`** — chronological changelog and decision log, referenced by retrospectives
-6. **`00-archived`** — deprecated docs. **Never delete a doc outright** — move superseded versions or cancelled plans here to preserve history.
+1. **`01-requirements`** — จะสร้างอะไร
+   - `01-spec` — ข้อกำหนดฟีเจอร์, user stories, กฎทางธุรกิจ, ขอบเขตงาน (ต้นทางของความต้องการ)
+   - `02-plan` — roadmap, phase/milestone, ลำดับความสำคัญ
+   - `03-task` — งานย่อยที่แตกออกมาจากแผนให้ลงมือทำได้จริง
+2. **`02-design`** — หน้าตาเป็นอย่างไรและสร้างอย่างไร ต่อยอดจาก requirements
+   - `01-prototypes` — wireframe/mockup, user flow, design system เบื้องต้น
+   - `02-technical` — architecture, database schema, API design, การเลือกเทคโนโลยี/ไลบรารี
+3. **`03-testing`** — การตรวจสอบ ต่อยอดจาก design
+   - `01-test-plan` — test case/scenario, test data, ขอบเขตการทดสอบ
+   - `02-test-result` — ผล pass/fail, บั๊กที่พบ, สถานะการแก้ไข
+4. **`04-retrospectives`** — บทเรียนที่ได้แต่ละ phase/sprint โดยอ้างอิงจาก `03-testing/02-test-result` และ `05-log`
+5. **`05-log`** — changelog และ decision log แบบเรียงตามลำดับเวลา ใช้อ้างอิงใน retrospectives
+6. **`00-archived`** — เอกสารที่เลิกใช้แล้ว **ห้ามลบเอกสารทิ้งเด็ดขาด** — ให้ย้ายเวอร์ชันเก่าหรือแผนที่ยกเลิกมาเก็บไว้ที่นี่แทน เพื่อรักษาประวัติไว้
 
-When adding new documentation, place it in the stage-appropriate folder (spec-level facts go in `01-spec`, not `02-plan`, etc.) and follow the upstream/downstream references already declared in that folder's `index.md`.
+เมื่อจะเพิ่มเอกสารใหม่ ให้วางในโฟลเดอร์ที่ตรงกับขั้นตอนนั้น ๆ (ข้อมูลระดับสเปคให้ไปอยู่ใน `01-spec` ไม่ใช่ `02-plan` เป็นต้น) และทำตามการอ้างอิงต้นทาง/ปลายทางที่ประกาศไว้ใน `index.md` ของโฟลเดอร์นั้นอยู่แล้ว
 
-## Conventions
+## ข้อตกลงในการทำงาน (Conventions)
 
-- Documentation is written in Thai (ไทย); match that language when adding to existing docs.
-- Obsidian-specific settings (`.obsidian/app.json`, `appearance.json`, `core-plugins.json`) are vault config, not application config — leave them alone unless the user asks to change vault behavior.
+- เอกสารเขียนเป็นภาษาไทย ให้ใช้ภาษาเดียวกันเมื่อเพิ่มเนื้อหาในเอกสารที่มีอยู่
+- ไฟล์ตั้งค่าเฉพาะของ Obsidian (`.obsidian/app.json`, `appearance.json`, `core-plugins.json`) เป็นการตั้งค่า vault ไม่ใช่การตั้งค่าแอปพลิเคชัน — อย่าไปแก้ไข เว้นแต่ผู้ใช้จะขอให้เปลี่ยนพฤติกรรมของ vault
