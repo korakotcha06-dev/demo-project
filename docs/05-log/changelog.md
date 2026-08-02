@@ -6,6 +6,16 @@
 
 ---
 
+## 2026-08-02 — Touch ให้ feedback เชิงปฏิบัติการ 4 ข้อ คลี่คลายประเด็นเปิดที่เหลือของ backlog v1
+
+- อัปเดต [[../01-requirements/01-spec/product-backlog-v1|01-spec/product-backlog-v1]]: **(1)** เพิ่ม AC ของ US-01 ให้ชัดว่าสแกน QR ต้องเข้าหน้าสั่งอาหารโดยตรง ไม่มีหน้ากลาง **(2)** US-11 (loyalty) มีรูปแบบชัดแล้ว — opt-in + stamp card ซื้อครบ 10 แถมฟรี 1 — เลื่อนจาก P2 เป็น P1 **(3)** เพิ่ม Business Rule ข้อ 12 แยกกฎจ่ายเงินตามช่องทาง: QR โต๊ะ (dine-in) จ่ายที่เคาน์เตอร์เหมือนเดิม vs QR เคาน์เตอร์ (takeaway) ต้องจ่ายก่อนเสมอ ไม่มีจ่ายทีหลัง — เพิ่ม user story ใหม่ US-28 (ลูกค้าสั่ง+รอจ่ายเงินที่เคาน์เตอร์) และ US-29 (แคชเชียร์ยืนยันรับเงิน) **(4)** แก้ Business Rule ข้อ 2 ให้ชัดว่าตะกร้าต่อโต๊ะรองรับการสั่งพร้อมกันจากหลายคน/หลายอุปกรณ์ (concurrent) ตราบใดที่ยังไม่ปิดบิล ไม่ใช่ single-writer cart
+- แก้ Business Rule ข้อ 3 ให้ระบุชัดว่าใช้เฉพาะช่องทางโต๊ะ และปิดสถานะ NEED-INPUT เดิมทั้ง 3 ข้อ (จ่ายก่อน/หลัง, แชร์ตะกร้า/split bill, รูปแบบสมาชิก) เป็น resolved ในหัวข้อ 5 ของเอกสาร
+- อัปเดต [[../01-requirements/02-plan/release-roadmap-v1|02-plan/release-roadmap-v1]]: เพิ่ม US-28/US-29 เข้า Phase 0 (ถือเป็นความจริงเชิงปฏิบัติการตั้งแต่วันเปิดร้าน ไม่ใช่แค่ dine-in) และย้าย US-11 จาก Phase 2 มา Phase 1
+- อัปเดต [[../01-requirements/03-task/mvp-task-breakdown-v1|03-task/mvp-task-breakdown-v1]]: เพิ่มกลุ่มงาน G (ช่องทางเคาน์เตอร์/takeaway) และ task ใหม่ในกลุ่ม A/B สำหรับ channel field และ concurrent cart — ปิด blocker เดิมในหัวข้อ "งานข้ามกลุ่ม" เพราะ Touch ยืนยันแล้ว
+- ประเด็นที่ยังเปิดเล็กน้อย (ไม่บล็อก Phase 0): ถ้อยคำ consent/เงื่อนไขของ loyalty stamp card (US-11) เป็นรายละเอียดระดับ copywriting ของ Phase 1
+
+---
+
 ## 2026-08-02 — เริ่มต้น product backlog ระบบสั่งอาหารด้วย QR Code (v1)
 
 - สร้าง product backlog เริ่มต้น (v1) ที่ [[../01-requirements/01-spec/product-backlog-v1|01-spec/product-backlog-v1]] จากโจทย์ตั้งต้นใน `CLAUDE.md` — แตกเป็น 4 actors (ลูกค้า / พนักงานครัว-บาร์ / แคชเชียร์ / แอดมิน), 27 user stories พร้อม acceptance criteria, business rules, และขอบเขตงาน (in/out of scope)
