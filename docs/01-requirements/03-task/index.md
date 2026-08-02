@@ -7,3 +7,7 @@
 - ผู้รับผิดชอบและ deadline ของแต่ละงาน (ถ้ามี)
 
 เมื่อทำงานเสร็จ ผลลัพธ์ที่เกี่ยวข้องกับการออกแบบให้บันทึกต่อใน [[../../02-design/index|02-design]] และความเคลื่อนไหวสำคัญให้บันทึกใน [[../../05-log/index|05-log]]
+
+## เอกสารในโฟลเดอร์นี้
+
+- [[mvp-task-breakdown-v1|MVP Task Breakdown v1]] — งานย่อยของ Phase 0 (MVP) จาก [[../02-plan/release-roadmap-v1|02-plan/release-roadmap-v1]] แบ่งตามหน้าจอ/บทบาท พร้อมสถานะ handoff ให้ COULSON
