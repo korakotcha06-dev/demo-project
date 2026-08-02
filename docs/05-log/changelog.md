@@ -6,6 +6,14 @@
 
 ---
 
+## 2026-08-02 — เขียน retrospective ฉบับแรกของโปรเจกต์ (เฟส requirements/backlog)
+
+- สร้าง [[../04-retrospectives/requirements-phase-retro-v1|04-retrospectives/requirements-phase-retro-v1]] สรุปบทเรียนจากเฟส requirements-gathering/backlog-creation ที่เพิ่งจบ (สร้าง backlog v1 + 2 รอบ refinement ด้านล่าง) — ใช้หลักฐานจาก entry ทั้งสองของ changelog นี้ ไม่ได้อ้างอิงผลทดสอบเพราะ [[../03-testing/02-test-result/index|03-testing/02-test-result]] ยังว่างเปล่าตามที่ควรเป็น (ยังไม่มีโค้ดในโปรเจกต์)
+- ประเด็นหลักที่สรุปได้: MVP หลักไม่ต้องแก้ทิศทางตลอด 3 รอบ, การจด default+NEED-INPUT ทำให้ COULSON ไม่ต้องรอครบทุกข้อ, แต่รอบแรกพลาดถามคำถามเชิงปฏิบัติการ (เช่น มีช่องทางเคาน์เตอร์ไหม) ทำให้ต้องแก้ถึง 2 รอบทีหลัง — ตั้ง action item ให้ใช้ "operational reality checklist" ก่อนร่าง backlog รอบแรกของ feature ถัดไป
+- อัปเดต [[../04-retrospectives/index|04-retrospectives/index]] ให้ลิงก์เอกสารใหม่เข้า
+
+---
+
 ## 2026-08-02 — Touch ให้ feedback เชิงปฏิบัติการ 4 ข้อ คลี่คลายประเด็นเปิดที่เหลือของ backlog v1
 
 - อัปเดต [[../01-requirements/01-spec/product-backlog-v1|01-spec/product-backlog-v1]]: **(1)** เพิ่ม AC ของ US-01 ให้ชัดว่าสแกน QR ต้องเข้าหน้าสั่งอาหารโดยตรง ไม่มีหน้ากลาง **(2)** US-11 (loyalty) มีรูปแบบชัดแล้ว — opt-in + stamp card ซื้อครบ 10 แถมฟรี 1 — เลื่อนจาก P2 เป็น P1 **(3)** เพิ่ม Business Rule ข้อ 12 แยกกฎจ่ายเงินตามช่องทาง: QR โต๊ะ (dine-in) จ่ายที่เคาน์เตอร์เหมือนเดิม vs QR เคาน์เตอร์ (takeaway) ต้องจ่ายก่อนเสมอ ไม่มีจ่ายทีหลัง — เพิ่ม user story ใหม่ US-28 (ลูกค้าสั่ง+รอจ่ายเงินที่เคาน์เตอร์) และ US-29 (แคชเชียร์ยืนยันรับเงิน) **(4)** แก้ Business Rule ข้อ 2 ให้ชัดว่าตะกร้าต่อโต๊ะรองรับการสั่งพร้อมกันจากหลายคน/หลายอุปกรณ์ (concurrent) ตราบใดที่ยังไม่ปิดบิล ไม่ใช่ single-writer cart
