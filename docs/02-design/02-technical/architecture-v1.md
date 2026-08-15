@@ -1,0 +1,323 @@
+# Architecture v1 — ระบบสั่งอาหารด้วย QR Code (Phase 0)
+
+> **สถานะ: DRAFT (ร่างสถาปัตยกรรม Phase 0 — รอ Touch/JARVIS อนุมัติก่อนเริ่ม build)**
+> ต้นทาง: [[../../01-requirements/01-spec/product-backlog-v1|Product Backlog v1]] (US-01..US-43, Business Rule ข้อ 1-23), [[../../01-requirements/01-spec/initial-menu-data-v1|Initial Menu Data v1]], [[../../01-requirements/01-spec/ux-requirements-v1|UX Requirements v1]], [[../../01-requirements/02-plan/release-roadmap-v1|Release Roadmap v1]], [[../../01-requirements/03-task/mvp-task-breakdown-v1|MVP Task Breakdown v1]]
+> จัดทำโดย: COULSON (Web PM & Architect) — วันที่ 2026-08-15
+> เอกสารพี่น้อง: [[data-model-v1|Data Model v1]] · [[api-design-v1|API Design v1]] · หน้าจอ/flow อยู่ที่ [[../01-prototypes/index|01-prototypes]] (COULSON อีก instance รับผิดชอบ)
+
+กลับไปที่ [[index|02-technical]]
+
+---
+
+## 0. ขอบเขตของเอกสารนี้
+
+เอกสารนี้ตอบคำถาม **"ระบบนี้ประกอบด้วยอะไร ทำงานร่วมกันอย่างไร และทำไมถึงเลือกแบบนี้"** สำหรับ **Phase 0 (MVP) เท่านั้น** — ครอบคลุม US-01..US-07, US-13..US-16, US-18..US-20, US-23, US-24, US-28..US-30, US-35, US-36, US-42, US-43 ตาม [[../../01-requirements/02-plan/release-roadmap-v1|Release Roadmap v1]]
+
+**ไม่อยู่ในเอกสารนี้:** schema รายละเอียด (อยู่ที่ [[data-model-v1|Data Model v1]]), รายการ endpoint (อยู่ที่ [[api-design-v1|API Design v1]]), wireframe/design system (อยู่ที่ [[../01-prototypes/index|01-prototypes]]), และการออกแบบ ETA ของ US-38 ซึ่ง requirement ตัดสินใจแล้วว่า**เลื่อนทั้งก้อนไป Phase 1** (ดู [[../../01-requirements/03-task/mvp-task-breakdown-v1|MVP Task Breakdown v1]] หัวข้อ "งานข้ามกลุ่ม")
+
+---
+
+## 1. ข้อจำกัดจริงที่กำหนดสถาปัตยกรรม (Constraints First)
+
+สถาปัตยกรรมนี้ไม่ได้เลือกจาก "เทคโนโลยีที่ดีที่สุด" แต่เลือกจากข้อจำกัดจริง 8 ข้อนี้ ทุกการตัดสินใจในหัวข้อ 3 ย้อนกลับมาอธิบายได้ด้วยข้อใดข้อหนึ่ง:
+
+| # | ข้อจำกัด | ที่มา | ผลต่อสถาปัตยกรรม |
+|---|---|---|---|
+| C1 | **ห้ามมี app store / ห้ามติดตั้งแอป** | US-01 AC, UX-02 | ต้องเป็นเว็บที่เปิดจากกล้องมือถือได้ทันที → web app, ไม่ใช่ native |
+| C2 | **สแกนแล้วต้องเห็นเมนูภายใน ≤3 วิ (4G) / ≤5 วิ (Slow 3G) และห้ามมีหน้ากลาง** | UX-01 | URL ใน QR ต้องเป็น**หน้าเมนูเอง** ไม่ใช่ redirect · ต้อง server-render + cache เมนู |
+| C3 | **ต้อง realtime จริง ≤5 วิ ทั้ง 2 ทิศทาง** | UX-04, UX-06, US-05, US-13 | ต้องมีกลไก push ไม่ใช่ refresh เอง — และต้องเป็น push ที่ไม่ต้องดูแลเซิร์ฟเวอร์เอง |
+| C4 | **ตะกร้าต่อโต๊ะเขียนพร้อมกันได้จริงจากหลายเครื่อง** | BR ข้อ 2, UX-06 | ต้องมี DB ที่มี transaction จริง (ไม่ใช่ localStorage/สถานะในเบราว์เซอร์) |
+| C5 | **เจ้าของร้านไม่สายเทค แก้เมนู/โต๊ะเองได้ ≤5 นาที** | UX-11, US-23, US-42, persona P5 | ต้องมีหน้าแอดมินในระบบเดียวกัน ห้ามให้แก้ผ่านไฟล์/โค้ด/SQL |
+| C6 | **งบจำกัด ร้านเดียว ไม่มีทีม ops** | โจทย์ตั้งต้น | ต้องเป็น managed service ที่มี free/low tier · ห้ามมี server ที่ต้อง patch เอง |
+| C7 | **Phase 0 ห้ามเก็บข้อมูลส่วนบุคคลของลูกค้าเลย** | BR ข้อ 14, ข้อ 22 | ห้ามใช้ anonymous account / persistent device id · session token ต้องหมดอายุตามรอบบริการ |
+| C8 | **QR ที่พิมพ์ติดโต๊ะเป็นของถาวร แก้ไม่ได้** | BR ข้อ 10, US-42 | **URL scheme ของ QR คือ public API ถาวร** — โดเมนและ path ห้ามเปลี่ยนตลอดอายุร้าน |
+
+> 🔴 **C8 คือข้อจำกัดที่มองข้ามง่ายที่สุดและแพงที่สุดถ้าพลาด** — QR สติกเกอร์คือ artifact ทางกายภาพที่แก้ไม่ได้หลังพิมพ์ ถ้าเปลี่ยนโดเมน/เปลี่ยนรูปแบบ path ทีหลัง = ต้องพิมพ์ใหม่ทุกโต๊ะ ดูมาตรการที่หัวข้อ 6.3
+
+---
+
+## 2. ภาพรวมระบบ (System Overview)
+
+### 2.1 Surface ทั้ง 3 = codebase เดียว
+
+```mermaid
+graph TB
+    subgraph "อุปกรณ์ผู้ใช้"
+        A["📱 มือถือลูกค้า<br/>(guest, ไม่ login)<br/>/t/{code} · /c/{code}"]
+        B["📟 แท็บเล็ตสถานีหน้าร้าน<br/>(staff, login)<br/>/staff"]
+        C["💻 เครื่องเจ้าของร้าน<br/>(admin, login)<br/>/admin"]
+    end
+
+    subgraph "Vercel — Next.js 15 App Router (codebase เดียว)"
+        D["RSC Pages<br/>server-render เมนู/สถานะ"]
+        E["Route Handlers /api/v1<br/>ตรรกะธุรกิจ + transaction ทั้งหมด"]
+    end
+
+    subgraph "Supabase (managed)"
+        F[("PostgreSQL<br/>source of truth")]
+        G["Realtime<br/>WebSocket"]
+        H["Auth<br/>เฉพาะพนักงาน/แอดมิน"]
+        I["Storage<br/>รูปเมนู"]
+    end
+
+    A -->|HTTPS| D
+    B -->|HTTPS| D
+    C -->|HTTPS| D
+    D --> E
+    E -->|service role| F
+    E -->|ออก session token| A
+    A -.->|subscribe ตาม token| G
+    B -.->|subscribe| G
+    C -.->|subscribe| G
+    F -->|logical replication| G
+    B -->|login| H
+    C -->|login| H
+    F --> I
+```
+
+**หลักการสำคัญ 3 ข้อของภาพนี้:**
+
+1. **ทุกการเขียนผ่าน Route Handler เท่านั้น** — ไม่มี client ตัวไหน (แม้ฝั่งพนักงาน) เขียน DB ตรง เพราะกฎธุรกิจที่ต้องอยู่ในทรานแซกชันเดียว (BR ข้อ 4 reject รายเดียว, BR ข้อ 11 สถานะโต๊ะ, BR ข้อ 12 gate การจ่ายเงิน) ถ้ากระจายไปอยู่ในโค้ดฝั่ง client จะบังคับใช้ไม่ได้จริง
+2. **การอ่านแบบ realtime ไปตรงที่ Supabase Realtime** — เพราะ Vercel เป็น serverless ถือ WebSocket ค้างไม่ได้ (ดูหัวข้อ 3.3)
+3. **codebase เดียว 3 route group** — `/t`,`/c` (ลูกค้า), `/staff`, `/admin` แยกด้วย Next.js route group + middleware ตรวจสิทธิ์ ไม่ใช่ 3 โปรเจกต์ เพราะทั้ง 3 surface ใช้ menu/option/order model ชุดเดียวกัน และ US-30 บังคับให้หน้าจอพนักงานใช้ตะกร้าตัวเดียวกับลูกค้า
+
+### 2.2 Surface และผู้ใช้
+
+| Surface | Path | ผู้ใช้ | ยืนยันตัวตน | อุปกรณ์อ้างอิง |
+|---|---|---|---|---|
+| **ลูกค้า — โต๊ะ (dine-in)** | `/t/{qr_code}` | ลูกค้า (guest) | session token จาก QR (ไม่มีบัญชี) | มือถือ 375×812 mobile-first |
+| **ลูกค้า — เคาน์เตอร์ (takeaway)** | `/c/{qr_code}` | ลูกค้า (guest) | session token จาก QR | มือถือ เหมือนกัน |
+| **สถานีหน้าร้าน** | `/staff` | พนักงานแคชเชียร์/หน้าร้าน (บทบาทรวม) | Supabase Auth (email/password) | แท็บเล็ตวางเคาน์เตอร์ ระยะอ่าน 50-80 ซม. |
+| **แอดมิน** | `/admin` | เจ้าของร้าน | Supabase Auth (role=admin) | เดสก์ท็อป/แท็บเล็ต |
+
+> **หมายเหตุตาม BR ข้อ 13:** สถานีหน้าร้านเป็น **จอเดียว** สำหรับ Phase 0 (คนรับเงิน = คนทำเครื่องดื่ม) แต่ data model แยก concept "สถานี" ไว้แล้ว (ดู [[data-model-v1|Data Model v1]] §3.5) — เพิ่มสถานีที่ 2 ใน Phase 2 (US-31) ได้โดยไม่ต้องรื้อ schema
+
+---
+
+## 3. การตัดสินใจทางเทคโนโลยี (Technology Decisions)
+
+ทุกข้อระบุ **ทางเลือกที่ไม่เลือก + ข้อเสียจริงของมัน** ไม่ใช่แค่ยกมาให้ครบรูปแบบ
+
+### 3.1 Framework / Runtime → **Next.js 15 (App Router) + TypeScript**
+
+**เลือกเพราะ:** RSC ทำให้หน้าเมนูถูก render ที่เซิร์ฟเวอร์และส่ง HTML ที่มีเมนูครบมาเลย → ตอบ C2 (≤3 วิ ไม่มีหน้ากลาง) ได้โดยตรง · Route Handler ในโปรเจกต์เดียวกันทำให้ไม่ต้องมี backend แยกให้ deploy/ดูแล (C6) · TypeScript ทำให้ contract ระหว่าง 3 surface ที่แชร์ model กันไม่หลุด
+
+| ทางเลือกที่ไม่เลือก | ข้อเสียจริงในบริบทนี้ |
+|---|---|
+| **Vite + React SPA + API แยก (Express/Fastify)** | SPA ต้องโหลด JS bundle ก่อนถึงจะเห็นเมนู → พัง C2 บนเน็ตร้านช้าเกือบแน่นอน และเพิ่มของที่ต้อง deploy/ดูแลเป็น 2 ชิ้น (C6) |
+| **WordPress + WooCommerce plugin** | ทีมมี expertise จริง แต่ realtime ≤5 วิ ต้องต่อ plugin/บริการภายนอกเพิ่ม, ตะกร้าของ Woo เป็น single-session ต่อผู้ใช้ ขัด C4 ตรง ๆ, และต้องดูแล hosting+อัปเดตปลั๊กอินเอง (C6) |
+| **No-code (LINE MyShop / Google Form / Notion)** | ตัด C3 (realtime), C4 (concurrent cart), C8 (คุม URL ถาวรไม่ได้) ทิ้งทั้งหมด — เร็วกว่าในสัปดาห์แรก แต่ไม่ตอบโจทย์ตั้งต้นที่ระบบต้องรู้ว่า "โต๊ะไหนสั่ง" และแสดงสถานะ realtime |
+| **React Native / Flutter** | ขัด C1 ตรง ๆ (ต้องติดตั้งแอป) |
+
+### 3.2 ฐานข้อมูล + Auth + Storage → **Supabase (Postgres จัดการให้)**
+
+**เลือกเพราะ:** ต้องการ **relational + transaction จริง** เพราะกฎธุรกิจของระบบนี้เป็นเรื่อง invariant ข้ามหลาย entity (บิล ↔ ออเดอร์ ↔ รายการ ↔ ตัวเลือก ↔ สถานะโต๊ะ) การรีเจ็กต์รายการเดียวโดยไม่ล้มทั้งบิล (BR ข้อ 4) และการปิดบิลที่ชนกับการสั่งเพิ่ม (US-06 vs US-19) เขียนให้ถูกต้องได้เฉพาะเมื่อมี transaction + row lock · และ Supabase ให้ Realtime/Auth/Storage มาในบริการเดียว ตอบ C6 (ไม่มีทีม ops) · free tier รองรับร้านเดียวได้จริง
+
+| ทางเลือกที่ไม่เลือก | ข้อเสียจริงในบริบทนี้ |
+|---|---|
+| **Firebase / Firestore** | realtime ดีมาก แต่เป็น document store ที่ไม่มี multi-document transaction ที่เขียนง่าย — invariant แบบ "ปิดบิลต้องไม่ชนกับออเดอร์ใหม่ในโต๊ะเดียวกัน" ต้องเขียนเอง และการรวมยอดบิลกลายเป็นงาน aggregation ที่ผิดพลาดง่าย · ค่าใช้จ่ายผูกกับจำนวน read ซึ่ง realtime ทำให้พุ่งได้ |
+| **Postgres self-host (VPS) + Socket.io เอง** | ควบคุมได้เต็มที่และถูกกว่าในระยะยาว แต่ต้อง patch OS, ทำ backup, ต่อ SSL, monitor uptime เอง — ขัด C6 ชัดเจนสำหรับร้านที่ไม่มีคนดูแล |
+| **PocketBase / Appwrite (self-host)** | เบาและมี realtime ในตัว แต่ยังต้องมี VPS ที่ใครสักคนดูแล (C6) และ ecosystem/เอกสารบางกว่าเมื่อเจอปัญหา production |
+| **Planetscale / Neon + Auth แยก + Realtime แยก** | Postgres/MySQL ดีแต่ต้องประกอบ 3 บริการเอง → เพิ่มจุดที่พังได้และเพิ่มงาน integrate โดยไม่ได้อะไรที่ Supabase ไม่มี |
+
+### 3.3 กลไก Realtime → **Supabase Realtime (Postgres Changes ผ่าน WebSocket) + polling fallback 5 วินาที**
+
+**นี่คือการตัดสินใจ ไม่ใช่การยกทางเลือกทิ้งไว้** — requirement (กลุ่มงาน C ใน task breakdown) ระบุว่า "ต้องอัปเดตโดยลูกค้าไม่ต้องกดรีเฟรชเอง" และ UX-04/UX-06 กำหนด ≤5 วินาที
+
+**เลือก WebSocket ผ่าน Supabase Realtime เป็นทางหลัก** เพราะ:
+- เขียนที่ Postgres แล้ว event ไหลออกมาเอง (logical replication) → **ไม่มีทางที่ UI กับ DB จะไม่ตรงกันเพราะลืม publish event** ซึ่งเป็นบั๊กคลาสสิกของ pub/sub ที่แยกจาก DB
+- ตอบ C6: ไม่มี WebSocket server ให้ดูแล และ Vercel serverless ถือ connection ค้างไม่ได้อยู่แล้ว
+- latency จริงหลัก 100-500ms << 5 วินาที เหลือ headroom ให้เน็ตร้านช้า
+
+**แต่ต้องมี polling fallback เสมอ** — เน็ตร้านกาแฟหลุด/WebSocket โดน captive portal หรือ proxy บล็อกเป็นเรื่องปกติ ถ้า WS ล้มแล้วจอนิ่งเงียบ พนักงาน (persona P4 เบียร์ = single point of failure ของทั้งระบบ) จะพลาดออเดอร์โดยไม่รู้ตัว ดังนั้น:
+- ทุก client ที่ subscribe ต้องมี **heartbeat check**: ถ้าไม่ได้รับ event หรือ connection state ≠ `SUBSCRIBED` เกิน 10 วินาที → สลับเป็น polling `GET` ทุก 5 วินาทีอัตโนมัติ และ**แสดงป้ายบอกผู้ใช้ว่าอยู่ในโหมดสำรอง** (ไม่ใช่ degrade เงียบ ๆ)
+- จอสถานี (`/staff`) ต้องมี **ตัวบ่งชี้สถานะการเชื่อมต่อที่มองเห็นตลอดเวลา** (ข้อความ+ไอคอน ไม่ใช้สีเดี่ยว ตาม UX-10/BR ข้อ 23)
+
+| ทางเลือกที่ไม่เลือก | ข้อเสียจริงในบริบทนี้ |
+|---|---|
+| **Polling อย่างเดียว (ทุก 3-5 วิ)** | ทำได้และง่ายที่สุด แต่จอสถานีที่เปิดค้างทั้งวัน = ~20,000 request/วัน/เครื่อง ทั้งที่ 95% ไม่มีอะไรเปลี่ยน · และ UX-06 (2 เครื่องเห็นตะกร้ากันภายใน 5 วิ) จะรู้สึกกระตุกทุกครั้งที่เพื่อนร่วมโต๊ะเพิ่มของ ทำให้ "ตะกร้าแชร์" รู้สึกพัง ทั้งที่ทำงานถูก |
+| **SSE (Server-Sent Events)** | ทางเดียว (server→client) พอสำหรับสถานะ แต่บน Vercel serverless การถือ stream ค้างนาน ๆ กิน execution time และ reconnect logic ต้องเขียนเอง — ได้ข้อเสียของ WebSocket โดยไม่ได้ข้อดี |
+| **Socket.io server ของตัวเอง** | ยืดหยุ่นสุด แต่ต้องมี long-running server แยก (VPS/Fly.io) = ของชิ้นที่ 3 ที่ต้องดูแล ขัด C6 และเพิ่มความเสี่ยงว่า event กับ DB ไม่ตรงกัน |
+| **Push Notification (Web Push)** | ต้องเก็บ push token ที่ผูกกับอุปกรณ์ข้ามครั้งการใช้งาน → **ขัด BR ข้อ 22 ตรง ๆ** (US-39 จำกัดเป็น in-app/session-scoped เท่านั้น) ห้ามใช้ |
+
+**ช่องทางที่ subscribe (Phase 0):**
+
+| ผู้ subscribe | ขอบเขตที่เห็น | บังคับด้วย |
+|---|---|---|
+| ลูกค้าโต๊ะ | cart_item + order + order_item ของ `table_session` ตัวเอง เท่านั้น | RLS อ่าน claim `tsid` จาก session token |
+| ลูกค้าเคาน์เตอร์ | order ของ `customer_session` ตัวเอง เท่านั้น | RLS อ่าน claim `sid` |
+| ทุก client (รวมลูกค้า) | `product.is_available`, `option_value.is_available` (สาธารณะ) | ตาราง read-public |
+| จอสถานี | order/order_item ทั้งหมดที่ยังไม่ปิด + bill + table_session | role=staff |
+
+### 3.4 การยืนยันตัวตน → **แยก 2 กลไกโดยเจตนา**
+
+**พนักงาน/แอดมิน (BR ข้อ 9):** Supabase Auth (email+password) → JWT มี claim `role` (`staff` \| `admin`) · เก็บเฉพาะ username/hash/role เท่านั้นตาม BR ข้อ 21 · Phase 0 ใช้บัญชีต่อสถานี (พนักงาน 1 + แอดมิน 1) ตามที่ US-27 ระบุว่าเพียงพอ — **ข้อเสียที่ต้องรู้ตัว:** audit trail ของการยกเลิก/ปิดบิลจะบอกได้แค่ "บัญชีพนักงาน" ไม่ใช่ "คนไหน" (ดูความเสี่ยง R7)
+
+**ลูกค้า (C7 + BR ข้อ 8/14):** **ไม่มีบัญชี และห้ามใช้ anonymous sign-in** — Supabase anonymous auth สร้าง user row ถาวรที่ระบุอุปกรณ์ข้ามครั้งการใช้บริการได้ = ขัด BR ข้อ 14 ตรง ๆ
+
+แทนที่ด้วย **session token ที่ผูกกับรอบบริการ**:
+- ลูกค้าสแกน QR → เซิร์ฟเวอร์สร้าง/เข้าร่วม `customer_session` แล้วออก JWT ที่มี claim `{ sid, tsid?, tid?, ch, exp }` — **ไม่มีข้อมูลส่วนบุคคลใด ๆ** เก็บใน cookie แบบ `HttpOnly; Secure; SameSite=Lax`
+- อายุ: 60 นาทีตาม UX-05 ต่ออายุอัตโนมัติทุกครั้งที่มี activity **แต่ตายทันทีเมื่อบิลของโต๊ะถูกปิด** (BR ข้อ 7)
+- token นี้เซ็นด้วย JWT secret เดียวกับ Supabase → ใช้ subscribe Realtime ได้โดย RLS ตรวจ `auth.jwt()->>'tsid'` ได้ตรง ๆ ไม่ต้องมี proxy realtime เอง
+
+> **ผลข้างเคียงที่ยอมรับโดยเจตนา:** ใครก็ตามที่ถ่ายรูป QR โต๊ะไปสแกนจากที่อื่นจะเห็นตะกร้า/ยอดของโต๊ะนั้นได้ — **QR ทางกายภาพคือ credential** นี่เป็นผลตรงจาก BR ข้อ 10 (QR static) + ข้อ 8 (ไม่มีบัญชี) ที่ Touch ยืนยันแล้ว ไม่ใช่ช่องโหว่ที่เผลอทำ ความเสียหายสูงสุดคือเห็นรายการเครื่องดื่มของโต๊ะ (ไม่มีข้อมูลส่วนบุคคลให้รั่ว ตาม BR ข้อ 14) และแกล้งสั่งของเข้าโต๊ะคนอื่นได้ — มาตรการลดผลกระทบอยู่ที่ความเสี่ยง R6
+
+### 3.5 ส่วนประกอบที่เหลือ
+
+| ส่วน | เลือก | เหตุผลสั้น |
+|---|---|---|
+| Styling | Tailwind CSS + shadcn/ui | design token (ฟอนต์ ≥16px, contrast, ปุ่ม ≥44/48px ตาม BR ข้อ 23) บังคับได้ที่ระดับ token — SHURI/01-prototypes เป็นเจ้าของค่าจริง |
+| ฟอร์ม/validation | React Hook Form + **Zod** | schema Zod ตัวเดียวใช้ validate ทั้งฝั่ง client และใน Route Handler → กันเคส client bypass |
+| รูปเมนู | Supabase Storage + `next/image` (WebP, responsive) | เน็ตร้านช้าเป็นข้อจำกัดจริง (UX §4) รูปเมนูคือ payload ที่ใหญ่ที่สุด |
+| สร้าง QR | สร้างเป็น PNG/SVG ฝั่งเซิร์ฟเวอร์ตอนแอดมินกดดาวน์โหลด (US-24/US-42) | ไม่ต้องเก็บไฟล์ QR — เนื้อหาคือ URL ที่ derive จาก `qr_code.code` ได้เสมอ |
+| เวลา | เก็บเป็น `timestamptz` ทั้งหมด แสดงผลด้วย `Asia/Bangkok` | กันเคสรายงาน/กะข้ามวันเพี้ยนใน Phase 1 (US-17/US-25) |
+| เงิน | **จำนวนเต็มหน่วยสตางค์ (integer)** | ไม่มี float error สะสมตอนรวมบิล — แปลงเป็นบาทเฉพาะตอนแสดงผล |
+| ภาษา | ไทยเป็นหลัก โครงสร้าง content แยก string ออกจาก component | US-10 (สองภาษา) เป็น P2 แต่ต้องไม่ปิดทาง |
+
+---
+
+## 4. Flow หลักที่สถาปัตยกรรมต้องรองรับ
+
+### 4.1 dine-in — ออเดอร์เข้าครัวได้เลย ไม่ต้องรอจ่าย (BR ข้อ 3)
+
+```mermaid
+sequenceDiagram
+    participant ลูกค้า
+    participant Next as Next.js RSC/API
+    participant PG as Postgres
+    participant RT as Realtime
+    participant สถานี
+
+    ลูกค้า->>Next: GET /t/{code} (สแกน QR)
+    Next->>PG: resolve QR → table + เปิด/เข้าร่วม table_session
+    Next-->>ลูกค้า: HTML หน้าเมนู + set session cookie (ไม่มีหน้ากลาง)
+    ลูกค้า->>Next: POST /api/v1/cart/items (เพิ่มของ)
+    Next->>PG: INSERT ... ON CONFLICT DO UPDATE (atomic)
+    PG-->>RT: change event
+    RT-->>ลูกค้า: อุปกรณ์อื่นในโต๊ะเดียวกันเห็นทันที (UX-06)
+    ลูกค้า->>Next: POST /api/v1/orders (ยืนยัน + Idempotency-Key)
+    Next->>PG: TX: ตรวจของหมดรายรายการ → สร้าง order → เปิด table_session ถ้ายังไม่เปิด
+    PG-->>RT: order ใหม่
+    RT-->>สถานี: ตั๋วออเดอร์ขึ้นจอ + เสียงแจ้งเตือน (US-13/US-15)
+    Next-->>ลูกค้า: 201 {order, rejected_items[]} — reject เฉพาะรายการที่หมด (BR ข้อ 4)
+```
+
+### 4.2 counter/takeaway — ต้องจ่ายก่อนเสมอ (BR ข้อ 12)
+
+- **ที่มา ก (US-28 ลูกค้าสั่งเอง):** ยืนยันออเดอร์ → order สถานะ `awaiting_payment` → **ไม่ขึ้นคิวทำ** → แคชเชียร์กดยืนยันรับเงิน (US-29) → order ไป `queued` และขึ้นคิวเดียวกับทุกช่องทาง
+- **ที่มา ข (US-30 พนักงานคีย์แทน):** สร้างออเดอร์ + บันทึกรับเงิน **ในทรานแซกชันเดียว** → order เกิดมาเป็น `queued` ทันที ไม่ต้องมีขั้นยืนยันซ้ำ
+- ทั้งสองที่มาบรรจบที่คิวเดียวกัน ต่างกันแค่ `origin` field เพื่อการ audit/แยกป้ายบนจอ (UX-10)
+
+**invariant ที่บังคับที่ระดับฐานข้อมูล ไม่ใช่แค่ที่ UI:** ออเดอร์ channel=`counter` จะพ้นจาก `awaiting_payment` ได้ก็ต่อเมื่อบิลของมันมี `paid_at` แล้วเท่านั้น (ดู [[data-model-v1|Data Model v1]] §5 INV-3)
+
+### 4.3 ปิดบิล (US-19) — จุดเดียวที่โต๊ะกลับเป็นว่าง
+
+ไม่มี endpoint ใดในระบบที่เขียน "สถานะโต๊ะ" ได้โดยตรง — สถานะโต๊ะ **derive จากการมีอยู่ของ `table_session` ที่ยังเปิด** เท่านั้น (BR ข้อ 11) รายละเอียดที่ [[data-model-v1|Data Model v1]] §4.2
+
+---
+
+## 5. การ Deploy และสภาพแวดล้อม
+
+### 5.1 สภาพแวดล้อม
+
+| สภาพแวดล้อม | Vercel | Supabase | ใช้ทำอะไร |
+|---|---|---|---|
+| `development` | local `next dev` | Supabase local (Docker) หรือ project แยก | พัฒนา |
+| `preview` | auto ต่อ PR | project `staging` | OKOYE ทดสอบ + usability test ตาม UX §7 |
+| `production` | domain จริง | project `production` | ร้านจริง |
+
+**ห้ามให้ preview ชี้ไปที่ DB production เด็ดขาด** — การทดสอบ concurrent cart / ปิดบิล จะสร้างข้อมูลปลอมปนบิลจริง
+
+### 5.2 CI/CD และ migration
+
+- Git → Vercel auto deploy (PR = preview, main = production)
+- Schema เป็น **migration file ใน repo** (`supabase/migrations/*.sql`) เท่านั้น — ห้ามแก้ schema ผ่าน dashboard เพราะ environment จะไหลออกจากกันแล้ว reproduce บั๊กไม่ได้
+- Seed data (เมนู 19 รายการ + option group 4 กลุ่ม จาก [[../../01-requirements/01-spec/initial-menu-data-v1|Initial Menu Data v1]]) เป็น seed script แยกจาก migration — เพราะราคาเป็น DRAFT ที่ Touch ต้องเคาะเอง และหลังเปิดร้านเจ้าของร้านแก้ผ่าน UI (US-23) ไม่ใช่แก้ seed
+- **Gate ก่อน production:** OKOYE ต้องผ่าน checklist ใน [[../../03-testing/01-test-plan/index|01-test-plan]] รวม test case เฉพาะของ BR ข้อ 2 (concurrent cart) และ ข้อ 3/12 (กฎจ่ายเงิน) ตาม UX §7 ข้อ 5
+
+### 5.3 โดเมนและ URL scheme ของ QR — สัญญาถาวร (C8)
+
+**ตัดสินใจก่อนพิมพ์ QR ใบแรก และห้ามเปลี่ยนอีกเลย:**
+
+```
+https://<โดเมนสั้นของร้าน>/t/{code}   ← QR โต๊ะ (dine-in)
+https://<โดเมนสั้นของร้าน>/c/{code}   ← QR เคาน์เตอร์ (takeaway)
+```
+
+- `{code}` = สตริงสุ่มสั้น (base32 8-10 ตัว) **ไม่ใช่ table id และไม่ใช่เลขโต๊ะ** → เดา URL ของโต๊ะอื่นไม่ได้ และเปลี่ยนชื่อโต๊ะแล้ว QR ไม่พัง (US-42)
+- ใช้โดเมนที่ร้านเป็นเจ้าของเอง **ห้ามใช้ `*.vercel.app` บน QR ที่พิมพ์จริง** — ถ้าย้าย hosting ทีหลังจะต้องพิมพ์ QR ใหม่ทุกใบ
+- path `/t/` และ `/c/` ต้องคง redirect ถาวรไว้ตลอดไปแม้จะ refactor route ภายใน
+- **ก่อนสั่งพิมพ์เต็มจำนวน:** พิมพ์ต้นแบบ 1 ใบ ทดสอบ flow จริงบนมือถือ ≥2 รุ่น ตาม task ในกลุ่มงาน A
+
+### 5.4 การสำรองข้อมูลและกู้คืน
+
+| รายการ | Phase 0 |
+|---|---|
+| Backup อัตโนมัติ | Supabase daily backup (ต้องยืนยันว่า tier ที่ใช้เปิดให้จริง — ดูความเสี่ยง R2) |
+| Backup ที่ควบคุมเอง | `pg_dump` รายวันเก็บนอก Supabase (งานเล็ก คุ้มมากถ้าเทียบกับการเสียบิลทั้งวัน) |
+| แผน rollback ของโค้ด | Vercel instant rollback ไป deployment ก่อนหน้า |
+| แผน rollback ของ schema | ทุก migration ต้องมี down script หรือเป็น additive-only — **ห้าม migration ที่ลบคอลัมน์ในวันเปิดร้าน** |
+| แผนสำรองตอนระบบล่ม | รับออเดอร์ด้วยกระดาษ + คีย์เข้าระบบย้อนหลังผ่าน US-30 เมื่อระบบกลับมา (ดู R1) |
+
+---
+
+## 6. ตารางความเสี่ยงทางเทคนิค
+
+| # | ความเสี่ยง | โอกาส | ผลกระทบ | มาตรการ |
+|---|---|---|---|---|
+| **R1** | **เน็ตร้านล่ม/ช้า → ทั้งระบบใช้ไม่ได้** (cloud-dependent 100%, Phase 0 ไม่มี offline mode) | สูง | สูงสุด — สั่งอาหารไม่ได้เลยทั้งร้าน | (1) เตรียม mobile hotspot สำรองเป็น SOP ของร้าน (2) SOP กระดาษ + คีย์ย้อนหลังผ่าน US-30 (3) หน้าจอทุก surface ต้องแสดงสถานะ offline ชัดเจน ห้ามค้างเงียบ (4) พิจารณา PWA + service worker cache เมนูใน Phase 1 |
+| **R2** | Supabase free tier มีเพดาน concurrent realtime connection และอาจ pause project ถ้าไม่ active | กลาง | สูง — จอสถานีหลุด realtime ช่วง peak | ยืนยัน tier ที่ใช้จริงก่อนเปิดร้าน · polling fallback (§3.3) ทำให้ยังทำงานต่อได้แม้ WS ตาย · monitor จำนวน connection |
+| **R3** | Vercel serverless cold start + เน็ตช้า ทำให้พลาดเกณฑ์ UX-01 (≤3 วิ / ≤5 วิ) | กลาง | กลาง — ลูกค้าที่รีบ (persona ฟ้า) เลิกใช้ | เมนูเป็น static/ISR cache + revalidate ตอนแอดมินแก้ · บีบรูปเป็น WebP หลายขนาด · วัดจริงด้วย Lighthouse บนโปรไฟล์ Slow 3G ก่อน sign-off |
+| **R4** | **บั๊ก concurrency ของตะกร้าแชร์** (BR ข้อ 2) — รายการหายหรือถูกเขียนทับ | กลาง | สูง — ทำเครื่องดื่มผิด/ขาด ลูกค้าไม่พอใจที่หน้าร้าน | API ระดับรายการ + `ON CONFLICT DO UPDATE` (ไม่มี PUT ทั้งตะกร้า) · optimistic version บนการตั้งจำนวน · test case เฉพาะของ OKOYE ตาม UX §7 ข้อ 5 (0% data loss, ≥3 รอบ) |
+| **R5** | **ปิดบิลชนกับการสั่งเพิ่ม** → เก็บเงินขาด | กลาง | สูง — ความเสียหายเป็นเงินจริง | `SELECT ... FOR UPDATE` บน `table_session` ทั้ง 2 path · ปิดบิลต้องส่ง `expected_total` มาด้วย ถ้าไม่ตรง → 409 พร้อมรายการใหม่ ให้พนักงานยืนยันยอดใหม่ (ห้ามเก็บยอดเก่าเงียบ ๆ) — ดู [[api-design-v1|API Design v1]] §5.3 |
+| **R6** | QR ทางกายภาพคือ credential — ถ่ายรูป QR ไปสั่งของเข้าโต๊ะคนอื่น/ดูยอดโต๊ะอื่นได้ | ต่ำ-กลาง | กลาง — ก่อกวน ไม่ใช่ข้อมูลรั่ว (Phase 0 ไม่มีข้อมูลส่วนบุคคล) | ผลตรงจาก BR ข้อ 8+10 ที่ยืนยันแล้ว · จำกัดผลด้วย rate limit ต่อ session · session ตายเมื่อปิดบิล · พนักงานยกเลิกรายการที่ผิดปกติได้ทันที (US-20) |
+| **R7** | บัญชี login ใช้ร่วมกันต่อสถานี (US-27 เป็น P2) → audit บอกไม่ได้ว่าใครยกเลิก/ปิดบิล | สูง | ต่ำ-กลาง | ยอมรับใน Phase 0 ตามที่ backlog ระบุ · เก็บ `staff_user_id` ในทุก event ไว้แล้ว → พอ US-27 มา บัญชีรายคนใช้ field เดิมได้ทันทีโดยไม่ต้อง migrate |
+| **R8** | เจ้าของร้านแก้ราคาเมนูระหว่างที่มีบิลเปิดค้าง → ยอดบิลเปลี่ยนย้อนหลัง | กลาง | สูง — ทะเลาะกับลูกค้าเรื่องเงิน | **snapshot ชื่อ+ราคา+ตัวเลือกลงใน `order_item` ตอนยืนยันออเดอร์** ราคาในเมนูเปลี่ยนภายหลังไม่กระทบบิลที่สั่งไปแล้ว (ดู [[data-model-v1|Data Model v1]] §3.3) |
+| **R9** | จอสถานีเป็น single point of failure (BR ข้อ 13 สถานีเดียว, persona P4) | สูง | สูง | ออกแบบให้ `/staff` เปิดพร้อมกันได้หลายเครื่องโดยไม่ชนกัน (conditional update ตาม §5 ของ API doc) → ถ้าแท็บเล็ตตาย ใช้มือถือพนักงานเปิดแทนได้ทันที |
+| **R10** | Vendor lock-in กับ Supabase/Vercel | ต่ำ | กลาง | core คือ Postgres มาตรฐาน + Next.js — ย้าย self-host ได้ · สิ่งที่ผูกจริงคือ Realtime กับ Auth ซึ่งถูกห่อไว้หลัง service layer ของเราเอง ไม่เรียกตรงจาก component |
+| **R11** | ค่าใช้จ่ายบานปลายจาก realtime/รูปภาพเมื่อร้านเดินเครื่องเต็ม | ต่ำ | ต่ำ | ตั้ง billing alert · ควบคุมขนาดรูป · ทบทวนหลังเปิดร้าน 1 เดือน |
+| **R12** | เวลา/เขตเวลาเพี้ยนทำให้รายงานกะ (Phase 1) ผิด | ต่ำ | กลาง | `timestamptz` ทุก field ตั้งแต่ Phase 0 + นิยาม "วันทำการ" ให้ชัดตอนออกแบบ US-17/US-25 |
+
+---
+
+## 7. สิ่งที่ Phase 0 จงใจ "ไม่ทำ" แต่ต้องไม่ปิดทาง
+
+| ไม่ทำตอนนี้ | ทำไม | เตรียมทางไว้อย่างไร |
+|---|---|---|
+| ETA / จำนวนคิว (US-38) | requirement ตัดสินใจแล้วว่าเลื่อนทั้งก้อนไป Phase 1 พร้อมอัลกอริทึม | ไม่เตรียม schema ล่วงหน้าโดยเจตนา (ตามที่ task breakdown สั่ง) |
+| Aging indicator (US-41) | Phase 1 | เก็บ `placed_at` + `status_changed_at` ของทุกออเดอร์ตั้งแต่ Phase 0 → คำนวณ aging ได้ทันทีโดยไม่ต้อง migrate |
+| ปุ่มเรียกพนักงาน (US-37) | Phase 1 — เป็น event ใหม่ที่ไม่แตะ schema เดิม | ไม่ต้องเตรียมอะไร ยืนยันตามที่ task breakdown ประเมินไว้ |
+| Loyalty + PDPA (US-11, US-32-34) | Phase 1 — **จุดเดียวที่จะเก็บข้อมูลส่วนบุคคล** | Phase 0 ไม่มีตารางลูกค้าเลย — เมื่อถึง Phase 1 จะเป็นตารางใหม่ที่แยกขาด ทำให้ scope ของ PDPA ชัดเจนโดยธรรมชาติ |
+| Multi-station (US-31) | Phase 2 | `station` เป็นตารางจริงตั้งแต่ Phase 0 และ order มี `station_id` — Phase 2 แค่เพิ่มแถว + กฎ routing |
+| Online payment (US-12) | Phase 2 | `payment` แยกจาก `bill` แล้ว → เพิ่ม method/gateway reference ได้โดยไม่แตะ order |
+| ใบเสร็จ/คืนเงิน (US-21/22) | Phase 1 | `payment` เป็น ledger แบบ append — คืนเงินคือแถวใหม่ ไม่ใช่การแก้แถวเดิม |
+| หลายภาษา (US-10) | Phase 2 | แยก string ออกจาก component ตั้งแต่ต้น · ชื่อสินค้าอังกฤษมีอยู่แล้วใน seed data |
+
+---
+
+## 8. ประเด็นที่ต้องกลับไปถาม XAVIER/Touch
+
+ทั้งหมดนี้ **ไม่บล็อกการเริ่มออกแบบ/build** — COULSON ใช้ default ที่ระบุไว้ไปก่อนได้ แต่ต้องได้คำตอบก่อน **finalize schema** (ข้อ 1-3) หรือก่อนเปิดร้านจริง (ข้อ 4-6)
+
+| # | ประเด็น | ทำไมถึงตอบเองไม่ได้ | Default ที่ใช้ไปก่อน |
+|---|---|---|---|
+| 1 | **"รอเสิร์ฟ" เป็น label หรือ status field จริง** — XAVIER flag ไว้เองใน US-30 และกลุ่มงาน F ว่าต้องยืนยันก่อน finalize schema | กระทบ enum ของสถานะออเดอร์โดยตรง ถ้าตัดสินผิดต้อง migrate ทีหลัง | **ใช้เป็น label ที่ derive** จาก (channel=counter AND status ∈ queued/in_progress/ready) + เพิ่ม transition `ready → completed` ("ส่งมอบแล้ว") เฉพาะช่องทางเคาน์เตอร์เพื่อเคลียร์กระดานจุดรับของ — ดู [[data-model-v1|Data Model v1]] §4.1 |
+| 2 | **เมนูร้อน/เย็นเป็น 2 สินค้าแยก หรือ 1 สินค้า + ตัวเลือกอุณหภูมิ** — [[../../01-requirements/01-spec/initial-menu-data-v1|Initial Menu Data v1]] ให้หมวดหมู่เป็น "ร้อน/เย็น" แต่ให้ราคาร้อน+เย็นอยู่ในสินค้าแถวเดียวกัน สองอย่างนี้ขัดกันในเชิง data model | กระทบ UX-11 โดยตรง (เพิ่มสินค้าใหม่ 1 รายการ ≤5 นาที) — ถ้าเป็น 2 แถว เจ้าของร้านต้องกรอก 2 ครั้งต่อเมนู 1 ตัว | **1 สินค้า = 1 (เมนู × อุณหภูมิ)** อยู่ในหมวดร้อนหรือเย็น ราคาอยู่บนแถวสินค้า → 19 รายการกลายเป็น ~30 แถวสินค้า เหตุผล: หมวดหมู่ที่ Touch ยืนยันคือ ร้อน/เย็น และ "หมดชั่วคราว" ต้องมาร์กแยกอุณหภูมิได้จริง (น้ำแข็งหมด ≠ กาแฟร้อนหมด) |
+| 3 | **ตัวเลือก "เปลี่ยนเป็นนมโอ๊ต" อยู่ Phase 0 หรือ Phase 1** — initial-menu-data ระบุว่ายังไม่มี US เฉพาะ ("ใกล้เคียงกลไก US-08 Phase 1") แต่ตารางเมนูใส่ไว้กับสินค้า 9 รายการแล้ว | ไม่มี US รองรับ = ไม่มีใครอนุมัติเข้า Phase 0 อย่างเป็นทางการ | **กลไกรองรับตั้งแต่ Phase 0** (เป็น option group ธรรมดา) แต่ **ไม่เปิดใช้ใน seed data ของ Phase 0** จนกว่าจะยืนยัน — เปิดทีหลังได้ในไม่กี่คลิกผ่าน US-23 โดยไม่ต้องแก้โค้ด |
+| 4 | **อายุของ session ช่องทางเคาน์เตอร์** — BR ข้อ 7 นิยามการจบ session ของ**โต๊ะ**ไว้ชัด แต่ไม่มีกฎสำหรับลูกค้าที่สแกน QR เคาน์เตอร์แล้วเดินออกไปโดยไม่สั่ง/ไม่จ่าย | เป็นกฎธุรกิจ ไม่ใช่การตัดสินใจทางเทคนิค | session เคาน์เตอร์หมดอายุหลังไม่มี activity **30 นาที** และตะกร้าที่ยังไม่ยืนยันถูกทิ้ง · ออเดอร์ที่ค้าง `awaiting_payment` **ไม่หมดอายุเอง** ต้องให้พนักงานยกเลิกด้วย US-20 เสมอ (เพราะเป็นเงิน) |
+| 5 | **ปิดบิลได้ไหมถ้ายังมีเครื่องดื่มค้างทำอยู่** — ในร้านจริงลูกค้าจ่ายเงินก่อนแล้วรอรับของบ่อยมาก แต่ US-19 ไม่ได้ระบุ | กระทบกฎเงินและลำดับงานหน้าร้าน | **ปิดได้ แต่ต้องมีคำเตือนที่บอกจำนวนออเดอร์ที่ยังไม่เสร็จ และให้พนักงานยืนยันอีกครั้ง** · ปิดบิลแล้วออเดอร์ที่ค้างจะ auto-complete พร้อมกัน |
+| 6 | **โต๊ะที่เปิดบิลแล้วยกเลิกออเดอร์หมดทุกใบ ควรกลับเป็น "ว่าง" เองไหม** | BR ข้อ 11 บอกแค่ 2 จุด (ออเดอร์แรก / ปิดบิล) ไม่ครอบคลุมเคสนี้ | **ไม่กลับเองอัตโนมัติ** — session ยังเปิดจนกว่าพนักงานจะกดปิดบิล (ยอด 0 บาทได้) เพราะการ auto-close จะทำให้ลูกค้าที่ยังนั่งอยู่โดนตัด session กลางคัน |
+
+**ประเด็นที่ requirement เปิดค้างอยู่แล้วและกระทบสถาปัตยกรรม (ไม่ใช่ของใหม่จาก COULSON):** NEED-INPUT ข้อ 3 และ 4 ของ [[../../01-requirements/01-spec/ux-requirements-v1|UX Requirements v1]] — อุปกรณ์จริงของจอสถานี และความเร็วเน็ตร้านจริง ข้อหลังกระทบโดยตรงว่าจะต้องลงทุนทำ PWA/offline cache ใน Phase 0 หรือรอ Phase 1 ได้ (ดูความเสี่ยง R1)
+
+---
+
+ส่งงาน — COULSON → ทัช (งาน / ผลลัพธ์ / ค้าง-เสี่ยง / skill ที่ใช้)
+
+**งาน:** ออกแบบสถาปัตยกรรม Phase 0 ของระบบสั่งอาหารด้วย QR code ต่อจาก backlog ที่ XAVIER ปิดแล้ว — เลือก stack, กลไก realtime, รูปแบบการยืนยันตัวตนของทั้ง 3 surface, แผน deploy และประเมินความเสี่ยงทางเทคนิค
+
+**ผลลัพธ์:** `docs/02-design/02-technical/architecture-v1.md` — ข้อจำกัดจริง 8 ข้อที่กำหนดสถาปัตยกรรม (C1-C8), ภาพรวม 3 surface บน codebase เดียว (Next.js 15 + Supabase + Vercel) พร้อมทางเลือกที่ไม่เลือกและข้อเสียจริงของแต่ละตัว, **ตัดสินใจเรื่อง realtime แล้ว** (Supabase Realtime WebSocket + polling fallback 5 วิ พร้อมตัวบ่งชี้สถานะที่มองเห็น — ไม่ปล่อยเป็นทางเลือกลอย), รูปแบบ session token ของลูกค้าที่ไม่ขัด BR ข้อ 14 (ห้ามใช้ anonymous account), แผน deploy 3 สภาพแวดล้อม + สัญญา URL ถาวรของ QR, และตารางความเสี่ยง 12 ข้อพร้อมมาตรการ
+
+**ค้าง/เสี่ยง:** ความเสี่ยงสูงสุดคือ **R1 — ระบบพึ่งเน็ตร้าน 100% ไม่มี offline mode ใน Phase 0** ถ้าเน็ตล่มคือขายไม่ได้ทั้งร้าน ต้องมี SOP กระดาษ + hotspot สำรองเป็นเงื่อนไขของการเปิดร้าน ไม่ใช่ทางเลือก · รองลงมาคือ R5 (ปิดบิลชนกับสั่งเพิ่ม = เก็บเงินขาด) และ R4 (concurrency ของตะกร้าแชร์) ซึ่งทั้งคู่มีมาตรการระดับ transaction แล้วแต่ต้องให้ OKOYE ทดสอบเฉพาะทาง · มี 6 ประเด็นที่ต้องกลับไปถาม XAVIER/Touch โดย 3 ข้อแรกต้องได้คำตอบก่อน finalize schema (ความหมายของ "รอเสิร์ฟ", เมนูร้อน/เย็นเป็น 1 หรือ 2 สินค้า, สถานะของตัวเลือกนมโอ๊ตที่ไม่มี US รองรับ) ทุกข้อมี default ที่ใช้เดินงานต่อได้แล้ว
+
+**skill ที่ใช้:** scrutinize (ตรวจว่าทุกการเลือกเทคโนโลยีย้อนกลับไปหาข้อจำกัดจริงของร้านได้ ไม่ใช่เลือกตามความคุ้นเคย และไล่จับจุดที่ requirement ขัดกันเอง เช่น หมวดหมู่ร้อน/เย็น vs ราคา 2 คอลัมน์ในสินค้าแถวเดียว), management-talk (แยกประเด็นที่ Touch ต้องตัดสินในฐานะเจ้าของร้าน ออกจาก default ทางเทคนิคที่ COULSON เดินต่อเองได้)
