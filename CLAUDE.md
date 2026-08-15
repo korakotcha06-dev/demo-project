@@ -43,7 +43,8 @@
 
 | Agent | สเตจที่รับผิดชอบ | ที่อยู่ |
 |-------|------------------|--------|
-| **XAVIER** (เอ็กซาเวียร์) | `01-requirements` — วิเคราะห์ requirement, เขียน user story/business rule, จัดลำดับ product backlog | `.claude/agents/xavier.md` (project) |
+| **XAVIER** (เอ็กซาเวียร์) | `01-requirements` — วิเคราะห์ requirement, เขียน user story/business rule, จัดลำดับ product backlog (P0/P1/P2 + MoSCoW) | `.claude/agents/xavier.md` (project) |
+| **PEGGY** (เพ็กกี้) | `01-requirements` — Feature List (feature → sub-feature → capability แม็ปกับ US ID) และ User Journey เป็น **Mermaid diagram** · ทำงานคู่กับ XAVIER แต่คนละมุม: XAVIER เขียน story/กฎ/ลำดับ · PEGGY ทำมุมมองลำดับชั้นและมุมมองเส้นทางของ persona | `.claude/agents/peggy.md` (project) |
 | **COULSON** (โควสัน) | `02-design` — architecture, DB schema, API design ต่อจาก backlog ที่ XAVIER ส่งมอบ | global |
 | **SHURI** (ชูริ) | `02-design/01-prototypes` + frontend build (รายงานต่อ COULSON) | global |
 | **BANNER** (แบนเนอร์) | backend/API/DB ของระบบสั่งอาหาร (รายงานต่อ COULSON) | global |
@@ -52,4 +53,11 @@
 
 ลำดับการส่งงาน: **XAVIER** ปิด backlog ใน `01-requirements` ก่อน → ส่งต่อ **COULSON** เริ่ม `02-design` → ทีม SHURI/BANNER ทำตาม scope ที่ COULSON แตกให้ → **OKOYE** เป็นด่านสุดท้ายก่อนขึ้นจริง
 
-ใช้ Skill `.claude/skills/product-backlog/SKILL.md` (หรือ `/product-backlog`) เมื่อมี requirement ใหม่ที่ต้องแตกเป็น user story + backlog ก่อนส่งเข้า `01-spec` / `02-plan` / `03-task`
+## Skill ของโปรเจกต์นี้
+
+| Skill | ใช้เมื่อไหร่ | ที่อยู่ |
+|-------|-------------|--------|
+| `/product-backlog` | มี requirement ใหม่ที่ต้องแตกเป็น **user story + acceptance criteria + business rule + ลำดับความสำคัญ** ก่อนส่งเข้า `01-spec` / `02-plan` / `03-task` | `.claude/skills/product-backlog/SKILL.md` |
+| `/feature-journey` | ต้องการ **Feature List** (ภาพลำดับชั้นของฟีเจอร์ทั้งระบบ แม็ปกับ US ID) หรือ **User Journey เป็น Mermaid diagram** (เส้นทางของ persona พร้อมจุดที่อารมณ์ตก) | `.claude/skills/feature-journey/SKILL.md` |
+
+สอง skill นี้ทำคนละหน้าที่และใช้คู่กันได้: `/product-backlog` ให้ **รายการ story และลำดับ** ส่วน `/feature-journey` ให้ **ลำดับชั้น (มีอะไรบ้าง) และลำดับเวลา (เกิดอะไรขึ้นตามลำดับ)** ของ requirement ชุดเดียวกัน — ไม่ใช่อันใดอันหนึ่งแทนกัน
