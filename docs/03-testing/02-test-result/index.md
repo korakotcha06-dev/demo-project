@@ -12,7 +12,7 @@
 
 ## เอกสารในโฟลเดอร์นี้
 
-1. [[test-result-v1|Test Result v1]] — ผลรายเคสของทั้ง 121 เคส + ผล UAT · 4 สถานะเท่านั้น: `PASS` / `FAIL` / `BLOCKED` / `DEGRADED`
+1. [[test-result-v1|Test Result v1]] — ผลรายเคสของทั้ง 123 เคส + ผล UAT · 4 สถานะเท่านั้น: `PASS` / `FAIL` / `BLOCKED` / `DEGRADED`
 2. [[bug-log-v1|Bug Log v1]] — ทะเบียนบั๊ก `BUG-xxx` พร้อมความรุนแรง S1–S4, ขั้นตอนทำซ้ำ, เจ้าของ และวันที่ verify · รวมช่อง **"หลุดมาได้อย่างไร"** สำหรับ post-mortem
 3. [[test-summary-report-v1|Test Summary Report v1]] — คำตัดสิน **GO / NO-GO / ยังตัดสินไม่ได้** เทียบกับเกณฑ์ผ่าน-ไม่ผ่านใน [[../01-test-plan/test-plan-v1|Test Plan v1]] §7 ตรง ๆ
 
