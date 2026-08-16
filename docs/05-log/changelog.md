@@ -6,6 +6,22 @@
 
 ---
 
+## 2026-08-16 — ตั้งชุดเครื่องมือและเอกสารของสเตจ `03-testing` ให้ครบ (agent + 2 skill + 8 เอกสาร)
+
+ทำใน worktree `testing-suite` (branch `worktree-testing-suite`)
+
+- **ปัญหาที่แก้:** สเตจ `03-testing` ไม่มีเจ้าของที่เป็น project-scoped เลย — [[../03-testing/01-test-plan/test-plan-v1|test-plan-v1]] เขียนโดย **XAVIER ซึ่งเป็นเจ้าของ requirement เอง** (คนเขียนโจทย์ตรวจงานตัวเอง ไม่มีคนกลาง) · AC กระจายอยู่ใน backlog โดยไม่มี ID ทำให้ test case ผูกกลับได้แค่ระดับ `US-xx` · `02-test-result` ว่างเปล่าไม่มีแม้แต่โครง
+- **สร้าง agent `.claude/agents/okoye.md` (project-scoped)** — Test Analyst & QA Lead เจ้าของ `docs/03-testing` ทั้งสอง sub-stage · **override OKOYE ตัว global โดยตั้งใจ** เพราะตัว global เป็น pre-deploy web QA checklist runner ของงานลูกค้า TNM ซึ่งเป็นคนละบทบาทกับ test analyst ที่ทำงานในไปป์ไลน์เอกสาร · boundary สำคัญ: **ห้ามแก้ AC ในไฟล์ `01-spec` เอง ให้เสนอคืน XAVIER** (กติกาเดียวกับ PEGGY: *name the gap, don't fill it*) และ **ห้ามกรอก `02-test-result` ล่วงหน้า**
+- **สร้าง skill `/test-design`** — requirement → **AC testability audit** → test case → test data → RTM → test plan → UAT · ขั้นที่ห้ามข้ามคือ audit: ไล่ทุก AC ด้วยคำถาม *"คนสองคนอ่านแล้ววัดผลได้ตรงกันไหม"* พร้อมตารางธงแดง (`"ทันที"` · `"และ/หรือ"` · `"ใช้งานได้ดีบนมือถือ"` · ไม่ระบุว่ากันที่ชั้น UI หรือ DB)
+- **สร้าง skill `/test-run`** — รันเคสจริง → บันทึกผล 4 สถานะ (`PASS`/`FAIL`/`BLOCKED`/`DEGRADED`) → bug log → **คำตัดสิน GO/NO-GO** · แยกจาก `/test-design` เพราะเป็นคนละเวลาและคนละโฟลเดอร์ เหมือนที่ `/product-backlog` แยกจาก `/feature-journey`
+- **แยก [[../03-testing/01-test-plan/test-plan-v1|test-plan-v1]] เป็น 3 ไฟล์** — test plan เหลือแต่กลยุทธ์/ขอบเขต/เกณฑ์ผ่าน · **121 เคสย้ายไป [[../03-testing/01-test-plan/test-case-v1|test-case-v1]]** (ตรวจนับแล้วได้ 121 แถวเท่าเดิม ไม่แก้เนื้อหาแม้แต่เคสเดียว) · ชุดข้อมูล D-1…D-9 ย้ายไป [[../03-testing/01-test-plan/test-data-v1|test-data-v1]] พร้อมเช็กลิสต์ตรวจรับก่อนเริ่ม · เหตุผล: เป็นคนละ deliverable และแก้คนละจังหวะ — กลยุทธ์เปลี่ยนน้อย เคสกับข้อมูลเปลี่ยนบ่อย
+- **สร้างโครงเอกสารใหม่ 5 ฉบับ** — [[../01-requirements/01-spec/acceptance-criteria-v1|01-spec/acceptance-criteria-v1]] (ทะเบียน AC ที่มี ID ถาวร `AC-<US>-<n>` · **เจ้าของคือ XAVIER**) · [[../03-testing/01-test-plan/traceability-matrix-v1|traceability-matrix-v1]] · [[../03-testing/01-test-plan/uat-scenario-v1|uat-scenario-v1]] · [[../03-testing/02-test-result/test-result-v1|test-result-v1]] · [[../03-testing/02-test-result/bug-log-v1|bug-log-v1]] · [[../03-testing/02-test-result/test-summary-report-v1|test-summary-report-v1]]
+- **ประเด็นความเป็นเจ้าของที่ต้องระวัง:** agent global `design-syncer` ประกาศในคำอธิบายว่ารับงาน *"สร้าง test plan / เขียน acceptance criteria"* ด้วย — **ชนกับ OKOYE โดยตรง** · ตกลงในรอบนี้ว่า **`03-testing` เป็นของ OKOYE** ส่วน `acceptance-criteria-v1` เป็นของ **XAVIER** ถ้าจะใช้ `design-syncer` กับโปรเจกต์นี้ ต้องเลี่ยงสองชั้นนี้ ไม่งั้นจะมีสอง agent เขียนทับกัน
+- **ยังค้าง:** ตาราง AC หัวข้อ 4 ของ `acceptance-criteria-v1` ยังว่าง — ต้องให้ **XAVIER** ไล่ย้าย AC จาก [[../01-requirements/01-spec/product-backlog-v1|product-backlog-v1]] มาออก ID · จนกว่าจะเสร็จ RTM จะสืบกลับได้แค่ระดับ US ซึ่งหยาบเกินไปเวลา US เดียวมี AC หลายข้อและผ่านบางข้อ
+- **หมายเหตุเรื่องขอบเขตสัปดาห์:** งานชุดนี้เป็นสเตจ `03-testing` ซึ่งไม่อยู่ในตารางสัปดาห์ 2–5 ที่รู้แล้ว — ควรส่งเป็น deliverable ของสัปดาห์ตัวเอง **ไม่ปนกับงานสัปดาห์ 4 (Prototype) ที่กำลังทำอยู่**
+
+---
+
 ## 2026-08-12 — รวมงาน Week 3 จากอีก worktree: เพิ่ม AI Landscape (TPQI 7002), US-44/45, Business Rule ข้อ 24-27 และข้อมูลร้านจริง 3 ข้อ
 
 - มีงาน Week 3 ที่ทำคู่ขนานกันอีกชุดใน worktree `week-3-00b49f` (branch `claude/week-3-00b49f`) — ตรวจเทียบกับงานในสายนี้แล้วพบว่า **persona / journey map / UX principles ซ้ำกันเต็ม ๆ** จึงตัดสินใจ **ยึดเอกสารชุดของสายนี้เป็นหลัก** (committed ก่อน + ละเอียดกว่า: `screen-inventory-v1` map ครบทุก US, `design-system-adoption-v1` มี accessibility override layer) แล้ว **โอนเฉพาะส่วนที่ไม่ซ้ำเข้ามา** ไม่นำไฟล์ที่ซ้ำเข้ามาให้ vault มี persona 2 ชุด
