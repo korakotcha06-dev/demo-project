@@ -44,7 +44,7 @@
   <div class="diagram">
   <svg viewBox="0 0 1280 780" role="img" aria-labelledby="race-close-bill-v1-title race-close-bill-v1-desc" xmlns="http://www.w3.org/2000/svg">
     <title id="race-close-bill-v1-title">แผนภาพลำดับเวลา — การปิดบิลชนกับการสั่งอาหารเพิ่มที่โต๊ะเดียวกัน</title>
-    <desc id="race-close-bill-v1-desc">แคชเชียร์เปิดหน้าสรุปยอดโต๊ะและเห็นยอด 250 บาท ระหว่างนั้นลูกค้าส่งคำสั่งซื้อลาเต้เพิ่ม 70 บาท และแคชเชียร์กดปิดบิลด้วยยอดที่เห็น ทั้งสองคำขอถูกบังคับให้ล็อกแถว table_session ด้วยคำสั่ง SELECT FOR UPDATE ก่อนทำงาน ถ้าคำสั่งซื้อได้ล็อกก่อน ลูกค้าจะได้รับ 201 และแคชเชียร์จะได้รับ 409 BILL_CHANGED พร้อมยอดใหม่ 320 บาทให้กดยืนยันอีกครั้ง ถ้าการปิดบิลได้ล็อกก่อน แคชเชียร์จะปิดบิลสำเร็จที่ยอด 250 บาท และลูกค้าจะได้รับ 409 SESSION_CLOSED โดยรายการในตะกร้าไม่ถูกลบทิ้ง</desc>
+    <desc id="race-close-bill-v1-desc">แคชเชียร์เปิดหน้าสรุปยอดโต๊ะและเห็นยอด 250 บาท ระหว่างนั้นลูกค้าส่งคำสั่งซื้อลาเต้เพิ่ม 70 บาท และแคชเชียร์กดปิดบิลด้วยยอดที่เห็น ทั้งสองคำขอถูกบังคับให้ล็อกแถว visit_session ด้วยคำสั่ง SELECT FOR UPDATE ก่อนทำงาน ถ้าคำสั่งซื้อได้ล็อกก่อน ลูกค้าจะได้รับ 201 และแคชเชียร์จะได้รับ 409 BILL_CHANGED พร้อมยอดใหม่ 320 บาทให้กดยืนยันอีกครั้ง ถ้าการปิดบิลได้ล็อกก่อน แคชเชียร์จะปิดบิลสำเร็จที่ยอด 250 บาท และลูกค้าจะได้รับ 409 SESSION_CLOSED โดยรายการในตะกร้าไม่ถูกลบทิ้ง</desc>
 
     <defs>
       <marker id="rcb-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
@@ -162,7 +162,7 @@
       <rect x="1030" y="72" width="180" height="56" rx="6" fill="#f5f5f5"/>
       <rect x="1030" y="72" width="180" height="56" rx="6" fill="rgba(45,49,66,0.05)" stroke="#4f5d75" stroke-width="1"/>
       <text x="1120" y="96" font-size="12" font-weight="600" fill="#2d3142" text-anchor="middle">แถวใน Postgres</text>
-      <text x="1120" y="114" font-size="8" fill="#7a8399" text-anchor="middle" font-family="'Geist Mono',monospace" letter-spacing="0.08em">TABLE_SESSION</text>
+      <text x="1120" y="114" font-size="8" fill="#7a8399" text-anchor="middle" font-family="'Geist Mono',monospace" letter-spacing="0.08em">VISIT_SESSION</text>
     </g>
 
     <!-- ===== legend ===== -->
@@ -189,7 +189,7 @@
       <p class="eyebrow">THE MECHANISM</p>
       <div class="card-header"><span class="card-dot dot-coral"></span><h3>ล็อกแถวเดียวกันทั้งสองทาง</h3></div>
       <ul>
-        <li><code>POST /orders</code> และ <code>POST /bills/{id}/close</code> เริ่มด้วย <code>SELECT … FOR UPDATE</code> บน <code>table_session</code> บรรทัดเดียวกัน</li>
+        <li><code>POST /orders</code> และ <code>POST /bills/{id}/close</code> เริ่มด้วย <code>SELECT … FOR UPDATE</code> บน <code>visit_session</code> บรรทัดเดียวกัน</li>
         <li>ใครได้ล็อกก่อนคือผู้ชนะ อีกฝ่ายไม่ถูกปฏิเสธเงียบ แต่ได้ 409 ที่บอกสถานะใหม่</li>
         <li><code>close</code> บังคับส่ง <code>expected_total_satang</code> — เท่ากับประกาศว่า "จะเก็บตามยอดที่เห็นอยู่"</li>
       </ul>

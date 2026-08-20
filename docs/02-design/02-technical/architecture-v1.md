@@ -145,10 +145,10 @@ graph TB
 
 | ผู้ subscribe | ขอบเขตที่เห็น | บังคับด้วย |
 |---|---|---|
-| ลูกค้าโต๊ะ | cart_item + order + order_item ของ `table_session` ตัวเอง เท่านั้น | RLS อ่าน claim `tsid` จาก session token |
+| ลูกค้าโต๊ะ | cart_item + order + order_item ของ `visit_session` ตัวเอง เท่านั้น | RLS อ่าน claim `tsid` จาก session token |
 | ลูกค้าเคาน์เตอร์ | order ของ `customer_session` ตัวเอง เท่านั้น | RLS อ่าน claim `sid` |
 | ทุก client (รวมลูกค้า) | `product.is_available`, `option_value.is_available` (สาธารณะ) | ตาราง read-public |
-| จอสถานี | order/order_item ทั้งหมดที่ยังไม่ปิด + bill + table_session | role=staff |
+| จอสถานี | order/order_item ทั้งหมดที่ยังไม่ปิด + bill + visit_session | role=staff |
 
 ### 3.4 การยืนยันตัวตน → **แยก 2 กลไกโดยเจตนา**
 
@@ -190,14 +190,14 @@ sequenceDiagram
     participant สถานี
 
     ลูกค้า->>Next: GET /t/{code} (สแกน QR)
-    Next->>PG: resolve QR → table + เปิด/เข้าร่วม table_session
+    Next->>PG: resolve QR → table + เปิด/เข้าร่วม visit_session
     Next-->>ลูกค้า: HTML หน้าเมนู + set session cookie (ไม่มีหน้ากลาง)
     ลูกค้า->>Next: POST /api/v1/cart/items (เพิ่มของ)
     Next->>PG: INSERT ... ON CONFLICT DO UPDATE (atomic)
     PG-->>RT: change event
     RT-->>ลูกค้า: อุปกรณ์อื่นในโต๊ะเดียวกันเห็นทันที (UX-06)
     ลูกค้า->>Next: POST /api/v1/orders (ยืนยัน + Idempotency-Key)
-    Next->>PG: TX: ตรวจของหมดรายรายการ → สร้าง order → เปิด table_session ถ้ายังไม่เปิด
+    Next->>PG: TX: ตรวจของหมดรายรายการ → สร้าง order → เปิด visit_session ถ้ายังไม่เปิด
     PG-->>RT: order ใหม่
     RT-->>สถานี: ตั๋วออเดอร์ขึ้นจอ + เสียงแจ้งเตือน (US-13/US-15)
     Next-->>ลูกค้า: 201 {order, rejected_items[]} — reject เฉพาะรายการที่หมด (BR ข้อ 4)
@@ -213,7 +213,7 @@ sequenceDiagram
 
 ### 4.3 ปิดบิล (US-19) — จุดเดียวที่โต๊ะกลับเป็นว่าง
 
-ไม่มี endpoint ใดในระบบที่เขียน "สถานะโต๊ะ" ได้โดยตรง — สถานะโต๊ะ **derive จากการมีอยู่ของ `table_session` ที่ยังเปิด** เท่านั้น (BR ข้อ 11) รายละเอียดที่ [[data-model-v1|Data Model v1]] §4.2
+ไม่มี endpoint ใดในระบบที่เขียน "สถานะโต๊ะ" ได้โดยตรง — สถานะโต๊ะ **derive จากการมีอยู่ของ `visit_session` ที่ยังเปิด** เท่านั้น (BR ข้อ 11) รายละเอียดที่ [[data-model-v1|Data Model v1]] §4.2
 
 ---
 
@@ -274,7 +274,7 @@ https://<โดเมนของบริการ>/c/{code}   ← QR เคา
 | **R2** | Supabase free tier มีเพดาน concurrent realtime connection และอาจ pause project ถ้าไม่ active | กลาง | สูง — จอสถานีหลุด realtime ช่วง peak | ยืนยัน tier ที่ใช้จริงก่อนเปิดร้าน · polling fallback (§3.3) ทำให้ยังทำงานต่อได้แม้ WS ตาย · monitor จำนวน connection |
 | **R3** | Vercel serverless cold start + เน็ตช้า ทำให้พลาดเกณฑ์ UX-01 (≤3 วิ / ≤5 วิ) | กลาง | กลาง — ลูกค้าที่รีบ (persona ฟ้า) เลิกใช้ | เมนูเป็น static/ISR cache + revalidate ตอนแอดมินแก้ · บีบรูปเป็น WebP หลายขนาด · วัดจริงด้วย Lighthouse บนโปรไฟล์ Slow 3G ก่อน sign-off |
 | **R4** | **บั๊ก concurrency ของตะกร้าแชร์** (BR ข้อ 2) — รายการหายหรือถูกเขียนทับ | กลาง | สูง — ทำเครื่องดื่มผิด/ขาด ลูกค้าไม่พอใจที่หน้าร้าน | API ระดับรายการ + `ON CONFLICT DO UPDATE` (ไม่มี PUT ทั้งตะกร้า) · optimistic version บนการตั้งจำนวน · test case เฉพาะของ OKOYE ตาม UX §7 ข้อ 5 (0% data loss, ≥3 รอบ) |
-| **R5** | **ปิดบิลชนกับการสั่งเพิ่ม** → เก็บเงินขาด | กลาง | สูง — ความเสียหายเป็นเงินจริง | `SELECT ... FOR UPDATE` บน `table_session` ทั้ง 2 path · ปิดบิลต้องส่ง `expected_total` มาด้วย ถ้าไม่ตรง → 409 พร้อมรายการใหม่ ให้พนักงานยืนยันยอดใหม่ (ห้ามเก็บยอดเก่าเงียบ ๆ) — ดู [[api-design-v1|API Design v1]] §5.3 |
+| **R5** | **ปิดบิลชนกับการสั่งเพิ่ม** → เก็บเงินขาด | กลาง | สูง — ความเสียหายเป็นเงินจริง | `SELECT ... FOR UPDATE` บน `visit_session` ทั้ง 2 path · ปิดบิลต้องส่ง `expected_total` มาด้วย ถ้าไม่ตรง → 409 พร้อมรายการใหม่ ให้พนักงานยืนยันยอดใหม่ (ห้ามเก็บยอดเก่าเงียบ ๆ) — ดู [[api-design-v1|API Design v1]] §5.3 |
 | **R6** | QR ทางกายภาพคือ credential — ถ่ายรูป QR ไปสั่งของเข้าโต๊ะคนอื่น/ดูยอดโต๊ะอื่นได้ | ต่ำ-กลาง | กลาง — ก่อกวน ไม่ใช่ข้อมูลรั่ว (Phase 0 ไม่มีข้อมูลส่วนบุคคล) | ผลตรงจาก BR ข้อ 8+10 ที่ยืนยันแล้ว · จำกัดผลด้วย rate limit ต่อ session · session ตายเมื่อปิดบิล · พนักงานยกเลิกรายการที่ผิดปกติได้ทันที (US-20) |
 | **R7** | บัญชี login ใช้ร่วมกันต่อสถานี (US-27 เป็น P2) → audit บอกไม่ได้ว่าใครยกเลิก/ปิดบิล | สูง | ต่ำ-กลาง | ยอมรับใน Phase 0 ตามที่ backlog ระบุ · เก็บ `staff_user_id` ในทุก event ไว้แล้ว → พอ US-27 มา บัญชีรายคนใช้ field เดิมได้ทันทีโดยไม่ต้อง migrate |
 | **R8** | เจ้าของร้านแก้ราคาเมนูระหว่างที่มีบิลเปิดค้าง → ยอดบิลเปลี่ยนย้อนหลัง | กลาง | สูง — ทะเลาะกับลูกค้าเรื่องเงิน | **snapshot ชื่อ+ราคา+ตัวเลือกลงใน `order_item` ตอนยืนยันออเดอร์** ราคาในเมนูเปลี่ยนภายหลังไม่กระทบบิลที่สั่งไปแล้ว (ดู [[data-model-v1|Data Model v1]] §3.3) |
@@ -344,7 +344,7 @@ C6 เดิมเขียนว่า *"งบจำกัด ร้านเ�
 
 ### 9.3 สิ่งที่ไม่เปลี่ยนเลย — และนี่คือเหตุผลที่เลือกทางนี้
 
-- [[data-model-v1|Data Model v1]] **ทั้งฉบับ** — 21 entity, invariant 22 ข้อ, CHECK constraint, `table_status_v` VIEW, state machine ทั้งสามตัว
+- [[data-model-v1|Data Model v1]] **ทั้งฉบับ** — 21 entity, invariant 22 ข้อ, CHECK constraint, `service_point_status_v` VIEW, state machine ทั้งสามตัว
 - [[api-design-v1|API Design v1]] **§5.1–5.6 ทั้งหมด** — race condition ทั้ง 6 เคสยังแก้ด้วย `SELECT … FOR UPDATE` และ `ON CONFLICT DO UPDATE` เหมือนเดิม
 - Business Rule ทุกข้อยังถูกบังคับด้วยโครงสร้างฐานข้อมูล ไม่ใช่ด้วยวินัยของคนเขียนโค้ด
 
@@ -490,7 +490,7 @@ https://<โดเมนของบริการ>/t/{code}     ← code ส�
 
 ### 11.3 🔴 ของชิ้นที่สองที่แพงถ้าทำทีหลัง — `shop_id` ใน schema
 
-ตอนนี้ schema เป็นแบบร้านเดียวโดยปริยาย — `zone`, `shop_table`, `qr_code`, `category`, `product`, `option_group`, `staff_user`, `station` ไม่มีตัวไหนบอกว่าเป็นของร้านไหน เพราะมีร้านเดียว
+ตอนนี้ schema เป็นแบบร้านเดียวโดยปริยาย — `zone`, `service_point`, `qr_code`, `category`, `product`, `option_group`, `staff_user`, `station` ไม่มีตัวไหนบอกว่าเป็นของร้านไหน เพราะมีร้านเดียว
 
 **เสนอ: ใส่ `shop_id` ตั้งแต่วันแรก แม้ตาราง `shop` จะมีแถวเดียว**
 

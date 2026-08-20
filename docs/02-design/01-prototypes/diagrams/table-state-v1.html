@@ -32,12 +32,12 @@
 <div class="wrap">
   <p class="eyebrow">DATA MODEL · §4.2 · STATE MACHINE</p>
   <h1>สถานะโต๊ะ — ไม่มีปุ่มให้กด</h1>
-  <p class="subtitle">โต๊ะไม่มีคอลัมน์ status ในตาราง สถานะทั้งหมดคำนวณสดจาก VIEW ที่มองว่ามี table_session เปิดค้างอยู่หรือไม่ ผลคือไม่มีอะไรให้ UPDATE จึงไม่มี endpoint เปิดหรือปิดโต๊ะ กติกา BR 11 จึงถูกบังคับด้วยโครงสร้าง ไม่ใช่ด้วยความตั้งใจของคนเขียนโค้ด</p>
+  <p class="subtitle">โต๊ะไม่มีคอลัมน์ status ในตาราง สถานะทั้งหมดคำนวณสดจาก VIEW ที่มองว่ามี visit_session เปิดค้างอยู่หรือไม่ ผลคือไม่มีอะไรให้ UPDATE จึงไม่มี endpoint เปิดหรือปิดโต๊ะ กติกา BR 11 จึงถูกบังคับด้วยโครงสร้าง ไม่ใช่ด้วยความตั้งใจของคนเขียนโค้ด</p>
 
   <div class="diagram">
   <svg viewBox="0 0 1280 620" role="img" aria-labelledby="table-state-v1-title table-state-v1-desc" xmlns="http://www.w3.org/2000/svg">
     <title id="table-state-v1-title">แผนภาพสถานะของโต๊ะ ซึ่งคำนวณจากออเดอร์เท่านั้น</title>
-    <desc id="table-state-v1-desc">โต๊ะเริ่มที่สถานะว่างเมื่อแอดมินสร้างโต๊ะใหม่ เปลี่ยนเป็นไม่ว่างเมื่อมี table_session เปิดขึ้นซึ่งเป็นผลข้างเคียงของออเดอร์แรก และกลับเป็นว่างเมื่อบิลถูกปิดเท่านั้น แอดมินปลดระวางโต๊ะได้เฉพาะตอนที่โต๊ะว่างและกู้คืนได้ภายหลัง ไม่มีเส้นทางใดที่พนักงานกดเปลี่ยนสถานะโต๊ะเองได้ และไม่มีเส้นทางจากไม่ว่างไปปลดระวางโดยตรง</desc>
+    <desc id="table-state-v1-desc">โต๊ะเริ่มที่สถานะว่างเมื่อแอดมินสร้างโต๊ะใหม่ เปลี่ยนเป็นไม่ว่างเมื่อมี visit_session เปิดขึ้นซึ่งเป็นผลข้างเคียงของออเดอร์แรก และกลับเป็นว่างเมื่อบิลถูกปิดเท่านั้น แอดมินปลดระวางโต๊ะได้เฉพาะตอนที่โต๊ะว่างและกู้คืนได้ภายหลัง ไม่มีเส้นทางใดที่พนักงานกดเปลี่ยนสถานะโต๊ะเองได้ และไม่มีเส้นทางจากไม่ว่างไปปลดระวางโดยตรง</desc>
     <defs>
       <marker id="tst-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
       <marker id="tst-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#eb6c36"/></marker>
@@ -67,13 +67,13 @@
       <rect x="180" y="164" width="220" height="88" rx="8" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
       <text x="290" y="196" font-size="12" font-weight="600" fill="#2d3142">available</text>
       <text x="290" y="216" font-size="12" fill="#4f5d75">ว่าง</text>
-      <text x="290" y="236" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">NO OPEN TABLE_SESSION</text>
+      <text x="290" y="236" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">NO OPEN VISIT_SESSION</text>
 
       <rect x="560" y="164" width="220" height="88" rx="8" fill="#f5f5f5"/>
       <rect x="560" y="164" width="220" height="88" rx="8" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="1"/>
       <text x="670" y="196" font-size="12" font-weight="600" fill="#2d3142">occupied</text>
       <text x="670" y="216" font-size="12" fill="#4f5d75">ไม่ว่าง</text>
-      <text x="670" y="236" font-size="8" fill="#eb6c36" font-family="'Geist Mono',monospace" letter-spacing="0.08em">TABLE_SESSION.STATUS = OPEN</text>
+      <text x="670" y="236" font-size="8" fill="#eb6c36" font-family="'Geist Mono',monospace" letter-spacing="0.08em">VISIT_SESSION.STATUS = OPEN</text>
 
       <rect x="940" y="164" width="220" height="88" rx="8" fill="#f5f5f5"/>
       <rect x="940" y="164" width="220" height="88" rx="8" fill="rgba(45,49,66,0.05)" stroke="#4f5d75" stroke-width="1"/>
@@ -105,7 +105,7 @@
       <p class="eyebrow">STRUCTURAL ENFORCEMENT</p>
       <div class="card-header"><span class="card-dot dot-coral"></span><h3>ทำไมถึงกดผิดไม่ได้</h3></div>
       <ul>
-        <li><strong>ไม่มีคอลัมน์ <code>status</code> ใน <code>shop_table</code></strong> — สถานะมาจาก <code>table_status_v</code> ที่ LEFT JOIN หา session ที่ยังเปิดอยู่</li>
+        <li><strong>ไม่มีคอลัมน์ <code>status</code> ใน <code>service_point</code></strong> — สถานะมาจาก <code>table_status_v</code> ที่ LEFT JOIN หา session ที่ยังเปิดอยู่</li>
         <li>ไม่มีอะไรให้ UPDATE จึงไม่มี endpoint เปิดหรือปิดโต๊ะให้เรียกตั้งแต่แรก</li>
         <li>transition ที่ผิดกฎถูกกันด้วยโครงสร้าง ไม่ใช่ด้วยข้อตกลงระหว่างทีม</li>
       </ul>
@@ -114,7 +114,7 @@
       <p class="eyebrow">ONE WAY BACK</p>
       <div class="card-header"><span class="card-dot dot-ink"></span><h3>ทางเดียวที่โต๊ะกลับเป็นว่าง</h3></div>
       <ul>
-        <li>ปิดบิล ซึ่งไปปิด <code>table_session</code> ให้เป็น <code>closed</code> — US-19 เท่านั้น</li>
+        <li>ปิดบิล ซึ่งไปปิด <code>visit_session</code> ให้เป็น <code>closed</code> — US-19 เท่านั้น</li>
         <li>โต๊ะที่มีบิลเปิดค้าง <strong>ปลดระวางไม่ได้</strong> ต้องปิดบิลก่อน ไม่งั้นได้ <code>409 TABLE_HAS_OPEN_BILL</code></li>
         <li>โต๊ะที่ปลดระวางแล้วเปิด session ใหม่ไม่ได้ ลูกค้าที่สแกน QR เดิมต้องได้ข้อความที่อ่านเข้าใจ</li>
       </ul>
