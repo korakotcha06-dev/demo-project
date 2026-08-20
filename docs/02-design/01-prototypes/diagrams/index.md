@@ -30,7 +30,8 @@
 |---|---|---|---|
 | `architecture-v2` | **สถาปัตยกรรมปัจจุบัน** — VPS ของ TNM + Cloudflare | [[../../02-technical/architecture-v1\|Architecture v1]] §9 | ใช้อยู่ |
 | `architecture-v1` | สถาปัตยกรรมรอบแรก — Supabase + Vercel | [[../../02-technical/architecture-v1\|Architecture v1]] §2.1 | **ถูกแทนที่ 2026-08-20** เก็บไว้เป็นบันทึกการตัดสินใจรอบแรก |
-| `er-core-v1` | ER แกนเงิน 8 ตารางจาก 21 entity | [[../../02-technical/data-model-v1\|Data Model v1]] §2 |  |
+| `er-core-v2` | **ER ปัจจุบัน** — เพิ่ม `shop` เป็นราก · `shop_id` ทุกตาราง · ฟิลด์ VAT | [[../../02-technical/data-model-v1\|Data Model v1]] §9 + §10 | ใช้อยู่ |
+| `er-core-v1` | ER แกนเงิน 8 ตารางจาก 21 entity — ก่อนรองรับหลายร้าน | [[../../02-technical/data-model-v1\|Data Model v1]] §2 | **ถูกแทนที่ 2026-08-20** |
 | `race-close-bill-v1` | ปิดบิลชนกับการสั่งเพิ่ม — race condition ที่เสียหายเป็นเงินจริง | [[../../02-technical/api-design-v1\|API Design v1]] §5.3 |  |
 
 ## State machine
