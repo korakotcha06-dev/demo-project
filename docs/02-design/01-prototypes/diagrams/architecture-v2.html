@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>สถาปัตยกรรม v2 · VPS + Cloudflare</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&family=Noto+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--paper:#f5f5f5;--paper-2:#ececec;--ink:#2d3142;--muted:#4f5d75;--soft:#7a8399;--rule:rgba(45,49,66,0.12);--rule-solid:#bfc0c0;--accent:#eb6c36;--accent-tint:rgba(235,108,54,0.08);--link:#2e5aa8;
+    --sans:'Geist','IBM Plex Sans Thai','Noto Sans Thai','Sukhumvit Set','Thonburi',sans-serif;
+    --mono:'Geist Mono','IBM Plex Sans Thai','Noto Sans Thai',monospace;--serif:'Instrument Serif',Georgia,serif;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;padding:3rem 2rem}
+  .wrap{max-width:1280px;margin:0 auto}
+  .eyebrow{font-family:var(--mono);font-size:8px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin:0 0 0.5rem}
+  h1{font-family:var(--serif);font-size:1.75rem;font-weight:400;margin:0 0 0.5rem;line-height:1.2}
+  .subtitle{color:var(--muted);font-size:0.875rem;margin:0 0 2rem;max-width:64ch;line-height:1.6}
+  .diagram{margin:0 0 2.5rem}
+  svg{display:block;width:100%;height:auto}
+  .cards{display:grid;grid-template-columns:1.1fr 1fr 0.9fr;gap:1rem;margin-bottom:2.5rem}
+  .card{background:#fff;border:1px solid var(--rule);border-radius:6px;padding:1.25rem}
+  .card-header{display:flex;align-items:center;gap:0.5rem;margin:0 0 0.75rem}
+  .card-dot{width:7px;height:7px;border-radius:50%;flex:none}
+  .dot-coral{background:var(--accent)}.dot-ink{background:var(--ink)}.dot-soft{background:var(--soft)}
+  .card h3{font-size:0.875rem;font-weight:600;margin:0}
+  .card ul{margin:0;padding-left:1.1rem;color:var(--muted);font-size:0.8125rem;line-height:1.7}
+  code{font-family:var(--mono);font-size:0.75rem;background:rgba(45,49,66,0.05);padding:1px 4px;border-radius:3px}
+  footer{border-top:1px solid var(--rule);padding-top:1rem;font-family:var(--mono);font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:var(--soft)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="eyebrow">ARCHITECTURE · §9 · REVISED 2026-08-20</p>
+  <h1>ย้ายมาอยู่บน VPS ของเราเอง</h1>
+  <p class="subtitle">ฐานข้อมูลยังเป็น Postgres เหมือนเดิมทุกประการ เปลี่ยนแค่ว่าใครดูแลมัน ผลที่ตามมาโดยไม่ได้ตั้งใจคือข้อจำกัดที่เคยบังคับให้ใช้ Realtime ของผู้ให้บริการหายไปด้วย เพราะ process ที่รันยาวบน VPS ถือ WebSocket เองได้ ต่างจาก serverless</p>
+
+  <div class="diagram">
+  <svg viewBox="0 0 1280 780" role="img" aria-labelledby="architecture-v2-title architecture-v2-desc" xmlns="http://www.w3.org/2000/svg">
+    <title id="architecture-v2-title">ผังสถาปัตยกรรมหลังย้ายมาโฮสต์บน VPS ของ TNM หลัง Cloudflare</title>
+    <desc id="architecture-v2-desc">อุปกรณ์ผู้ใช้สามชนิดเรียกผ่าน Cloudflare ซึ่งทำหน้าที่ DNS ซีดีเอ็น ไฟร์วอลล์ และ Tunnel เข้าสู่ VPS ของ TNM โดยไม่ต้องเปิดพอร์ตขาเข้า บน VPS มี Next.js ที่รวมทั้งการเรนเดอร์หน้าเว็บและ Route Handlers ซึ่งเป็นทางเขียนลงฐานข้อมูลทางเดียว เขียนลง PostgreSQL ที่ self-host อยู่บนเครื่องเดียวกัน ฐานข้อมูลส่งสัญญาณผ่าน LISTEN NOTIFY ไปยัง WebSocket server ที่รันอยู่ในโปรเจกต์เดียวกัน แล้วส่งสถานะสดกลับไปยังอุปกรณ์ทั้งสามผ่าน Cloudflare</desc>
+    <defs>
+      <marker id="a2-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+      <marker id="a2-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#eb6c36"/></marker>
+      <marker id="a2-arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/></marker>
+    </defs>
+    <rect width="100%" height="100%" fill="#f5f5f5"/>
+
+    <g fill="rgba(45,49,66,0.02)" stroke="rgba(45,49,66,0.10)" stroke-width="0.8">
+      <rect x="48" y="88" width="304" height="360" rx="8"/>
+      <rect x="448" y="200" width="264" height="136" rx="8"/>
+      <rect x="808" y="88" width="384" height="384" rx="8"/>
+    </g>
+    <g font-family="'Geist Mono',monospace" font-size="7" fill="rgba(45,49,66,0.40)" letter-spacing="0.14em" text-anchor="middle">
+      <rect x="140" y="92" width="120" height="12" rx="2" fill="#f5f5f5"/><text x="200" y="101">USER DEVICES</text>
+      <rect x="524" y="204" width="112" height="12" rx="2" fill="#f5f5f5"/><text x="580" y="213">CLOUDFLARE EDGE</text>
+      <rect x="900" y="92" width="200" height="12" rx="2" fill="#f5f5f5"/><text x="1000" y="101">TNM VPS · SINGLE HOST</text>
+    </g>
+
+    <g fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#a2-arrow)">
+      <path d="M 320 156 H 412 A 8 8 0 0 1 420 164 V 244 A 8 8 0 0 0 428 252 H 480"/>
+      <path d="M 320 268 H 480"/>
+      <path d="M 320 380 H 412 A 8 8 0 0 0 420 372 V 292 A 8 8 0 0 1 428 284 H 480"/>
+      <path d="M 680 268 H 752 A 8 8 0 0 0 760 260 V 170 A 8 8 0 0 1 768 162 H 840"/>
+      <path d="M 1000 328 V 368"/>
+      <path d="M 1000 440 V 520 A 8 8 0 0 1 992 528 H 208 A 8 8 0 0 1 200 528 V 416" stroke-dasharray="4,3"/>
+    </g>
+    <path d="M 1000 204 V 244" fill="none" stroke="#eb6c36" stroke-width="1.2" marker-end="url(#a2-arrow-accent)"/>
+
+    <g font-family="'Geist Mono',monospace" font-size="8" fill="#7a8399" letter-spacing="0.08em" text-anchor="middle">
+      <rect x="340" y="242" width="60" height="16" rx="2" fill="#f5f5f5"/><text x="370" y="253">HTTPS ×3</text>
+      <rect x="768" y="128" width="60" height="16" rx="2" fill="#f5f5f5"/><text x="798" y="139">TUNNEL</text>
+      <rect x="836" y="330" width="140" height="16" rx="2" fill="#f5f5f5"/><text x="906" y="341">LISTEN / NOTIFY</text>
+      <rect x="880" y="216" width="104" height="16" rx="2" fill="#f5f5f5"/><text x="932" y="227" fill="#eb6c36">ONLY WRITE PATH</text>
+    </g>
+    <rect x="490" y="502" width="180" height="16" rx="2" fill="#f5f5f5"/>
+    <text x="580" y="514" font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai',sans-serif" font-size="12" fill="#7a8399" text-anchor="middle">รับสถานะสด ×3 ผ่าน Cloudflare</text>
+
+    <g font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai','Sukhumvit Set',sans-serif" text-anchor="middle">
+      <rect x="80" y="120" width="240" height="72" rx="6" fill="#f5f5f5"/>
+      <rect x="80" y="120" width="240" height="72" rx="6" fill="rgba(79,93,117,0.10)" stroke="#7a8399" stroke-width="1"/>
+      <text x="200" y="144" font-size="12" font-weight="600" fill="#2d3142">มือถือลูกค้า</text>
+      <text x="200" y="164" font-size="12" fill="#4f5d75">guest · ไม่มีบัญชี</text>
+      <text x="200" y="180" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">/T/{CODE} · /C/{CODE}</text>
+
+      <rect x="80" y="232" width="240" height="72" rx="6" fill="#f5f5f5"/>
+      <rect x="80" y="232" width="240" height="72" rx="6" fill="rgba(79,93,117,0.10)" stroke="#7a8399" stroke-width="1"/>
+      <text x="200" y="256" font-size="12" font-weight="600" fill="#2d3142">แท็บเล็ตสถานีหน้าร้าน</text>
+      <text x="200" y="276" font-size="12" fill="#4f5d75">staff · ยังไม่เลือกกลไก auth</text>
+      <text x="200" y="292" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">/STAFF</text>
+
+      <rect x="80" y="344" width="240" height="72" rx="6" fill="#f5f5f5"/>
+      <rect x="80" y="344" width="240" height="72" rx="6" fill="rgba(79,93,117,0.10)" stroke="#7a8399" stroke-width="1"/>
+      <text x="200" y="368" font-size="12" font-weight="600" fill="#2d3142">เครื่องเจ้าของร้าน</text>
+      <text x="200" y="388" font-size="12" fill="#4f5d75">admin · ยังไม่เลือกกลไก auth</text>
+      <text x="200" y="404" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">/ADMIN</text>
+
+      <rect x="480" y="232" width="200" height="72" rx="6" fill="#f5f5f5"/>
+      <rect x="480" y="232" width="200" height="72" rx="6" fill="rgba(45,49,66,0.03)" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+      <text x="580" y="256" font-size="12" font-weight="600" fill="#2d3142">Cloudflare</text>
+      <text x="580" y="276" font-size="12" fill="#4f5d75">DNS · CDN · WAF · Tunnel</text>
+      <text x="580" y="292" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">NO INBOUND PORTS ON VPS</text>
+
+      <rect x="840" y="120" width="320" height="84" rx="6" fill="#f5f5f5"/>
+      <rect x="840" y="120" width="320" height="84" rx="6" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="1"/>
+      <text x="1000" y="148" font-size="12" font-weight="600" fill="#2d3142">Next.js 15 · RSC + Route Handlers</text>
+      <text x="1000" y="168" font-size="12" fill="#4f5d75">ทางเขียนลงฐานข้อมูลทางเดียว</text>
+      <text x="1000" y="188" font-size="8" fill="#eb6c36" font-family="'Geist Mono',monospace" letter-spacing="0.08em">LONG-RUNNING NODE · NOT SERVERLESS</text>
+
+      <rect x="840" y="244" width="320" height="84" rx="6" fill="#f5f5f5"/>
+      <rect x="840" y="244" width="320" height="84" rx="6" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="1"/>
+      <text x="1000" y="272" font-size="12" font-weight="600" fill="#2d3142">PostgreSQL · self-host</text>
+      <text x="1000" y="292" font-size="12" fill="#4f5d75">schema และ invariant เหมือนเดิมทุกข้อ</text>
+      <text x="1000" y="312" font-size="8" fill="#eb6c36" font-family="'Geist Mono',monospace" letter-spacing="0.08em">SOURCE OF TRUTH</text>
+
+      <rect x="840" y="368" width="320" height="72" rx="6" fill="#f5f5f5"/>
+      <rect x="840" y="368" width="320" height="72" rx="6" fill="rgba(45,49,66,0.05)" stroke="#4f5d75" stroke-width="1"/>
+      <text x="1000" y="392" font-size="12" font-weight="600" fill="#2d3142">WebSocket ที่เราถือเอง</text>
+      <text x="1000" y="412" font-size="12" fill="#4f5d75">event ออกจาก DB ตรง ไม่ใช่ pub/sub แยก</text>
+      <text x="1000" y="428" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">POLLING FALLBACK 5S</text>
+    </g>
+
+    <line x1="40" y1="712" x2="1240" y2="712" stroke="rgba(45,49,66,0.10)" stroke-width="0.8"/>
+    <text x="40" y="732" fill="#4f5d75" font-size="8" font-family="'Geist Mono',monospace" letter-spacing="0.14em">LEGEND</text>
+    <g font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai',sans-serif" font-size="12" fill="#4f5d75">
+      <line x1="140" y1="728" x2="176" y2="728" stroke="#4f5d75" stroke-width="1" marker-end="url(#a2-arrow)"/><text x="188" y="732">คำขอปกติ</text>
+      <line x1="284" y1="728" x2="320" y2="728" stroke="#4f5d75" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#a2-arrow)"/><text x="332" y="732">สถานะสด</text>
+      <line x1="452" y1="728" x2="488" y2="728" stroke="#eb6c36" stroke-width="1.2" marker-end="url(#a2-arrow-accent)"/><text x="500" y="732">ทางเขียนทางเดียว</text>
+      <rect x="660" y="722" width="24" height="12" rx="2" fill="rgba(45,49,66,0.02)" stroke="rgba(45,49,66,0.10)" stroke-width="0.8"/><text x="696" y="732">ขอบเขตที่เราดูแลเอง</text>
+    </g>
+  </svg>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <p class="eyebrow">WHAT DID NOT MOVE</p>
+      <div class="card-header"><span class="card-dot dot-coral"></span><h3>สิ่งที่ไม่เปลี่ยนเลย</h3></div>
+      <ul>
+        <li><code>data-model-v1</code> ทั้งฉบับ — 21 entity, invariant 22 ข้อ, CHECK constraint, VIEW, state machine ทั้งสาม</li>
+        <li><code>api-design-v1</code> §5.1–5.6 — race condition ทั้ง 6 เคสยังใช้ <code>FOR UPDATE</code> และ <code>ON CONFLICT</code> เหมือนเดิม</li>
+        <li>Business Rule ทุกข้อยังถูกบังคับด้วยโครงสร้าง ไม่ใช่วินัยของคนเขียนโค้ด</li>
+      </ul>
+    </div>
+    <div class="card">
+      <p class="eyebrow">UNINTENDED WIN</p>
+      <div class="card-header"><span class="card-dot dot-ink"></span><h3>ของแถมที่ไม่ได้ตั้งใจ</h3></div>
+      <ul>
+        <li>§3.3 เลือก Realtime ของผู้ให้บริการเพราะ <strong>serverless ถือ connection ค้างไม่ได้</strong> — ข้อจำกัดนั้นหายไปพร้อมกับ Vercel</li>
+        <li>กลไกใหม่คือ <code>LISTEN/NOTIFY</code> ยิงเข้า WS ในโปรเจกต์เดียวกัน ยังรักษาคุณสมบัติเดิมไว้คือ event ออกจาก DB โดยตรง ไม่มีทางลืม publish</li>
+        <li>R2 เพดาน realtime และ R10 vendor lock-in ปิดทั้งคู่</li>
+      </ul>
+    </div>
+    <div class="card">
+      <p class="eyebrow">STILL OPEN</p>
+      <div class="card-header"><span class="card-dot dot-soft"></span><h3>ยังไม่ตัดสิน</h3></div>
+      <ul>
+        <li><strong>กลไก auth ของพนักงานและแอดมิน</strong> — เดิมใช้ Supabase Auth ตอนนี้ต้องเลือกใหม่ หลักการแยก 2 กลไกยังใช้ได้</li>
+        <li><strong>Firebase เป็นข้อบังคับของวิชาหรือไม่</strong> — รอถามผู้สอน ดู §9.7</li>
+        <li>ความเสี่ยงใหม่ R13 ภาระ ops · R14 backup ที่กู้ไม่ได้ · R15 VPS เครื่องเดียว</li>
+      </ul>
+    </div>
+  </div>
+
+  <footer>DIAGRAM DESIGN · ARCHITECTURE · DOC-WIDE · BALANCED · MIXED · DRAWN FROM ARCHITECTURE-V1.MD §9</footer>
+</div>
+</body>
+</html>
