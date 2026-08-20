@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>สถาปัตยกรรมระบบ · Phase 0</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&family=Noto+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--paper:#f5f5f5;--ink:#2d3142;--muted:#4f5d75;--soft:#7a8399;--rule:rgba(45,49,66,0.12);--accent:#eb6c36;
+    --sans:'Geist','IBM Plex Sans Thai','Noto Sans Thai','Sukhumvit Set','Thonburi',sans-serif;
+    --mono:'Geist Mono','IBM Plex Sans Thai','Noto Sans Thai',monospace;--serif:'Instrument Serif',Georgia,serif;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;padding:3rem 2rem}
+  .wrap{max-width:1280px;margin:0 auto}
+  .eyebrow{font-family:var(--mono);font-size:8px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin:0 0 0.5rem}
+  h1{font-family:var(--serif);font-size:1.75rem;font-weight:400;margin:0 0 0.5rem;line-height:1.2}
+  .subtitle{color:var(--muted);font-size:0.875rem;margin:0 0 2rem;max-width:64ch;line-height:1.6}
+  .diagram{margin:0 0 2.5rem}
+  svg{display:block;width:100%;height:auto}
+  .cards{display:grid;grid-template-columns:1.1fr 1fr 0.9fr;gap:1rem;margin-bottom:2.5rem}
+  .card{background:#fff;border:1px solid var(--rule);border-radius:6px;padding:1.25rem}
+  .card-header{display:flex;align-items:center;gap:0.5rem;margin:0 0 0.75rem}
+  .card-dot{width:7px;height:7px;border-radius:50%;flex:none}
+  .dot-coral{background:var(--accent)}.dot-ink{background:var(--ink)}.dot-soft{background:var(--soft)}
+  .card h3{font-size:0.875rem;font-weight:600;margin:0}
+  .card ul{margin:0;padding-left:1.1rem;color:var(--muted);font-size:0.8125rem;line-height:1.7}
+  code{font-family:var(--mono);font-size:0.75rem;background:rgba(45,49,66,0.05);padding:1px 4px;border-radius:3px}
+  footer{border-top:1px solid var(--rule);padding-top:1rem;font-family:var(--mono);font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:var(--soft)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="eyebrow">ARCHITECTURE · PHASE 0 · §2</p>
+  <h1>สาม Surface บน codebase เดียว</h1>
+  <p class="subtitle">ลูกค้า พนักงาน และแอดมิน เข้าคนละ route แต่ใช้โปรเจกต์เดียวกัน ทุกการเขียนลงฐานข้อมูลถูกบังคับให้ผ่าน Route Handler ที่เดียว ส่วนการอ่านสถานะแบบสดวิ่งตรงไปที่ Supabase Realtime เพราะ Vercel เป็น serverless ถือ WebSocket ค้างไม่ได้</p>
+
+  <div class="diagram">
+  <svg viewBox="0 0 1280 780" role="img" aria-labelledby="architecture-v1-title architecture-v1-desc" xmlns="http://www.w3.org/2000/svg">
+    <title id="architecture-v1-title">ผังสถาปัตยกรรมระบบสั่งอาหารด้วย QR Code เฟส 0</title>
+    <desc id="architecture-v1-desc">อุปกรณ์ผู้ใช้สามชนิดคือมือถือลูกค้าแบบไม่มีบัญชี แท็บเล็ตสถานีหน้าร้าน และเครื่องเจ้าของร้าน ทั้งสามเรียกผ่าน HTTPS เข้าสู่ RSC Pages บน Vercel ซึ่งส่งต่อไปยัง Route Handlers ที่ถือตรรกะธุรกิจและทรานแซกชันทั้งหมด Route Handlers เขียนลง PostgreSQL ของ Supabase ด้วยสิทธิ์ service role ฐานข้อมูลส่งการเปลี่ยนแปลงต่อไปยัง Supabase Realtime ผ่าน logical replication และอุปกรณ์ทั้งสามรับสถานะสดกลับมาโดยตรงจาก Realtime โดยไม่ผ่าน Vercel</desc>
+
+    <defs>
+      <marker id="arch-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+      <marker id="arch-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="#eb6c36"/></marker>
+      <marker id="arch-arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/></marker>
+    </defs>
+
+    <rect width="100%" height="100%" fill="#f5f5f5"/>
+
+    <!-- ===== zones (before arrows and nodes) ===== -->
+    <g fill="rgba(45,49,66,0.02)" stroke="rgba(45,49,66,0.10)" stroke-width="0.8">
+      <rect x="48" y="88" width="304" height="360" rx="8"/>
+      <rect x="468" y="144" width="344" height="268" rx="8"/>
+      <rect x="928" y="144" width="304" height="256" rx="8"/>
+    </g>
+    <g font-family="'Geist Mono',monospace" font-size="7" fill="rgba(45,49,66,0.40)" letter-spacing="0.14em" text-anchor="middle">
+      <rect x="140" y="92" width="120" height="12" rx="2" fill="#f5f5f5"/><text x="200" y="101">USER DEVICES</text>
+      <rect x="552" y="148" width="176" height="12" rx="2" fill="#f5f5f5"/><text x="640" y="157">VERCEL · NEXT.JS 15</text>
+      <rect x="1016" y="148" width="128" height="12" rx="2" fill="#f5f5f5"/><text x="1080" y="157">SUPABASE MANAGED</text>
+    </g>
+
+    <!-- ===== connectors ===== -->
+    <g fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#arch-arrow)">
+      <!-- e1 guest -> RSC -->
+      <path d="M 320 156 H 402 A 8 8 0 0 1 410 164 V 186 A 8 8 0 0 0 418 194 H 500"/>
+      <!-- e2 staff -> RSC -->
+      <path d="M 320 268 H 422 A 8 8 0 0 0 430 260 V 220 A 8 8 0 0 1 438 212 H 500"/>
+      <!-- e3 admin -> RSC -->
+      <path d="M 320 380 H 442 A 8 8 0 0 0 450 372 V 238 A 8 8 0 0 1 458 230 H 500"/>
+      <!-- e4 RSC -> Route Handlers -->
+      <path d="M 640 248 V 304"/>
+      <!-- e6 Postgres -> Realtime -->
+      <path d="M 1080 252 V 292"/>
+      <!-- e7 Realtime -> devices (dashed return, one arrow for three subscribers) -->
+      <path d="M 960 356 H 908 A 8 8 0 0 0 900 364 V 528 A 8 8 0 0 1 892 536 H 208 A 8 8 0 0 1 200 528 V 416" stroke-dasharray="4,3"/>
+    </g>
+    <!-- e5 Route Handlers -> Postgres · the only write path -->
+    <path d="M 780 342 H 862 A 8 8 0 0 0 870 334 V 222 A 8 8 0 0 1 878 214 H 960"
+          fill="none" stroke="#eb6c36" stroke-width="1.2" marker-end="url(#arch-arrow-accent)"/>
+
+    <!-- ===== connector labels ===== -->
+    <g font-family="'Geist Mono',monospace" font-size="8" fill="#7a8399" letter-spacing="0.08em" text-anchor="middle">
+      <rect x="340" y="242" width="60" height="16" rx="2" fill="#f5f5f5"/><text x="370" y="253">HTTPS ×3</text>
+      <rect x="786" y="316" width="80" height="16" rx="2" fill="#f5f5f5"/><text x="826" y="327" fill="#eb6c36">SERVICE ROLE</text>
+      <rect x="928" y="264" width="140" height="16" rx="2" fill="#f5f5f5"/><text x="998" y="275">LOGICAL REPLICATION</text>
+    </g>
+    <rect x="490" y="510" width="140" height="16" rx="2" fill="#f5f5f5"/>
+    <text x="560" y="522" font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai',sans-serif" font-size="12" fill="#7a8399" text-anchor="middle">รับสถานะสด ×3</text>
+
+    <!-- ===== nodes ===== -->
+    <g font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai','Sukhumvit Set',sans-serif" text-anchor="middle">
+      <!-- N1 guest -->
+      <rect x="80" y="120" width="240" height="72" rx="6" fill="#f5f5f5"/>
+      <rect x="80" y="120" width="240" height="72" rx="6" fill="rgba(79,93,117,0.10)" stroke="#7a8399" stroke-width="1"/>
+      <text x="200" y="144" font-size="12" font-weight="600" fill="#2d3142">มือถือลูกค้า</text>
+      <text x="200" y="164" font-size="12" fill="#4f5d75">guest · ไม่มีบัญชี</text>
+      <text x="200" y="180" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">/T/{CODE} · /C/{CODE}</text>
+
+      <!-- N2 staff -->
+      <rect x="80" y="232" width="240" height="72" rx="6" fill="#f5f5f5"/>
+      <rect x="80" y="232" width="240" height="72" rx="6" fill="rgba(79,93,117,0.10)" stroke="#7a8399" stroke-width="1"/>
+      <text x="200" y="256" font-size="12" font-weight="600" fill="#2d3142">แท็บเล็ตสถานีหน้าร้าน</text>
+      <text x="200" y="276" font-size="12" fill="#4f5d75">staff · Supabase Auth</text>
+      <text x="200" y="292" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">/STAFF</text>
+
+      <!-- N3 admin -->
+      <rect x="80" y="344" width="240" height="72" rx="6" fill="#f5f5f5"/>
+      <rect x="80" y="344" width="240" height="72" rx="6" fill="rgba(79,93,117,0.10)" stroke="#7a8399" stroke-width="1"/>
+      <text x="200" y="368" font-size="12" font-weight="600" fill="#2d3142">เครื่องเจ้าของร้าน</text>
+      <text x="200" y="388" font-size="12" fill="#4f5d75">admin · Supabase Auth</text>
+      <text x="200" y="404" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">/ADMIN</text>
+
+      <!-- N4 RSC -->
+      <rect x="500" y="176" width="280" height="72" rx="6" fill="#f5f5f5"/>
+      <rect x="500" y="176" width="280" height="72" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="640" y="200" font-size="12" font-weight="600" fill="#2d3142">RSC Pages</text>
+      <text x="640" y="220" font-size="12" fill="#4f5d75">server-render เมนูและสถานะ</text>
+      <text x="640" y="236" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">APP ROUTER · 3 ROUTE GROUP</text>
+
+      <!-- N5 Route Handlers · FOCAL -->
+      <rect x="500" y="304" width="280" height="76" rx="6" fill="#f5f5f5"/>
+      <rect x="500" y="304" width="280" height="76" rx="6" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="1"/>
+      <text x="640" y="332" font-size="12" font-weight="600" fill="#2d3142">Route Handlers</text>
+      <text x="640" y="352" font-size="12" fill="#4f5d75">ทางเขียนทางเดียวของทั้งระบบ</text>
+      <text x="640" y="368" font-size="8" fill="#eb6c36" font-family="'Geist Mono',monospace" letter-spacing="0.08em">/API/V1 · ISSUES SESSION TOKEN</text>
+
+      <!-- N6 Postgres · FOCAL -->
+      <rect x="960" y="176" width="240" height="76" rx="6" fill="#f5f5f5"/>
+      <rect x="960" y="176" width="240" height="76" rx="6" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="1"/>
+      <text x="1080" y="204" font-size="12" font-weight="600" fill="#2d3142">PostgreSQL</text>
+      <text x="1080" y="224" font-size="12" fill="#4f5d75">แหล่งความจริงเดียว</text>
+      <text x="1080" y="240" font-size="8" fill="#eb6c36" font-family="'Geist Mono',monospace" letter-spacing="0.08em">SOURCE OF TRUTH</text>
+
+      <!-- N7 Realtime -->
+      <rect x="960" y="292" width="240" height="72" rx="6" fill="#f5f5f5"/>
+      <rect x="960" y="292" width="240" height="72" rx="6" fill="rgba(45,49,66,0.05)" stroke="#4f5d75" stroke-width="1"/>
+      <text x="1080" y="316" font-size="12" font-weight="600" fill="#2d3142">Realtime</text>
+      <text x="1080" y="336" font-size="12" fill="#4f5d75">ส่งสถานะสดผ่าน WebSocket</text>
+      <text x="1080" y="352" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">POSTGRES CHANGES</text>
+    </g>
+
+    <!-- ===== legend ===== -->
+    <line x1="40" y1="712" x2="1240" y2="712" stroke="rgba(45,49,66,0.10)" stroke-width="0.8"/>
+    <text x="40" y="732" fill="#4f5d75" font-size="8" font-family="'Geist Mono',monospace" letter-spacing="0.14em">LEGEND</text>
+    <g font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai',sans-serif" font-size="12" fill="#4f5d75">
+      <line x1="140" y1="728" x2="176" y2="728" stroke="#4f5d75" stroke-width="1" marker-end="url(#arch-arrow)"/>
+      <text x="188" y="732">คำขอปกติ</text>
+      <line x1="284" y1="728" x2="320" y2="728" stroke="#4f5d75" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arch-arrow)"/>
+      <text x="332" y="732">สถานะสด ไม่ผ่าน Vercel</text>
+      <line x1="536" y1="728" x2="572" y2="728" stroke="#eb6c36" stroke-width="1.2" marker-end="url(#arch-arrow-accent)"/>
+      <text x="584" y="732">ทางเขียนทางเดียว</text>
+      <rect x="744" y="722" width="24" height="12" rx="2" fill="rgba(45,49,66,0.02)" stroke="rgba(45,49,66,0.10)" stroke-width="0.8"/>
+      <text x="780" y="732">ขอบเขตผู้ให้บริการ</text>
+    </g>
+  </svg>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <p class="eyebrow">THREE PRINCIPLES</p>
+      <div class="card-header"><span class="card-dot dot-coral"></span><h3>หลักที่ผังนี้บังคับ</h3></div>
+      <ul>
+        <li><strong>เขียนผ่าน Route Handler เท่านั้น</strong> — ไม่มี client ตัวไหนแม้ฝั่งพนักงานเขียน DB ตรง เพราะ BR 4 · BR 11 · BR 12 ต้องอยู่ในทรานแซกชันเดียว</li>
+        <li><strong>อ่านสดไปตรงที่ Realtime</strong> — Vercel เป็น serverless ถือ WebSocket ค้างไม่ได้ มี polling 5 วินาทีเป็นทางสำรอง</li>
+        <li><strong>codebase เดียว 3 route group</strong> — ไม่ใช่ 3 โปรเจกต์ เพราะ US-30 บังคับให้จอพนักงานใช้ตะกร้าตัวเดียวกับลูกค้า</li>
+      </ul>
+    </div>
+    <div class="card">
+      <p class="eyebrow">IDENTITY</p>
+      <div class="card-header"><span class="card-dot dot-ink"></span><h3>ยืนยันตัวตน 2 กลไก แยกโดยเจตนา</h3></div>
+      <ul>
+        <li><strong>ลูกค้า</strong> — session token ที่ออกจาก QR ไม่มีบัญชี ไม่มีรหัสผ่าน</li>
+        <li><strong>พนักงาน / แอดมิน</strong> — Supabase Auth อีเมลและรหัสผ่าน</li>
+        <li>สองกลไกนี้ไม่ปนกัน ทำให้ลูกค้าเข้าถึงหน้าพนักงานไม่ได้แม้เดา URL ถูก</li>
+      </ul>
+    </div>
+    <div class="card">
+      <p class="eyebrow">FIDELITY</p>
+      <div class="card-header"><span class="card-dot dot-soft"></span><h3>ต่างจากต้นฉบับตรงไหน</h3></div>
+      <ul>
+        <li>9 node → 7 (เพดาน 9) · 14 เส้น → 7</li>
+        <li><code>Storage</code> รูปเมนู ตัดทิ้ง — เป็นปลายทางที่ไม่เปลี่ยนเรื่อง</li>
+        <li><code>Auth</code> ยุบเป็น sublabel ของเครื่องพนักงานและแอดมิน</li>
+        <li>subscribe 3 เส้น รวมเป็นเส้นเดียวกำกับ ×3</li>
+      </ul>
+    </div>
+  </div>
+
+  <footer>DIAGRAM DESIGN · ARCHITECTURE · DOC-WIDE · BALANCED · MIXED · REDRAWN FROM ARCHITECTURE-V1.MD §2.1</footer>
+</div>
+</body>
+</html>

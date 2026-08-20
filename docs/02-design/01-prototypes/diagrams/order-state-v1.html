@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>สถานะออเดอร์ · data-model §4.1</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&family=Noto+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--paper:#f5f5f5;--ink:#2d3142;--muted:#4f5d75;--soft:#7a8399;--rule:rgba(45,49,66,0.12);--accent:#eb6c36;
+    --sans:'Geist','IBM Plex Sans Thai','Noto Sans Thai','Sukhumvit Set','Thonburi',sans-serif;
+    --mono:'Geist Mono','IBM Plex Sans Thai','Noto Sans Thai',monospace;--serif:'Instrument Serif',Georgia,serif;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;padding:3rem 2rem}
+  .wrap{max-width:1280px;margin:0 auto}
+  .eyebrow{font-family:var(--mono);font-size:8px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin:0 0 0.5rem}
+  h1{font-family:var(--serif);font-size:1.75rem;font-weight:400;margin:0 0 0.5rem;line-height:1.2}
+  .subtitle{color:var(--muted);font-size:0.875rem;margin:0 0 2rem;max-width:64ch;line-height:1.6}
+  .diagram{margin:0 0 2.5rem}
+  svg{display:block;width:100%;height:auto}
+  .cards{display:grid;grid-template-columns:1.1fr 1fr 0.9fr;gap:1rem;margin-bottom:2.5rem}
+  .card{background:#fff;border:1px solid var(--rule);border-radius:6px;padding:1.25rem}
+  .card-header{display:flex;align-items:center;gap:0.5rem;margin:0 0 0.75rem}
+  .card-dot{width:7px;height:7px;border-radius:50%;flex:none}
+  .dot-coral{background:var(--accent)}.dot-ink{background:var(--ink)}.dot-soft{background:var(--soft)}
+  .card h3{font-size:0.875rem;font-weight:600;margin:0}
+  .card ul{margin:0;padding-left:1.1rem;color:var(--muted);font-size:0.8125rem;line-height:1.7}
+  code{font-family:var(--mono);font-size:0.75rem;background:rgba(45,49,66,0.05);padding:1px 4px;border-radius:3px}
+  footer{border-top:1px solid var(--rule);padding-top:1rem;font-family:var(--mono);font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:var(--soft)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="eyebrow">DATA MODEL · §4.1 · STATE MACHINE</p>
+  <h1>สถานะออเดอร์</h1>
+  <p class="subtitle">ออเดอร์เข้าระบบได้สองประตู ประตูไหนขึ้นกับช่องทาง — dine-in เข้าคิวทันที ส่วนเคาน์เตอร์ต้องผ่านการชำระเงินก่อนเสมอ ปลายทางมีสองทางและทั้งคู่เป็นทางเดียว ปิดแล้วปิดเลย</p>
+
+  <div class="diagram">
+  <svg viewBox="0 0 1280 780" role="img" aria-labelledby="order-state-v1-title order-state-v1-desc" xmlns="http://www.w3.org/2000/svg">
+    <title id="order-state-v1-title">แผนภาพสถานะของออเดอร์ ตั้งแต่เข้าระบบจนจบ</title>
+    <desc id="order-state-v1-desc">ออเดอร์ช่องทางเคาน์เตอร์ที่ลูกค้าสั่งเองเริ่มที่สถานะรอชำระเงิน เมื่อแคชเชียร์ยืนยันรับเงินจึงเข้าสู่สถานะเข้าคิว ส่วนออเดอร์ที่โต๊ะและออเดอร์ที่พนักงานคีย์แทนเข้าสู่สถานะเข้าคิวได้ทันที จากเข้าคิวไปกำลังทำแล้วไปทำเสร็จรอส่งมอบ หรือข้ามขั้นกำลังทำไปทำเสร็จได้เลยตามกติกาสถานีเดียว และถอยจากทำเสร็จกลับมากำลังทำได้หนึ่งขั้นเมื่อกดพลาด เมื่อส่งมอบหรือปิดบิลแล้วจะกลายเป็นจบ ทุกสถานะก่อนจบสามารถถูกยกเลิกได้โดยพนักงานเท่านั้นและต้องระบุเหตุผล</desc>
+
+    <defs>
+      <marker id="ost-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+      <marker id="ost-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="#eb6c36"/></marker>
+      <marker id="ost-arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/></marker>
+    </defs>
+
+    <rect width="100%" height="100%" fill="#f5f5f5"/>
+
+    <!-- ===== transitions ===== -->
+    <g fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#ost-arrow)">
+      <path d="M 86 236 H 140"/>
+      <path d="M 80 226 V 152 A 8 8 0 0 1 88 144 H 492 A 8 8 0 0 1 500 152 V 200"/>
+      <path d="M 300 236 H 420"/>
+      <path d="M 580 236 H 700"/>
+      <path d="M 540 200 V 176 A 8 8 0 0 1 548 168 H 1052 A 8 8 0 0 1 1060 176 V 200"/>
+      <path d="M 860 236 H 980"/>
+      <path d="M 1060 272 V 312 A 8 8 0 0 1 1052 320 H 788 A 8 8 0 0 1 780 312 V 272" stroke-dasharray="4,3"/>
+      <path d="M 1100 272 V 440"/>
+      <path d="M 500 384 V 440" stroke-dasharray="4,3"/>
+      <path d="M 1100 512 V 572 A 8 8 0 0 1 1092 580 H 788"/>
+      <path d="M 500 512 V 572 A 8 8 0 0 0 508 580 H 772"/>
+    </g>
+
+    <!-- ===== transition labels ===== -->
+    <g font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai',sans-serif" font-size="12" fill="#7a8399" text-anchor="middle">
+      <rect x="212" y="118" width="164" height="16" rx="2" fill="#f5f5f5"/><text x="294" y="130">table · หรือพนักงานคีย์แทน</text>
+      <rect x="318" y="210" width="84" height="16" rx="2" fill="#f5f5f5"/><text x="360" y="222">ยืนยันรับเงิน</text>
+      <rect x="608" y="210" width="64" height="16" rx="2" fill="#f5f5f5"/><text x="640" y="222">กดเริ่มทำ</text>
+      <rect x="884" y="210" width="72" height="16" rx="2" fill="#f5f5f5"/><text x="920" y="222">กดเสร็จแล้ว</text>
+      <rect x="704" y="142" width="192" height="16" rx="2" fill="#f5f5f5"/><text x="800" y="154">ข้ามได้ · BR 13 สถานีเดียว</text>
+      <rect x="836" y="294" width="180" height="16" rx="2" fill="#f5f5f5"/><text x="926" y="306">ถอย 1 ขั้น · กดพลาด UX-09</text>
+      <rect x="884" y="340" width="196" height="16" rx="2" fill="#f5f5f5"/><text x="982" y="352">กดส่งมอบ · หรือ auto ตอนปิดบิล</text>
+    </g>
+    <rect x="86" y="212" width="52" height="16" rx="2" fill="#f5f5f5"/>
+    <text x="112" y="223" font-family="'Geist Mono',monospace" font-size="8" fill="#7a8399" text-anchor="middle" letter-spacing="0.08em">COUNTER</text>
+
+    <!-- ===== start / end pseudo-states ===== -->
+    <circle cx="80" cy="236" r="6" fill="#2d3142"/>
+    <circle cx="780" cy="580" r="8" fill="none" stroke="#2d3142" stroke-width="1"/>
+    <circle cx="780" cy="580" r="5" fill="#2d3142"/>
+
+    <!-- ===== states ===== -->
+    <g font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai','Sukhumvit Set',sans-serif" text-anchor="middle">
+      <!-- awaiting_payment · FOCAL -->
+      <rect x="140" y="200" width="160" height="72" rx="8" fill="#f5f5f5"/>
+      <rect x="140" y="200" width="160" height="72" rx="8" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="1"/>
+      <text x="220" y="224" font-size="12" font-weight="600" fill="#2d3142">awaiting_payment</text>
+      <text x="220" y="244" font-size="12" fill="#4f5d75">รอชำระเงิน</text>
+      <text x="220" y="260" font-size="8" fill="#eb6c36" font-family="'Geist Mono',monospace" letter-spacing="0.08em">COUNTER ONLY · BR 12</text>
+
+      <!-- queued -->
+      <rect x="420" y="200" width="160" height="72" rx="8" fill="#f5f5f5"/>
+      <rect x="420" y="200" width="160" height="72" rx="8" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="500" y="224" font-size="12" font-weight="600" fill="#2d3142">queued</text>
+      <text x="500" y="244" font-size="12" fill="#4f5d75">เข้าคิวเตรียมของ</text>
+      <text x="500" y="260" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">US-04 · BR 3</text>
+
+      <!-- in_progress -->
+      <rect x="700" y="200" width="160" height="72" rx="8" fill="#f5f5f5"/>
+      <rect x="700" y="200" width="160" height="72" rx="8" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="780" y="224" font-size="12" font-weight="600" fill="#2d3142">in_progress</text>
+      <text x="780" y="244" font-size="12" fill="#4f5d75">กำลังทำ</text>
+      <text x="780" y="260" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">US-14</text>
+
+      <!-- ready -->
+      <rect x="980" y="200" width="160" height="72" rx="8" fill="#f5f5f5"/>
+      <rect x="980" y="200" width="160" height="72" rx="8" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="1060" y="224" font-size="12" font-weight="600" fill="#2d3142">ready</text>
+      <text x="1060" y="244" font-size="12" fill="#4f5d75">ทำเสร็จ รอส่งมอบ</text>
+      <text x="1060" y="260" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">US-14</text>
+
+      <!-- any-state shorthand -->
+      <rect x="390" y="344" width="220" height="40" rx="8" fill="#f5f5f5"/>
+      <rect x="390" y="344" width="220" height="40" rx="8" fill="rgba(45,49,66,0.02)" stroke="rgba(45,49,66,0.20)" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="500" y="360" font-size="12" fill="#4f5d75">ทุกสถานะก่อน completed</text>
+      <text x="500" y="376" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">STAFF ONLY · REASON REQUIRED · BR 5</text>
+
+      <!-- cancelled -->
+      <rect x="420" y="440" width="160" height="72" rx="8" fill="#f5f5f5"/>
+      <rect x="420" y="440" width="160" height="72" rx="8" fill="rgba(45,49,66,0.05)" stroke="#4f5d75" stroke-width="1"/>
+      <text x="500" y="464" font-size="12" font-weight="600" fill="#2d3142">cancelled</text>
+      <text x="500" y="484" font-size="12" fill="#4f5d75">ยกเลิก ต้องสั่งใหม่</text>
+      <text x="500" y="500" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">CANCEL_REASON NOT NULL</text>
+
+      <!-- completed -->
+      <rect x="1020" y="440" width="160" height="72" rx="8" fill="#f5f5f5"/>
+      <rect x="1020" y="440" width="160" height="72" rx="8" fill="rgba(45,49,66,0.05)" stroke="#4f5d75" stroke-width="1"/>
+      <text x="1100" y="464" font-size="12" font-weight="600" fill="#2d3142">completed</text>
+      <text x="1100" y="484" font-size="12" fill="#4f5d75">จบ ปิดแล้วปิดเลย</text>
+      <text x="1100" y="500" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">REFUND ONLY · US-22</text>
+    </g>
+
+    <!-- ===== legend ===== -->
+    <line x1="40" y1="712" x2="1240" y2="712" stroke="rgba(45,49,66,0.10)" stroke-width="0.8"/>
+    <text x="40" y="732" fill="#4f5d75" font-size="8" font-family="'Geist Mono',monospace" letter-spacing="0.14em">LEGEND</text>
+    <g font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai',sans-serif" font-size="12" fill="#4f5d75">
+      <circle cx="150" cy="728" r="6" fill="#2d3142"/>
+      <text x="168" y="732">เริ่ม</text>
+      <circle cx="248" cy="728" r="8" fill="none" stroke="#2d3142" stroke-width="1"/>
+      <circle cx="248" cy="728" r="5" fill="#2d3142"/>
+      <text x="264" y="732">จบ</text>
+      <rect x="332" y="722" width="24" height="12" rx="4" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="0.8"/>
+      <text x="368" y="732">ประตูที่ BR 12 บังคับ</text>
+      <rect x="536" y="722" width="24" height="12" rx="4" fill="rgba(45,49,66,0.05)" stroke="#4f5d75" stroke-width="0.8"/>
+      <text x="572" y="732">สถานะปลายทาง ย้อนไม่ได้</text>
+      <line x1="784" y1="728" x2="820" y2="728" stroke="#4f5d75" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#ost-arrow)"/>
+      <text x="832" y="732">ทางถอย และทางยกเลิก</text>
+    </g>
+  </svg>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <p class="eyebrow">TWO DOORS IN</p>
+      <div class="card-header"><span class="card-dot dot-coral"></span><h3>ประตูเข้าต่างกันตามช่องทาง</h3></div>
+      <ul>
+        <li><strong>dine-in</strong> เข้า <code>queued</code> ทันที — BR 3 ห้ามบล็อกออเดอร์ด้วยการจ่ายเงิน มี CHECK constraint กันไม่ให้โต๊ะมีสถานะ <code>awaiting_payment</code> เลย</li>
+        <li><strong>เคาน์เตอร์</strong> ต้องผ่าน <code>awaiting_payment</code> ก่อน — BR 12 และข้ามได้เมื่อ <code>bill.paid_at IS NOT NULL</code> เท่านั้น (INV-3)</li>
+        <li>พนักงานคีย์แทน (US-30) จ่ายในทรานแซกชันเดียว จึงเข้า <code>queued</code> ได้เลย</li>
+      </ul>
+    </div>
+    <div class="card">
+      <p class="eyebrow">ALLOWED SHORTCUTS</p>
+      <div class="card-header"><span class="card-dot dot-ink"></span><h3>ทางลัดที่จงใจอนุญาต</h3></div>
+      <ul>
+        <li><code>queued → ready</code> ข้าม <code>in_progress</code> ได้ — BR 13 สถานีเดียว บังคับกด 2 ครั้งคือเพิ่มงานเปล่า</li>
+        <li><code>ready → in_progress</code> ถอยได้ 1 ขั้น — มือเปียกกดพลาดเกิดขึ้นจริง บันทึกลง event log</li>
+        <li>ทุกครั้งที่เปลี่ยนสถานะต้องเขียน <code>order_status_event</code></li>
+      </ul>
+    </div>
+    <div class="card">
+      <p class="eyebrow">FIDELITY</p>
+      <div class="card-header"><span class="card-dot dot-soft"></span><h3>ต่างจากต้นฉบับตรงไหน</h3></div>
+      <ul>
+        <li>วาดมือ — extractor พังกับ state ที่ตั้งชื่อเป็นภาษาไทย</li>
+        <li>เส้นยกเลิก 4 เส้น ยุบเป็นกล่องย่อ "ทุกสถานะก่อน completed" ตามที่ type reference สั่ง</li>
+        <li>เพิ่ม 2 transition จากตารางใต้แผนภาพที่ mermaid ต้นฉบับไม่มี — ข้าม <code>in_progress</code> และถอยกลับ 1 ขั้น</li>
+      </ul>
+    </div>
+  </div>
+
+  <footer>DIAGRAM DESIGN · STATE MACHINE · DOC-WIDE · BALANCED · ENGINEER · DRAWN FROM DATA-MODEL-V1.MD §4.1</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>J4 · มุมพนักงานหน้าร้านช่วง peak</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&family=Noto+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--paper:#f5f5f5;--ink:#2d3142;--muted:#4f5d75;--soft:#7a8399;--rule:rgba(45,49,66,0.12);--accent:#eb6c36;
+    --sans:'Geist','IBM Plex Sans Thai','Noto Sans Thai','Sukhumvit Set','Thonburi',sans-serif;
+    --mono:'Geist Mono','IBM Plex Sans Thai','Noto Sans Thai',monospace;--serif:'Instrument Serif',Georgia,serif;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;padding:3rem 2rem}
+  .wrap{max-width:1280px;margin:0 auto}
+  .eyebrow{font-family:var(--mono);font-size:8px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin:0 0 0.5rem}
+  h1{font-family:var(--serif);font-size:1.75rem;font-weight:400;margin:0 0 0.5rem;line-height:1.2}
+  .subtitle{color:var(--muted);font-size:0.875rem;margin:0 0 2rem;max-width:64ch;line-height:1.6}
+  .diagram{margin:0 0 2.5rem}
+  svg{display:block;width:100%;height:auto}
+  .cards{display:grid;grid-template-columns:1.1fr 1fr 0.9fr;gap:1rem;margin-bottom:2.5rem}
+  .card{background:#fff;border:1px solid var(--rule);border-radius:6px;padding:1.25rem}
+  .card-header{display:flex;align-items:center;gap:0.5rem;margin:0 0 0.75rem}
+  .card-dot{width:7px;height:7px;border-radius:50%;flex:none}
+  .dot-coral{background:var(--accent)}.dot-ink{background:var(--ink)}.dot-soft{background:var(--soft)}
+  .card h3{font-size:0.875rem;font-weight:600;margin:0}
+  .card ul{margin:0;padding-left:1.1rem;color:var(--muted);font-size:0.8125rem;line-height:1.7}
+  code{font-family:var(--mono);font-size:0.75rem;background:rgba(45,49,66,0.05);padding:1px 4px;border-radius:3px}
+  footer{border-top:1px solid var(--rule);padding-top:1rem;font-family:var(--mono);font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:var(--soft)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="eyebrow">USER FLOW · PHASE 0 · J4</p>
+  <h1>มุมพนักงานหน้าร้าน ช่วง peak</h1>
+  <p class="subtitle">สามที่มาไหลเข้ามาพร้อมกันได้ทุกเมื่อ แต่บรรจบที่คิวเตรียมของชุดเดียว ไม่แยกคิวตามที่มา มีเพียงออเดอร์จากช่องทางเคาน์เตอร์ที่ลูกค้าสั่งเองเท่านั้นที่ต้องผ่านด่านยืนยันรับเงินก่อน จากนั้นทุกอย่างวนกลับมาที่กระดานออเดอร์ซึ่งเปิดค้างอยู่ตลอดกะ</p>
+
+  <div class="diagram">
+  <svg viewBox="0 0 1280 780" role="img" aria-labelledby="j4-flow-v1-title j4-flow-v1-desc" xmlns="http://www.w3.org/2000/svg">
+    <title id="j4-flow-v1-title">แผนภาพลำดับขั้น J4 — งานของพนักงานหน้าร้านช่วงเวลาเร่งด่วน</title>
+    <desc id="j4-flow-v1-desc">ออเดอร์เข้ามาจากสามที่มาคือโต๊ะ dine-in ซึ่งเข้าคิวทันที เคาน์เตอร์ที่ลูกค้าสั่งเองซึ่งต้องผ่านคิวรอยืนยันการชำระเงินก่อน และเคาน์เตอร์ที่พนักงานคีย์แทนซึ่งรับเงินไปแล้วในขั้นตอนเดียว ทั้งสามบรรจบที่คิวเตรียมของรวมชุดเดียวตามกติกา BR 12 จากนั้นกระดานออเดอร์แจ้งเตือนด้วยทั้งเสียงและสัญญาณภาพ พนักงานอ่านตั๋ว ลงมือทำ และกดเสร็จ แล้วแยกทางตามช่องทางว่าจะนำไปเสิร์ฟที่โต๊ะหรือให้ลูกค้ามารับที่ปลายเคาน์เตอร์ ก่อนวนกลับมาที่กระดานออเดอร์ ระหว่างกะยังมีงานอื่นคือมาร์กของหมด ยกเลิกออเดอร์พร้อมเหตุผล และปิดบิลให้ลูกค้าโต๊ะ</desc>
+    <defs>
+      <marker id="j4f-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+      <marker id="j4f-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#eb6c36"/></marker>
+      <marker id="j4f-arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/></marker>
+    </defs>
+    <rect width="100%" height="100%" fill="#f5f5f5"/>
+
+    <g fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#j4f-arrow)">
+      <path d="M 300 132 H 412 A 8 8 0 0 1 420 140 V 364 A 8 8 0 0 0 428 372 H 520"/>
+      <path d="M 300 244 H 412 a 8 8 0 0 1 16 0 H 520"/>
+      <path d="M 620 280 V 344"/>
+      <path d="M 300 356 H 444 A 8 8 0 0 1 452 364 V 388 A 8 8 0 0 0 460 396 H 520"/>
+      <path d="M 720 382 H 852 A 8 8 0 0 0 860 374 V 142 A 8 8 0 0 1 868 134 H 940"/>
+      <path d="M 1040 172 V 216"/>
+      <path d="M 1040 292 V 336"/>
+      <path d="M 1140 374 H 1192 A 8 8 0 0 0 1200 366 V 162 A 8 8 0 0 0 1192 154 H 1140" stroke-dasharray="4,3"/>
+      <path d="M 940 158 H 928 A 8 8 0 0 0 920 166 V 476 A 8 8 0 0 0 928 484 H 940" stroke-dasharray="4,3"/>
+    </g>
+
+    <g font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai',sans-serif" font-size="12" fill="#7a8399" text-anchor="middle">
+      <rect x="308" y="218" width="96" height="16" rx="2" fill="#f5f5f5"/><text x="356" y="230">ต้องผ่านด่านเงิน</text>
+      <rect x="632" y="296" width="60" height="16" rx="2" fill="#f5f5f5"/><text x="662" y="308">จ่ายแล้ว</text>
+      <rect x="1084" y="300" width="108" height="16" rx="2" fill="#f5f5f5"/><text x="1138" y="312">วนกลับกระดาน</text>
+      <rect x="780" y="430" width="132" height="16" rx="2" fill="#f5f5f5"/><text x="846" y="442">งานอื่นระหว่างกะ</text>
+    </g>
+
+    <g font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai','Sukhumvit Set',sans-serif" text-anchor="middle">
+      <rect x="100" y="96" width="200" height="72" rx="6" fill="#f5f5f5"/>
+      <rect x="100" y="96" width="200" height="72" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="200" y="120" font-size="12" font-weight="600" fill="#2d3142">โต๊ะ dine-in</text>
+      <text x="200" y="140" font-size="12" fill="#4f5d75">เข้าคิวทันที ไม่รอจ่าย</text>
+      <text x="200" y="156" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">J1 · BR 3</text>
+
+      <rect x="100" y="208" width="200" height="72" rx="6" fill="#f5f5f5"/>
+      <rect x="100" y="208" width="200" height="72" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="200" y="232" font-size="12" font-weight="600" fill="#2d3142">เคาน์เตอร์ ลูกค้าสั่งเอง</text>
+      <text x="200" y="252" font-size="12" fill="#4f5d75">ยังไม่จ่ายเงิน</text>
+      <text x="200" y="268" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">J2 · US-28</text>
+
+      <rect x="100" y="320" width="200" height="72" rx="6" fill="#f5f5f5"/>
+      <rect x="100" y="320" width="200" height="72" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="200" y="344" font-size="12" font-weight="600" fill="#2d3142">เคาน์เตอร์ พนักงานคีย์แทน</text>
+      <text x="200" y="364" font-size="12" fill="#4f5d75">รับเงินไปแล้วในขั้นเดียว</text>
+      <text x="200" y="380" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">J3 · US-30</text>
+
+      <rect x="520" y="208" width="200" height="72" rx="6" fill="#f5f5f5"/>
+      <rect x="520" y="208" width="200" height="72" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="620" y="232" font-size="12" font-weight="600" fill="#2d3142">S-03 คิวรอยืนยันเงิน</text>
+      <text x="620" y="252" font-size="12" fill="#4f5d75">ต้องมองเห็นตลอด ไม่ซ่อน</text>
+      <text x="620" y="268" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">US-29 · ELSE BR 5 CANCEL</text>
+
+      <rect x="520" y="344" width="200" height="76" rx="6" fill="#f5f5f5"/>
+      <rect x="520" y="344" width="200" height="76" rx="6" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="1"/>
+      <text x="620" y="372" font-size="12" font-weight="600" fill="#2d3142">คิวเตรียมของรวม</text>
+      <text x="620" y="392" font-size="12" fill="#4f5d75">ทุกที่มาบรรจบ ไม่แยกคิว</text>
+      <text x="620" y="408" font-size="8" fill="#eb6c36" font-family="'Geist Mono',monospace" letter-spacing="0.08em">BR 12</text>
+
+      <rect x="940" y="96" width="200" height="76" rx="6" fill="#f5f5f5"/>
+      <rect x="940" y="96" width="200" height="76" rx="6" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="1"/>
+      <text x="1040" y="120" font-size="12" font-weight="600" fill="#2d3142">S-01 กระดานออเดอร์</text>
+      <text x="1040" y="140" font-size="12" fill="#4f5d75">เปิดค้างตลอดกะ · เตือนเสียงและภาพ</text>
+      <text x="1040" y="160" font-size="8" fill="#eb6c36" font-family="'Geist Mono',monospace" letter-spacing="0.08em">US-15 · SOUND + VISUAL ALERT</text>
+
+      <rect x="940" y="216" width="200" height="76" rx="6" fill="#f5f5f5"/>
+      <rect x="940" y="216" width="200" height="76" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="1040" y="240" font-size="12" font-weight="600" fill="#2d3142">อ่านตั๋ว ลงมือทำ กดเสร็จ</text>
+      <text x="1040" y="260" font-size="12" fill="#4f5d75">เลขโต๊ะตัวใหญ่ ป้ายที่มาชัด</text>
+      <text x="1040" y="280" font-size="12" fill="#4f5d75">ปุ่ม 48px มือเปียกกดได้</text>
+
+      <rect x="940" y="336" width="200" height="76" rx="6" fill="#f5f5f5"/>
+      <rect x="940" y="336" width="200" height="76" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="1040" y="360" font-size="12" font-weight="600" fill="#2d3142">แยกทางตามช่องทาง</text>
+      <text x="1040" y="380" font-size="12" fill="#4f5d75">โต๊ะ พนักงานเสิร์ฟ</text>
+      <text x="1040" y="400" font-size="12" fill="#4f5d75">เคาน์เตอร์ รอลูกค้ามารับ</text>
+
+      <rect x="940" y="456" width="200" height="56" rx="6" fill="#f5f5f5"/>
+      <rect x="940" y="456" width="200" height="56" rx="6" fill="rgba(45,49,66,0.02)" stroke="rgba(45,49,66,0.20)" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="1040" y="480" font-size="12" font-weight="600" fill="#4f5d75">ของหมด · ยกเลิก · ปิดบิล</text>
+      <text x="1040" y="496" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">S-05 · S-06 · S-07</text>
+    </g>
+
+    <line x1="40" y1="712" x2="1240" y2="712" stroke="rgba(45,49,66,0.10)" stroke-width="0.8"/>
+    <text x="40" y="732" fill="#4f5d75" font-size="8" font-family="'Geist Mono',monospace" letter-spacing="0.14em">LEGEND</text>
+    <g font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai',sans-serif" font-size="12" fill="#4f5d75">
+      <rect x="140" y="722" width="24" height="12" rx="2" fill="#ffffff" stroke="#2d3142" stroke-width="0.8"/><text x="172" y="732">ขั้นตอน</text>
+      <rect x="284" y="722" width="24" height="12" rx="2" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="0.8"/><text x="316" y="732">จุดที่ทุกที่มาบรรจบ</text>
+      <rect x="516" y="722" width="24" height="12" rx="2" fill="rgba(45,49,66,0.02)" stroke="rgba(45,49,66,0.20)" stroke-width="0.8" stroke-dasharray="4,3"/><text x="548" y="732">งานคู่ขนานระหว่างกะ</text>
+      <line x1="760" y1="728" x2="796" y2="728" stroke="#4f5d75" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#j4f-arrow)"/><text x="808" y="732">วนกลับ ไม่ใช่ทางเดินหน้า</text>
+    </g>
+  </svg>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <p class="eyebrow">ONE QUEUE</p>
+      <div class="card-header"><span class="card-dot dot-coral"></span><h3>สามที่มา คิวเดียว</h3></div>
+      <ul>
+        <li><strong>BR 12</strong> — ไม่แยกคิวตามที่มา พนักงานมีคิวเตรียมของให้ดูชุดเดียว</li>
+        <li>ด่านเดียวที่แทรกอยู่คือ S-03 คิวรอยืนยันเงิน และแทรกเฉพาะออเดอร์จาก J2</li>
+        <li>ป้ายบอกที่มาต้องอ่านออกใน 2 วินาที ด้วยข้อความบวกไอคอน — ไม่ใช่แยกคิว</li>
+      </ul>
+    </div>
+    <div class="card">
+      <p class="eyebrow">PEAK CONDITIONS</p>
+      <div class="card-header"><span class="card-dot dot-ink"></span><h3>เงื่อนไขหน้างานจริง</h3></div>
+      <ul>
+        <li>แจ้งเตือนต้องมีทั้ง <strong>เสียงและภาพ</strong> เพราะเสียงเครื่องชงกลบเสียงแจ้งเตือนได้</li>
+        <li>ปุ่มเปลี่ยนสถานะ 48px กดได้ทั้งที่มือเปียก</li>
+        <li>S-03 ต้องมองเห็นตลอดเวลา ห้ามซ่อนในเมนูย่อย</li>
+        <li>ตัวเลือกที่ลูกค้าเลือกต้องอ่านชัด ไม่งั้นทำผิดแก้วแล้วเสียของ</li>
+      </ul>
+    </div>
+    <div class="card">
+      <p class="eyebrow">FIDELITY</p>
+      <div class="card-header"><span class="card-dot dot-soft"></span><h3>ถูกยุบจากต้นฉบับ</h3></div>
+      <ul>
+        <li>24 node → 9 · 28 เส้น → 9 (ต้นฉบับใหญ่ที่สุดในทั้งเอกสาร)</li>
+        <li>เข้ากะ และ S-00 เข้าสู่ระบบ ตัดออก — เป็นขั้นก่อนเริ่มลูป</li>
+        <li>อ่านตั๋ว ลงมือทำ กดเสร็จ ยุบเป็นกล่องเดียว</li>
+        <li>จุดตัดสินใจช่องทาง กับปลายทาง 2 ทาง ยุบเป็นกล่องเดียว</li>
+        <li>งานคู่ขนาน 3 อย่างยุบเป็นกล่องเดียว</li>
+      </ul>
+    </div>
+  </div>
+
+  <footer>DIAGRAM DESIGN · FLOWCHART · DOC-WIDE · BALANCED · MIXED · REDRAWN FROM USER-FLOW-V1.MD §4</footer>
+</div>
+</body>
+</html>
