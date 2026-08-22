@@ -4,7 +4,17 @@
 
 ## สถานะโปรเจกต์
 
-โปรเจกต์นี้ยังไม่มี **โค้ดแอปพลิเคชัน** ใด ๆ — เป็นเพียง Obsidian vault สำหรับเก็บเอกสารตามโครงสร้าง SDLC ของผลิตภัณฑ์ที่ยังไม่ได้ลงมือสร้างจริง ไม่มี `package.json`, build tool, linter หรือ test runner อย่าสมมติหรือคิดคำสั่ง build/lint/test ขึ้นเอง เมื่อมีการเพิ่มโค้ดแอปพลิเคชันจริงเข้ามาในโปรเจกต์ ให้อัปเดตไฟล์นี้ด้วยคำสั่งที่ใช้งานได้จริง
+**repo นี้ยังเป็น Obsidian vault สำหรับเอกสารล้วน** ไม่มี `package.json`, build tool, linter หรือ test runner — อย่าสมมติหรือคิดคำสั่ง build/lint/test ขึ้นเองสำหรับ repo นี้
+
+🔴 **โค้ดแอปพลิเคชันมีอยู่แล้วตั้งแต่ 2026-08-22 แต่อยู่ใน repo แยก:**
+
+```
+/Users/korakotchangpan/Documents/ADT-AI/Classwork/qr-order-app
+```
+
+คำสั่ง build/test/dev ทั้งหมดอยู่ใน `CLAUDE.md` ของ repo นั้น (`pnpm dev:all`, `pnpm migrate`, `pnpm seed`, `pnpm test`, `pnpm check:invariants`) · **เอกสารใน `docs/` ของ vault นี้ยังเป็น source of truth ของโค้ดนั้นอยู่** — โค้ดขัดกับเอกสารเมื่อไหร่ให้ทำตามเอกสาร แล้วบันทึกเหตุผลไว้ใน `docs/05-log/changelog.md`
+
+สิ่งที่ build ไปแล้ว: schema เต็ม (24 ตาราง, INV-1..INV-10, RLS) + เส้นทาง dine-in (J1) ครบวง + 12 จาก 23 หน้าจอ — รายละเอียดพร้อมช่องว่างของเอกสารที่เจอตอนลงมือ อยู่ในบันทึก changelog วันที่ 2026-08-22
 
 ## โจทย์ของโปรเจกต์ (Product brief)
 
