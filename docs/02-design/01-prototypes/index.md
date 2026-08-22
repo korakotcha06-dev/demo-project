@@ -23,3 +23,7 @@
 ลำดับการอ่าน: **Design System Adoption → Screen Inventory → User Flow**
 
 **ยังไม่ได้ทำในรอบนี้ (งานถัดไปของ SHURI):** wireframe/mockup รายหน้าจอ, prototype แบบกดผ่านได้, และ design token ที่ implement จริงเป็นโค้ด
+
+## บันทึกการตรวจ mockup
+
+- [[mockup-thyna-pos-v1|Mockup Review — Thyna Cafe POS v1]] — ตรวจ mockup ชุด Thyna ที่ Touch ชี้ให้ดู (2026-08-22) · **ปิดช่องว่างที่ [[design-system-adoption-v1|design-system-adoption-v1]] §6.1 บันทึกว่า theme ไม่มีหน้าจอพนักงานเลย** · 5 จุดที่ยืนยันว่าออกแบบถูกทาง · 1 จุดที่รับมาใช้แล้ว (กระดาน 3 คอลัมน์) · **11 จุดที่ไม่รับมาพร้อมเหตุผล** โดยเรื่องใหญ่สุดคือ mockup แสดงชื่อลูกค้าบนตั๋วซึ่งขัด Business Rule ข้อ 14 ตรง ๆ
