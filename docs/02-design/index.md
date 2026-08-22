@@ -9,7 +9,7 @@
 
 ## สถานะ (2026-08-22) — เข้าสู่ implementation แล้ว
 
-เอกสารชั้นนี้ถูก **นำไปสร้างของจริง** แล้วใน repo แยก `qr-order-app` (ดู [[../05-log/changelog|05-log/changelog]] วันที่ 2026-08-22)
+เอกสารชั้นนี้ถูก **นำไปสร้างของจริง** แล้วใน repo แยก <https://github.com/korakotcha06-dev/qr-order-app> (private) — ดู [[../05-log/changelog|05-log/changelog]] วันที่ 2026-08-22
 
 รอบแรกปิด **schema เต็ม + เส้นทาง dine-in (J1) ครบวง + 12 จาก 23 หน้าจอ** — ช่องทางเคาน์เตอร์และหน้าจอแอดมินยังไม่ทำ
 

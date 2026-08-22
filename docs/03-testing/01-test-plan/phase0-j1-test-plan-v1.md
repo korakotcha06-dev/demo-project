@@ -3,7 +3,7 @@
 > **สถานะ: ใช้งานอยู่** — ครอบเฉพาะขอบเขตที่ build เสร็จแล้วในรอบแรก (2026-08-22)
 > ต้นทาง: [[../../02-design/02-technical/api-design-v1|API Design v1]] §5 · §7 · [[../../02-design/02-technical/data-model-v1|Data Model v1]] §5 · §9.7 · [[../../01-requirements/01-spec/ux-requirements-v1|UX Requirements v1]] §7
 > ส่งถึง: OKOYE (ด่านสุดท้ายก่อนขึ้นจริง)
-> โค้ดที่ทดสอบ: `/Users/korakotchangpan/Documents/ADT-AI/Classwork/qr-order-app`
+> โค้ดที่ทดสอบ: <https://github.com/korakotcha06-dev/qr-order-app> (private) · local `/Users/korakotchangpan/Documents/ADT-AI/Classwork/qr-order-app`
 
 กลับไปที่ [[index|01-test-plan]]
 

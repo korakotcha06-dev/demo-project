@@ -8,9 +8,8 @@
 
 🔴 **โค้ดแอปพลิเคชันมีอยู่แล้วตั้งแต่ 2026-08-22 แต่อยู่ใน repo แยก:**
 
-```
-/Users/korakotchangpan/Documents/ADT-AI/Classwork/qr-order-app
-```
+- GitHub: <https://github.com/korakotcha06-dev/qr-order-app> (private)
+- local: `/Users/korakotchangpan/Documents/ADT-AI/Classwork/qr-order-app`
 
 คำสั่ง build/test/dev ทั้งหมดอยู่ใน `CLAUDE.md` ของ repo นั้น (`pnpm dev:all`, `pnpm migrate`, `pnpm seed`, `pnpm test`, `pnpm check:invariants`) · **เอกสารใน `docs/` ของ vault นี้ยังเป็น source of truth ของโค้ดนั้นอยู่** — โค้ดขัดกับเอกสารเมื่อไหร่ให้ทำตามเอกสาร แล้วบันทึกเหตุผลไว้ใน `docs/05-log/changelog.md`
 

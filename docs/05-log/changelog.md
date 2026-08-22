@@ -9,7 +9,8 @@
 ## 2026-08-22 — เริ่มเขียนโค้ดจริง: ปิดเส้นทาง J1 ครบวงใน repo แยก `qr-order-app`
 
 โปรเจกต์ข้ามจาก "เอกสารครบถึง `02-design`" มาเป็น **ระบบที่รันได้จริง** เป็นครั้งแรก
-โค้ดอยู่ใน repo แยก ไม่ปนกับ vault: `/Users/korakotchangpan/Documents/ADT-AI/Classwork/qr-order-app`
+โค้ดอยู่ใน repo แยก ไม่ปนกับ vault — <https://github.com/korakotcha06-dev/qr-order-app> (private · สร้างและ push แล้ว 2026-08-22)
+local: `/Users/korakotchangpan/Documents/ADT-AI/Classwork/qr-order-app`
 
 - **ขอบเขตรอบนี้ = vertical slice ไม่ใช่ Phase 0 ทั้งก้อน** — Phase 0 มี 23 US / 23 หน้าจอ / 22 entity
   ถ้าทำทีเดียวหมดจะไม่มีอะไรทดสอบได้จนกว่าจะจบทั้งหมด · เลือกทำ **schema เต็ม + เส้นทาง dine-in (J1) ครบวง**
