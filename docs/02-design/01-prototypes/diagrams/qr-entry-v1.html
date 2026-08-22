@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>สแกน QR แล้วเกิดอะไรขึ้น · ux-journey-map §4.5.1</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&family=Noto+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--paper:#f5f5f5;--paper-2:#ececec;--ink:#2d3142;--muted:#4f5d75;--soft:#7a8399;--rule:rgba(45,49,66,0.12);--rule-solid:#bfc0c0;--accent:#eb6c36;--accent-tint:rgba(235,108,54,0.08);--link:#2e5aa8;
+    --sans:'Geist','IBM Plex Sans Thai','Noto Sans Thai','Sukhumvit Set','Thonburi',sans-serif;
+    --mono:'Geist Mono','IBM Plex Sans Thai','Noto Sans Thai',monospace;--serif:'Instrument Serif',Georgia,serif;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;padding:3rem 2rem}
+  .wrap{max-width:1280px;margin:0 auto}
+  .eyebrow{font-family:var(--mono);font-size:8px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin:0 0 0.5rem}
+  h1{font-family:var(--serif);font-size:1.75rem;font-weight:400;margin:0 0 0.5rem;line-height:1.2}
+  .subtitle{color:var(--muted);font-size:0.875rem;margin:0 0 2rem;max-width:64ch;line-height:1.6}
+  .diagram{margin:0 0 2.5rem}
+  svg{display:block;width:100%;height:auto}
+  .cards{display:grid;grid-template-columns:1.1fr 1fr 0.9fr;gap:1rem;margin-bottom:2.5rem}
+  .card{background:#fff;border:1px solid var(--rule);border-radius:6px;padding:1.25rem}
+  .card-header{display:flex;align-items:center;gap:0.5rem;margin:0 0 0.75rem}
+  .card-dot{width:7px;height:7px;border-radius:50%;flex:none}
+  .dot-coral{background:var(--accent)}.dot-ink{background:var(--ink)}.dot-soft{background:var(--soft)}
+  .card h3{font-size:0.875rem;font-weight:600;margin:0}
+  .card ul{margin:0;padding-left:1.1rem;color:var(--muted);font-size:0.8125rem;line-height:1.7}
+  code{font-family:var(--mono);font-size:0.75rem;background:rgba(45,49,66,0.05);padding:1px 4px;border-radius:3px}
+  footer{border-top:1px solid var(--rule);padding-top:1rem;font-family:var(--mono);font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:var(--soft)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="eyebrow">UX JOURNEY MAP · §4.5.1 · ENTRY BRANCHING</p>
+  <h1>สแกน QR แล้วเกิดอะไรขึ้น</h1>
+  <p class="subtitle">คำถามที่ J1 ไม่ได้ถามคือ ถ้าโต๊ะนั้นยังมีบิลของลูกค้าชุดก่อนค้างอยู่ล่ะ คำตอบคือคนที่สแกนเข้ามาใหม่จะเข้า session เดิม ไม่ใช่เปิดของตัวเอง แปลว่าเห็นตะกร้าและออเดอร์ของคนอื่นที่โต๊ะเดียวกันทันที</p>
+
+  <div class="diagram">
+  <svg viewBox="0 0 1280 700" role="img" aria-labelledby="qr-entry-v1-title qr-entry-v1-desc" xmlns="http://www.w3.org/2000/svg">
+    <title id="qr-entry-v1-title">แผนภาพการแตกสาขาหลังลูกค้าสแกน QR</title>
+    <desc id="qr-entry-v1-desc">หลังลูกค้าสแกน QR ระบบดูก่อนว่าเป็น QR ของโต๊ะหรือของเคาน์เตอร์ ถ้าเป็นเคาน์เตอร์จะเปิด session ซื้อกลับใหม่เสมอ ถ้าเป็นโต๊ะจะดูต่อว่าโต๊ะนั้นมีบิลเปิดค้างอยู่หรือไม่ ถ้าไม่มีจะเปิด session ใหม่ของโต๊ะและโต๊ะยังคงว่างจนกว่าออเดอร์แรกจะเข้า ถ้ามีจะเข้า session เดิมและเห็นตะกร้ากับออเดอร์ร่วมกับคนอื่นที่โต๊ะเดียวกัน ทุกเส้นทางไปรวมกันที่หน้าเมนู เลือกสินค้า และยืนยันออเดอร์ โดยรายการที่เพิ่งหมดจะถูกปฏิเสธเฉพาะรายการนั้น จากนั้นออเดอร์เข้าคิวพนักงาน และแยกกฎการจ่ายเงินตามช่องทาง</desc>
+    <defs>
+      <marker id="qe-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+      <marker id="qe-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#eb6c36"/></marker>
+      <marker id="qe-arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/></marker>
+    </defs>
+    <rect width="100%" height="100%" fill="#f5f5f5"/>
+
+    <g fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#qe-arrow)">
+      <path d="M 200 120 V 152"/>
+      <path d="M 280 200 H 520"/>
+      <path d="M 200 248 V 300"/>
+      <path d="M 200 396 V 424"/>
+      <path d="M 280 348 H 520"/>
+      <path d="M 300 460 H 520"/>
+      <path d="M 620 384 V 424"/>
+      <path d="M 720 200 H 772 A 8 8 0 0 1 780 208 V 452 A 8 8 0 0 1 772 460 H 720"/>
+      <path d="M 720 484 H 852 A 8 8 0 0 0 860 476 V 208 A 8 8 0 0 1 868 200 H 940"/>
+      <path d="M 1040 236 V 288"/>
+      <path d="M 1040 372 V 424"/>
+    </g>
+
+    <g font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai',sans-serif" font-size="12" fill="#7a8399">
+      <rect x="336" y="174" width="128" height="16" rx="2" fill="#f5f5f5"/><text x="400" y="186" text-anchor="middle">QR เคาน์เตอร์</text>
+      <rect x="212" y="258" width="68" height="16" rx="2" fill="#f5f5f5"/><text x="216" y="270">QR โต๊ะ</text>
+      <rect x="212" y="392" width="100" height="16" rx="2" fill="#f5f5f5"/><text x="216" y="404">ไม่มีบิลค้าง</text>
+      <rect x="340" y="322" width="120" height="16" rx="2" fill="#f5f5f5"/><text x="400" y="334" text-anchor="middle">มีบิลค้างอยู่</text>
+    </g>
+
+    <g font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai','Sukhumvit Set',sans-serif" text-anchor="middle">
+      <rect x="100" y="72" width="200" height="48" rx="20" fill="#f5f5f5"/>
+      <rect x="100" y="72" width="200" height="48" rx="20" fill="rgba(79,93,117,0.10)" stroke="#7a8399" stroke-width="1"/>
+      <text x="200" y="100" font-size="12" font-weight="600" fill="#2d3142">ลูกค้าสแกน QR</text>
+
+      <polygon points="200,152 280,200 200,248 120,200" fill="#f5f5f5"/>
+      <polygon points="200,152 280,200 200,248 120,200" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="200" y="204" font-size="12" font-weight="600" fill="#2d3142">QR แบบไหน?</text>
+
+      <polygon points="200,300 280,348 200,396 120,348" fill="#f5f5f5"/>
+      <polygon points="200,300 280,348 200,396 120,348" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="200" y="344" font-size="12" font-weight="600" fill="#2d3142">โต๊ะมีบิล</text>
+      <text x="200" y="362" font-size="12" font-weight="600" fill="#2d3142">เปิดค้าง?</text>
+
+      <rect x="100" y="424" width="200" height="72" rx="6" fill="#f5f5f5"/>
+      <rect x="100" y="424" width="200" height="72" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="200" y="448" font-size="12" font-weight="600" fill="#2d3142">เปิด session ใหม่</text>
+      <text x="200" y="468" font-size="12" fill="#4f5d75">โต๊ะยังว่างจนออเดอร์แรกเข้า</text>
+      <text x="200" y="484" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">BR 11</text>
+
+      <rect x="520" y="164" width="200" height="72" rx="6" fill="#f5f5f5"/>
+      <rect x="520" y="164" width="200" height="72" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="620" y="188" font-size="12" font-weight="600" fill="#2d3142">session ซื้อกลับใหม่</text>
+      <text x="620" y="208" font-size="12" fill="#4f5d75">เปิดใหม่เสมอ ไม่มีการใช้ซ้ำ</text>
+      <text x="620" y="224" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">CHANNEL = COUNTER</text>
+
+      <rect x="520" y="312" width="200" height="72" rx="6" fill="#f5f5f5"/>
+      <rect x="520" y="312" width="200" height="72" rx="6" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="1"/>
+      <text x="620" y="336" font-size="12" font-weight="600" fill="#2d3142">เข้า session เดิมของโต๊ะ</text>
+      <text x="620" y="356" font-size="12" fill="#4f5d75">เห็นตะกร้าและออเดอร์ของคนอื่น</text>
+      <text x="620" y="372" font-size="8" fill="#eb6c36" font-family="'Geist Mono',monospace" letter-spacing="0.08em">BR 2 · BR 7</text>
+
+      <rect x="520" y="424" width="200" height="72" rx="6" fill="#f5f5f5"/>
+      <rect x="520" y="424" width="200" height="72" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="620" y="448" font-size="12" font-weight="600" fill="#2d3142">เมนู เลือกของ ยืนยัน</text>
+      <text x="620" y="468" font-size="12" fill="#4f5d75">ของที่เพิ่งหมด ปฏิเสธเฉพาะรายการ</text>
+      <text x="620" y="484" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">BR 4</text>
+
+      <rect x="940" y="164" width="200" height="72" rx="6" fill="#f5f5f5"/>
+      <rect x="940" y="164" width="200" height="72" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="1040" y="188" font-size="12" font-weight="600" fill="#2d3142">ออเดอร์เข้าคิวพนักงาน</text>
+      <text x="1040" y="208" font-size="12" fill="#4f5d75">คิวเดียว ไม่แยกตามที่มา</text>
+      <text x="1040" y="224" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">BR 12</text>
+
+      <rect x="940" y="288" width="200" height="84" rx="6" fill="#f5f5f5"/>
+      <rect x="940" y="288" width="200" height="84" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="1040" y="312" font-size="12" font-weight="600" fill="#2d3142">กฎเงินแยกตามช่องทาง</text>
+      <text x="1040" y="332" font-size="12" fill="#4f5d75">dine-in เข้าครัวทันที</text>
+      <text x="1040" y="352" font-size="12" fill="#4f5d75">takeaway จ่ายก่อนจึงเข้าคิวทำ</text>
+
+      <rect x="940" y="424" width="200" height="56" rx="20" fill="#f5f5f5"/>
+      <rect x="940" y="424" width="200" height="56" rx="20" fill="rgba(79,93,117,0.10)" stroke="#7a8399" stroke-width="1"/>
+      <text x="1040" y="448" font-size="12" font-weight="600" fill="#2d3142">ปิดบิล โต๊ะกลับเป็นว่าง</text>
+      <text x="1040" y="464" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">BR 11 · US-19</text>
+    </g>
+
+    <line x1="40" y1="632" x2="1240" y2="632" stroke="rgba(45,49,66,0.10)" stroke-width="0.8"/>
+    <text x="40" y="652" fill="#4f5d75" font-size="8" font-family="'Geist Mono',monospace" letter-spacing="0.14em">LEGEND</text>
+    <g font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai',sans-serif" font-size="12" fill="#4f5d75">
+      <rect x="140" y="642" width="24" height="12" rx="6" fill="rgba(79,93,117,0.10)" stroke="#7a8399" stroke-width="0.8"/><text x="176" y="652">เริ่ม / จบ</text>
+      <rect x="304" y="642" width="24" height="12" rx="2" fill="#ffffff" stroke="#2d3142" stroke-width="0.8"/><text x="340" y="652">ขั้นตอน</text>
+      <polygon points="464,640 480,648 464,656 448,648" fill="#ffffff" stroke="#2d3142" stroke-width="0.8"/><text x="492" y="652">จุดตัดสินใจ</text>
+      <rect x="616" y="642" width="24" height="12" rx="2" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="0.8"/><text x="652" y="652">สาขาที่ J1 ไม่ได้ครอบคลุม</text>
+    </g>
+  </svg>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <p class="eyebrow">THE MISSING BRANCH</p>
+      <div class="card-header"><span class="card-dot dot-coral"></span><h3>สแกนทับ session ของคนก่อน</h3></div>
+      <ul>
+        <li>QR เป็น static ผูกโต๊ะถาวร ไม่หมุนเวียนต่อรอบลูกค้า — <strong>BR 10</strong></li>
+        <li>ถ้าโต๊ะยังมีบิลค้าง คนที่สแกนใหม่จะเข้า session เดิม ไม่ใช่เปิดของตัวเอง — <strong>BR 7</strong></li>
+        <li>ผลคือเห็นตะกร้าและออเดอร์ของคนอื่นที่โต๊ะเดียวกันทันที ซึ่งถูกต้องตาม <strong>BR 2</strong> เมื่อเป็นคนกลุ่มเดียวกัน แต่เป็นคำถามที่ยังเปิดอยู่เมื่อเป็นลูกค้าคนละชุด</li>
+      </ul>
+    </div>
+    <div class="card">
+      <p class="eyebrow">CONVERGENCE</p>
+      <div class="card-header"><span class="card-dot dot-ink"></span><h3>สามทางเข้า หนึ่งคิว</h3></div>
+      <ul>
+        <li>session ใหม่ของโต๊ะ · session เดิมของโต๊ะ · session ซื้อกลับ ทั้งสามไปรวมที่หน้าเมนูเดียวกัน</li>
+        <li>ความต่างทั้งหมดถูกดันไปไว้ที่ปลายทาง คือกฎการจ่ายเงินตามช่องทาง ไม่ใช่ที่หน้าจอ</li>
+      </ul>
+    </div>
+    <div class="card">
+      <p class="eyebrow">FIDELITY</p>
+      <div class="card-header"><span class="card-dot dot-soft"></span><h3>ขอบเขตของภาพนี้</h3></div>
+      <ul>
+        <li>17 node → 10 · 19 เส้น → 11</li>
+        <li>เมนู เลือกของ ยืนยัน และการปฏิเสธรายการที่หมด ยุบเป็นกล่องเดียว</li>
+        <li>อีก 4 บล็อกในเอกสารเดียวกันเป็น grammar <code>journey</code> ซึ่ง skill ไม่รองรับ และห้ามแปลงเป็น type อื่น จึงไม่อยู่ในชุดนี้</li>
+      </ul>
+    </div>
+  </div>
+
+  <footer>DIAGRAM DESIGN · FLOWCHART · DOC-WIDE · BALANCED · MIXED · REDRAWN FROM UX-JOURNEY-MAP-V1.MD §4.5.1</footer>
+</div>
+</body>
+</html>

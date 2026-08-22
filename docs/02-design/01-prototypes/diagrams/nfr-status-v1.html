@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>สถานะ NFR · nfr-v1 §7</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&family=Noto+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--paper:#f5f5f5;--paper-2:#ececec;--ink:#2d3142;--muted:#4f5d75;--soft:#7a8399;--rule:rgba(45,49,66,0.12);--rule-solid:#bfc0c0;--accent:#eb6c36;--accent-tint:rgba(235,108,54,0.08);--link:#2e5aa8;
+    --sans:'Geist','IBM Plex Sans Thai','Noto Sans Thai','Sukhumvit Set','Thonburi',sans-serif;
+    --mono:'Geist Mono','IBM Plex Sans Thai','Noto Sans Thai',monospace;--serif:'Instrument Serif',Georgia,serif;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;padding:3rem 2rem}
+  .wrap{max-width:1280px;margin:0 auto}
+  .eyebrow{font-family:var(--mono);font-size:8px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin:0 0 0.5rem}
+  h1{font-family:var(--serif);font-size:1.75rem;font-weight:400;margin:0 0 0.5rem;line-height:1.2}
+  .subtitle{color:var(--muted);font-size:0.875rem;margin:0 0 2rem;max-width:64ch;line-height:1.6}
+  .diagram{margin:0 0 2.5rem}
+  svg{display:block;width:100%;height:auto}
+  .cards{display:grid;grid-template-columns:1.1fr 1fr 0.9fr;gap:1rem;margin-bottom:2.5rem}
+  .card{background:#fff;border:1px solid var(--rule);border-radius:6px;padding:1.25rem}
+  .card-header{display:flex;align-items:center;gap:0.5rem;margin:0 0 0.75rem}
+  .card-dot{width:7px;height:7px;border-radius:50%;flex:none}
+  .dot-coral{background:var(--accent)}.dot-ink{background:var(--ink)}.dot-soft{background:var(--soft)}
+  .card h3{font-size:0.875rem;font-weight:600;margin:0}
+  .card ul{margin:0;padding-left:1.1rem;color:var(--muted);font-size:0.8125rem;line-height:1.7}
+  code{font-family:var(--mono);font-size:0.75rem;background:rgba(45,49,66,0.05);padding:1px 4px;border-radius:3px}
+  footer{border-top:1px solid var(--rule);padding-top:1rem;font-family:var(--mono);font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:var(--soft)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="eyebrow">NFR · §7 · DESIGN COVERAGE</p>
+  <h1>NFR 20 ข้อ ออกแบบรองรับแล้วแค่ไหน</h1>
+  <p class="subtitle">แท่งทึบคือจำนวนข้อที่ 02-design รองรับแล้ว ส่วนกรอบจาง ๆ คือจำนวนข้อทั้งหมดของหมวดนั้น หมวดที่ทำเครื่องหมายไว้คือหมวดเดียวที่มีข้อซึ่ง design ยังไม่รองรับเลยถึงสองข้อ และทั้งสองข้อเป็น exit criteria ของ Phase 0 โดยตรง</p>
+
+  <div class="diagram">
+  <svg viewBox="0 0 1280 700" role="img" aria-labelledby="nfr-status-v1-title nfr-status-v1-desc" xmlns="http://www.w3.org/2000/svg">
+    <title id="nfr-status-v1-title">แผนภูมิแท่งแสดงจำนวน NFR ที่ออกแบบรองรับแล้วในแต่ละหมวด</title>
+    <desc id="nfr-status-v1-desc">หมวด A ความเร็ว รองรับแล้ว 2 จาก 4 หมวด B การทำงานพร้อมกัน รองรับแล้ว 3 จาก 5 หมวด C การอยู่รอดตลอดกะ รองรับแล้ว 2 จาก 4 และเป็นหมวดที่มีสองข้อซึ่งยังไม่ถูกออกแบบรองรับเลย หมวด D สิทธิ์และการเข้าถึง รองรับแล้ว 2 จาก 3 หมวด E ความเป็นส่วนตัว รองรับครบ 2 จาก 2 หมวด F การเข้าถึงง่าย รองรับครบ 2 จาก 2 รวมทั้งหมด 13 จาก 20 ข้อ และยังไม่มี test case สักข้อเดียว</desc>
+    <defs>
+      <marker id="nfr-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+      <marker id="nfr-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#eb6c36"/></marker>
+      <marker id="nfr-arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/></marker>
+    </defs>
+    <rect width="100%" height="100%" fill="#f5f5f5"/>
+
+    <line x1="380" y1="120" x2="380" y2="576" stroke="rgba(45,49,66,0.08)" stroke-width="0.8"/>
+    <text x="380" y="600" fill="#7a8399" font-size="8" font-family="'Geist Mono',monospace" text-anchor="middle">0</text>
+    <line x1="500" y1="120" x2="500" y2="576" stroke="rgba(45,49,66,0.08)" stroke-width="0.8"/>
+    <text x="500" y="600" fill="#7a8399" font-size="8" font-family="'Geist Mono',monospace" text-anchor="middle">1</text>
+    <line x1="620" y1="120" x2="620" y2="576" stroke="rgba(45,49,66,0.08)" stroke-width="0.8"/>
+    <text x="620" y="600" fill="#7a8399" font-size="8" font-family="'Geist Mono',monospace" text-anchor="middle">2</text>
+    <line x1="740" y1="120" x2="740" y2="576" stroke="rgba(45,49,66,0.08)" stroke-width="0.8"/>
+    <text x="740" y="600" fill="#7a8399" font-size="8" font-family="'Geist Mono',monospace" text-anchor="middle">3</text>
+    <line x1="860" y1="120" x2="860" y2="576" stroke="rgba(45,49,66,0.08)" stroke-width="0.8"/>
+    <text x="860" y="600" fill="#7a8399" font-size="8" font-family="'Geist Mono',monospace" text-anchor="middle">4</text>
+    <line x1="980" y1="120" x2="980" y2="576" stroke="rgba(45,49,66,0.08)" stroke-width="0.8"/>
+    <text x="980" y="600" fill="#7a8399" font-size="8" font-family="'Geist Mono',monospace" text-anchor="middle">5</text>
+    <line x1="380" y1="120" x2="380" y2="576" stroke="rgba(45,49,66,0.25)" stroke-width="1"/>
+    <rect x="380" y="140" width="480" height="44" rx="4" fill="#f5f5f5"/>
+    <rect x="380" y="140" width="480" height="44" rx="4" fill="none" stroke="rgba(45,49,66,0.20)" stroke-width="0.8" stroke-dasharray="4,3"/>
+    <rect x="380" y="140" width="240" height="44" rx="4" fill="rgba(79,93,117,0.15)" stroke="#4f5d75" stroke-width="1"/>
+    <text x="364" y="161" text-anchor="end" font-size="12" font-weight="600" fill="#2d3142" font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai',sans-serif">ความเร็วที่ผู้ใช้รู้สึกได้</text>
+    <text x="364" y="177" text-anchor="end" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">A · PERFORMANCE</text>
+    <text x="876" y="161" font-size="8" fill="#4f5d75" font-family="'Geist Mono',monospace" letter-spacing="0.08em">2 / 4 READY</text>
+    <text x="876" y="177" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">2 PARTIAL</text>
+    <rect x="380" y="212" width="600" height="44" rx="4" fill="#f5f5f5"/>
+    <rect x="380" y="212" width="600" height="44" rx="4" fill="none" stroke="rgba(45,49,66,0.20)" stroke-width="0.8" stroke-dasharray="4,3"/>
+    <rect x="380" y="212" width="360" height="44" rx="4" fill="rgba(79,93,117,0.15)" stroke="#4f5d75" stroke-width="1"/>
+    <text x="364" y="233" text-anchor="end" font-size="12" font-weight="600" fill="#2d3142" font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai',sans-serif">ทำงานพร้อมกันแล้วไม่พัง</text>
+    <text x="364" y="249" text-anchor="end" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">B · CONCURRENCY & RELIABILITY</text>
+    <text x="996" y="233" font-size="8" fill="#4f5d75" font-family="'Geist Mono',monospace" letter-spacing="0.08em">3 / 5 READY</text>
+    <text x="996" y="249" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">1 NOT DESIGNED YET</text>
+    <rect x="380" y="284" width="480" height="44" rx="4" fill="#f5f5f5"/>
+    <rect x="380" y="284" width="480" height="44" rx="4" fill="none" stroke="rgba(45,49,66,0.20)" stroke-width="0.8" stroke-dasharray="4,3"/>
+    <rect x="380" y="284" width="240" height="44" rx="4" fill="rgba(235,108,54,0.12)" stroke="#eb6c36" stroke-width="1"/>
+    <text x="364" y="305" text-anchor="end" font-size="12" font-weight="600" fill="#2d3142" font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai',sans-serif">อยู่รอดตลอดกะ</text>
+    <text x="364" y="321" text-anchor="end" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">C · SESSION & OPERABILITY</text>
+    <text x="876" y="305" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">2 / 4 READY</text>
+    <text x="876" y="321" font-size="8" fill="#eb6c36" font-family="'Geist Mono',monospace" letter-spacing="0.08em">2 NOT DESIGNED YET</text>
+    <rect x="380" y="356" width="360" height="44" rx="4" fill="#f5f5f5"/>
+    <rect x="380" y="356" width="360" height="44" rx="4" fill="none" stroke="rgba(45,49,66,0.20)" stroke-width="0.8" stroke-dasharray="4,3"/>
+    <rect x="380" y="356" width="240" height="44" rx="4" fill="rgba(79,93,117,0.15)" stroke="#4f5d75" stroke-width="1"/>
+    <text x="364" y="377" text-anchor="end" font-size="12" font-weight="600" fill="#2d3142" font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai',sans-serif">สิทธิ์และการเข้าถึง</text>
+    <text x="364" y="393" text-anchor="end" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">D · SECURITY & ACCESS</text>
+    <text x="756" y="377" font-size="8" fill="#4f5d75" font-family="'Geist Mono',monospace" letter-spacing="0.08em">2 / 3 READY</text>
+    <rect x="380" y="428" width="240" height="44" rx="4" fill="#f5f5f5"/>
+    <rect x="380" y="428" width="240" height="44" rx="4" fill="none" stroke="rgba(45,49,66,0.20)" stroke-width="0.8" stroke-dasharray="4,3"/>
+    <rect x="380" y="428" width="240" height="44" rx="4" fill="rgba(79,93,117,0.15)" stroke="#4f5d75" stroke-width="1"/>
+    <text x="364" y="449" text-anchor="end" font-size="12" font-weight="600" fill="#2d3142" font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai',sans-serif">ความเป็นส่วนตัว</text>
+    <text x="364" y="465" text-anchor="end" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">E · PRIVACY / PDPA</text>
+    <text x="636" y="449" font-size="8" fill="#4f5d75" font-family="'Geist Mono',monospace" letter-spacing="0.08em">2 / 2 READY</text>
+    <rect x="380" y="500" width="240" height="44" rx="4" fill="#f5f5f5"/>
+    <rect x="380" y="500" width="240" height="44" rx="4" fill="none" stroke="rgba(45,49,66,0.20)" stroke-width="0.8" stroke-dasharray="4,3"/>
+    <rect x="380" y="500" width="240" height="44" rx="4" fill="rgba(79,93,117,0.15)" stroke="#4f5d75" stroke-width="1"/>
+    <text x="364" y="521" text-anchor="end" font-size="12" font-weight="600" fill="#2d3142" font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai',sans-serif">การเข้าถึงง่าย</text>
+    <text x="364" y="537" text-anchor="end" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">F · ACCESSIBILITY</text>
+    <text x="636" y="521" font-size="8" fill="#4f5d75" font-family="'Geist Mono',monospace" letter-spacing="0.08em">2 / 2 READY</text>
+
+    <line x1="40" y1="632" x2="1240" y2="632" stroke="rgba(45,49,66,0.10)" stroke-width="0.8"/>
+    <text x="40" y="652" fill="#4f5d75" font-size="8" font-family="'Geist Mono',monospace" letter-spacing="0.14em">LEGEND</text>
+    <g font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai',sans-serif" font-size="12" fill="#4f5d75">
+      <rect x="140" y="642" width="24" height="12" rx="2" fill="rgba(79,93,117,0.15)" stroke="#4f5d75" stroke-width="0.8"/><text x="176" y="652">ออกแบบรองรับแล้ว</text>
+      <rect x="372" y="642" width="24" height="12" rx="2" fill="none" stroke="rgba(45,49,66,0.20)" stroke-width="0.8" stroke-dasharray="4,3"/><text x="408" y="652">จำนวนข้อทั้งหมดของหมวด</text>
+      <rect x="668" y="642" width="24" height="12" rx="2" fill="rgba(235,108,54,0.12)" stroke="#eb6c36" stroke-width="0.8"/><text x="704" y="652">หมวดที่มีข้อค้างเป็น exit criteria</text>
+    </g>
+  </svg>
+  </div>
+  <div class="cards">
+    <div class="card">
+      <p class="eyebrow">THREE GAPS</p>
+      <div class="card-header"><span class="card-dot dot-coral"></span><h3>สามข้อที่ design ยังไม่รองรับเลย</h3></div>
+      <ul>
+        <li><strong>NFR-06</strong> — หลายอุปกรณ์ล็อกอินบัญชีสถานีเดียวพร้อมกัน 2 ถึง 4 เครื่องโดยไม่เด้งกัน เป็น exit criteria ของ Phase 0 ตรง ๆ ถ้าออกแบบ auth เป็น single-session ต้องรื้อทีหลัง</li>
+        <li><strong>NFR-10</strong> — session อย่างน้อย 12 ชั่วโมง ห้าม auto-logout ระหว่างมีออเดอร์ค้าง</li>
+        <li><strong>NFR-11</strong> — ปลดล็อกด้วย PIN สั้น ห้ามพิมพ์รหัสผ่านเต็ม เพราะมือเปียกจริงหน้างาน</li>
+      </ul>
+    </div>
+    <div class="card">
+      <p class="eyebrow">ROOT CAUSE</p>
+      <div class="card-header"><span class="card-dot dot-ink"></span><h3>ทำไมสามข้อนี้ถึงหลุด</h3></div>
+      <ul>
+        <li>ทั้งสามมาจาก Business Rule ข้อ 26 ถึง 27 ซึ่งเขียนไว้เองว่าต้องถูกสะท้อนใน architecture และ data model</li>
+        <li><strong>ไม่มี US เป็นเจ้าภาพ</strong> จึงไม่เข้า feature tree และไม่มีใครหยิบไปออกแบบ</li>
+        <li>การมีรหัส <code>NFR-xx</code> คือกลไกที่ทำให้เรื่องแบบนี้ถูกจับได้ ไม่ใช่หลุดเงียบอีกรอบ</li>
+      </ul>
+    </div>
+    <div class="card">
+      <p class="eyebrow">THE OTHER ZERO</p>
+      <div class="card-header"><span class="card-dot dot-soft"></span><h3>ตัวเลขที่ไม่ได้อยู่ในแท่ง</h3></div>
+      <ul>
+        <li><strong>test coverage = 0 จาก 20</strong> ทุกหมวดเท่ากันหมด ยังไม่มี test case สักข้อ</li>
+        <li>ผมไม่ได้วาดเป็นแท่งที่สอง เพราะแท่งศูนย์ทั้งแถวอ่านเหมือนภาพเสีย</li>
+        <li>เลือกใช้แท่งแทน radar เพราะ radar ต้องการ 3 ถึง 5 entity เทียบกันบน 3 ถึง 5 แกน แต่ข้อมูลชุดนี้มี 6 หมวดและมีชุดค่าชุดเดียว</li>
+      </ul>
+    </div>
+  </div>
+
+  <footer>DIAGRAM DESIGN · BAR · DOC-WIDE · FAITHFUL · MIXED · DRAWN FROM NFR-V1.MD §7</footer>
+</div>
+</body>
+</html>

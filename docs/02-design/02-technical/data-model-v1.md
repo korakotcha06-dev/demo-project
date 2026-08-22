@@ -5,6 +5,8 @@
 > จัดทำโดย: COULSON (Web PM & Architect) — วันที่ 2026-08-15
 > เอกสารพี่น้อง: [[architecture-v1|Architecture v1]] · [[api-design-v1|API Design v1]]
 
+> 🔴 **แก้ไข 2026-08-20** — เพิ่มหัวข้อ 9 (หลายร้าน + แม่แบบ) และหัวข้อ 10 (VAT) · และ**เปลี่ยนชื่อทั้งฉบับตามหัวข้อ 9.4** — `shop_table` → `service_point` · `table_session` → `visit_session` · `table_id` → `service_point_id` · `table_status_v` → `service_point_status_v` · **เปลี่ยนเฉพาะชื่อ ไม่มี invariant หรือ state machine ข้อไหนเปลี่ยน** · คำว่า "โต๊ะ" ในเนื้อความคงไว้ เพราะเป็นคำเรียกของร้านกาแฟ ซึ่งเก็บที่ `shop.service_point_label`
+
 กลับไปที่ [[index|02-technical]]
 
 ---
@@ -29,12 +31,12 @@
 
 ```mermaid
 erDiagram
-    zone ||--o{ shop_table : "จัดกลุ่ม"
-    shop_table ||--o| qr_code : "1:1 static"
-    shop_table ||--o{ table_session : "รอบลูกค้า"
-    table_session ||--|| cart : "ตะกร้าแชร์ต่อโต๊ะ"
-    table_session ||--|| bill : "1 รอบ = 1 บิล"
-    table_session ||--o{ customer_session : "หลายอุปกรณ์"
+    zone ||--o{ service_point : "จัดกลุ่ม"
+    service_point ||--o| qr_code : "1:1 static"
+    service_point ||--o{ visit_session : "รอบลูกค้า"
+    visit_session ||--|| cart : "ตะกร้าแชร์ต่อโต๊ะ"
+    visit_session ||--|| bill : "1 รอบ = 1 บิล"
+    visit_session ||--o{ customer_session : "หลายอุปกรณ์"
     customer_session ||--o| cart : "เคาน์เตอร์: ตะกร้าต่อ session"
     cart ||--o{ cart_item : ""
     cart_item ||--o{ cart_item_option : ""
@@ -141,7 +143,7 @@ erDiagram
 #### `zone` — โซนของผัง (US-42 "ผังอย่างง่าย")
 `id` uuid PK · `name` text ("ในร้าน" / "นอกร้าน" / "ริมหน้าต่าง") · `sort_order` int · `deleted_at`
 
-#### `shop_table` — โต๊ะ 🔴 หัวใจของ US-42
+#### `service_point` — โต๊ะ 🔴 หัวใจของ US-42
 | field | type | หมายเหตุ |
 |---|---|---|
 | `id` | uuid PK | **immutable ตลอดอายุร้าน — QR ผูกกับ id นี้เท่านั้น ห้ามเปลี่ยน ห้าม reuse** |
@@ -162,7 +164,7 @@ erDiagram
 | `id` | uuid PK | |
 | `code` | text UNIQUE NOT NULL | สตริงสุ่ม base32 8-10 ตัว → เป็น path ใน URL (`/t/{code}`) **ไม่ใช่เลขโต๊ะ เดาไม่ได้** |
 | `channel` | enum(`table`,`counter`) NOT NULL | BR ข้อ 12 |
-| `table_id` | uuid NULL FK → shop_table | NOT NULL เมื่อ channel=`table` · NULL เมื่อ channel=`counter` |
+| `service_point_id` | uuid NULL FK → service_point | NOT NULL เมื่อ channel=`table` · NULL เมื่อ channel=`counter` |
 | `label` | text NULL | "QR เคาน์เตอร์" สำหรับให้แอดมินจำได้ |
 | `is_active` | boolean default true | |
 | `created_at` | | |
@@ -171,11 +173,11 @@ erDiagram
 ```sql
 -- 1 โต๊ะ = 1 QR ที่ใช้งานอยู่ ตลอดอายุร้าน (BR ข้อ 10)
 CREATE UNIQUE INDEX qr_one_active_per_table
-  ON qr_code (table_id) WHERE table_id IS NOT NULL AND is_active;
--- channel กับ table_id ต้องสอดคล้องกันเสมอ
+  ON qr_code (service_point_id) WHERE service_point_id IS NOT NULL AND is_active;
+-- channel กับ service_point_id ต้องสอดคล้องกันเสมอ
 ALTER TABLE qr_code ADD CONSTRAINT qr_channel_shape CHECK (
-  (channel = 'table'   AND table_id IS NOT NULL) OR
-  (channel = 'counter' AND table_id IS NULL)
+  (channel = 'table'   AND service_point_id IS NOT NULL) OR
+  (channel = 'counter' AND service_point_id IS NULL)
 );
 ```
 **ไม่มี field `expires_at` และไม่มี endpoint `regenerate`** — จงใจ ตาม BR ข้อ 10 (ลดสโคปตามที่ task breakdown ระบุ)
@@ -203,11 +205,11 @@ Phase 0 ใช้เก็บ: `accepting_orders` (เตรียมทาง U
 
 ### 3.3 กลุ่ม session และตะกร้า (รองรับ BR ข้อ 2, 7, 14 · UX-05, UX-06)
 
-#### `table_session` — "รอบลูกค้า" 🔴 หัวใจของ BR ข้อ 11
+#### `visit_session` — "รอบลูกค้า" 🔴 หัวใจของ BR ข้อ 11
 | field | type | หมายเหตุ |
 |---|---|---|
 | `id` | uuid PK | |
-| `table_id` | uuid FK → shop_table | |
+| `service_point_id` | uuid FK → service_point | |
 | `status` | enum(`open`,`closed`) NOT NULL | |
 | `opened_at` | timestamptz NOT NULL | ตอนออเดอร์แรกของรอบเข้าระบบ |
 | `closed_at` | timestamptz NULL | ตอนแคชเชียร์ปิดบิล |
@@ -217,7 +219,7 @@ Phase 0 ใช้เก็บ: `accepting_orders` (เตรียมทาง U
 ```sql
 -- 1 โต๊ะ มี session ที่เปิดอยู่ได้ไม่เกิน 1 รอบ ณ เวลาใดก็ตาม
 CREATE UNIQUE INDEX one_open_session_per_table
-  ON table_session (table_id) WHERE status = 'open';
+  ON visit_session (service_point_id) WHERE status = 'open';
 ```
 นี่คือ constraint ที่ทำให้ race condition "สองคนสั่งพร้อมกันตอนโต๊ะยังว่าง" ไม่สามารถสร้าง 2 บิลได้ — คนที่สองจะชน unique index แล้วโค้ดวนไปใช้ session ที่มีอยู่แทน
 
@@ -226,9 +228,9 @@ CREATE UNIQUE INDEX one_open_session_per_table
 |---|---|---|
 | `id` | uuid PK | ใส่เป็น claim `sid` ใน token |
 | `channel` | enum(`table`,`counter`) | |
-| `table_session_id` | uuid NULL FK | สำหรับ dine-in — หลาย customer_session ชี้ session เดียวกันได้ (= หลายคนที่โต๊ะเดียวกัน) |
+| `visit_session_id` | uuid NULL FK | สำหรับ dine-in — หลาย customer_session ชี้ session เดียวกันได้ (= หลายคนที่โต๊ะเดียวกัน) |
 | `qr_code_id` | uuid FK | สแกนมาจาก QR ใบไหน |
-| `cart_id` | uuid NULL FK | เคาน์เตอร์: ตะกร้าส่วนตัวต่อ session · โต๊ะ: NULL (ใช้ตะกร้าของ table_session) |
+| `cart_id` | uuid NULL FK | เคาน์เตอร์: ตะกร้าส่วนตัวต่อ session · โต๊ะ: NULL (ใช้ตะกร้าของ visit_session) |
 | `started_at` / `last_seen_at` / `expires_at` | timestamptz | |
 
 🔴 **PDPA guardrail (BR ข้อ 14):** ตารางนี้ **ห้ามมี** ชื่อ/เบอร์โทร/อีเมล/IP/user-agent/device fingerprint/cookie id ที่คงอยู่ข้ามครั้งการมาใช้บริการ — เก็บได้เฉพาะ id สุ่มที่ตายพร้อมรอบบริการ · มี job ลบแถวที่ `expires_at` ผ่านไปแล้ว 24 ชั่วโมง
@@ -241,9 +243,9 @@ CREATE UNIQUE INDEX one_open_session_per_table
 > ทดสอบด้วย **TC-072 / TC-072a / TC-072b** ที่แก้แล้วใน [[../../03-testing/01-test-plan/test-case-v1|Test Case Specification v1]]
 
 #### `cart` — ตะกร้า (ยังไม่ยืนยัน แก้ได้อิสระ ตาม glossary UX §6)
-`id` uuid PK · `scope` enum(`table_session`,`customer_session`) · `table_session_id` uuid NULL · `customer_session_id` uuid NULL · `created_at`
+`id` uuid PK · `scope` enum(`visit_session`,`customer_session`) · `visit_session_id` uuid NULL · `customer_session_id` uuid NULL · `created_at`
 
-- **dine-in: 1 `table_session` = 1 `cart` เดียว ที่ทุกอุปกรณ์ในโต๊ะเขียนร่วมกัน** ← นี่คือหัวใจของ BR ข้อ 2
+- **dine-in: 1 `visit_session` = 1 `cart` เดียว ที่ทุกอุปกรณ์ในโต๊ะเขียนร่วมกัน** ← นี่คือหัวใจของ BR ข้อ 2
 - **counter: 1 `customer_session` = 1 `cart`** (คนละคนที่ยืนหน้าเคาน์เตอร์ต้องไม่ปนตะกร้ากัน)
 
 #### `cart_item` และ `cart_item_option`
@@ -275,14 +277,14 @@ CREATE UNIQUE INDEX cart_item_line ON cart_item (cart_id, line_signature);
 |---|---|---|
 | `id` | uuid PK | |
 | `channel` | enum(`table`,`counter`) NOT NULL | |
-| `table_session_id` | uuid NULL FK | NOT NULL เมื่อ channel=`table` |
+| `visit_session_id` | uuid NULL FK | NOT NULL เมื่อ channel=`table` |
 | `status` | enum(`open`,`awaiting_payment`,`paid`,`voided`) NOT NULL | |
 | `total_satang` | int NOT NULL default 0 | ยอดที่คำนวณจาก order_item ที่ยัง active (คำนวณใหม่ทุกครั้งที่มีการเปลี่ยนแปลง ไม่ใช่ค่าที่พิมพ์เข้ามาเอง) |
 | `paid_at` | timestamptz NULL | 🔴 gate ของ BR ข้อ 12 |
 | `closed_by_staff_id` | uuid NULL FK | |
 | `created_at` | | |
 
-- **dine-in:** 1 `table_session` = 1 `bill` (status `open` → `paid` ตอนปิดบิล)
+- **dine-in:** 1 `visit_session` = 1 `bill` (status `open` → `paid` ตอนปิดบิล)
 - **counter:** 1 ออเดอร์ = 1 `bill` (status `awaiting_payment` → `paid`) เพราะแต่ละคนที่ซื้อกลับจ่ายจบเป็นราย ๆ
 
 #### `orders` — ออเดอร์ 1 รอบการกดยืนยัน
@@ -292,8 +294,8 @@ CREATE UNIQUE INDEX cart_item_line ON cart_item (cart_id, line_signature);
 | `bill_id` | uuid FK → bill | |
 | `channel` | enum(`table`,`counter`) NOT NULL | BR ข้อ 12 |
 | `origin` | enum(`customer_self`,`staff_entered`) NOT NULL | 🔴 **แยกจาก channel เด็ดขาด** (US-30, BR ข้อ 12) |
-| `table_id` | uuid NULL FK | denormalize ไว้เพื่อให้จอสถานีแสดงเลขโต๊ะได้โดยไม่ join ลึก |
-| `table_session_id` | uuid NULL FK | |
+| `service_point_id` | uuid NULL FK | denormalize ไว้เพื่อให้จอสถานีแสดงเลขโต๊ะได้โดยไม่ join ลึก |
+| `visit_session_id` | uuid NULL FK | |
 | `customer_session_id` | uuid NULL FK | NULL เมื่อ origin=`staff_entered` |
 | `station_id` | uuid FK → station | Phase 0 = สถานี default เสมอ |
 | `status` | enum(`awaiting_payment`,`queued`,`in_progress`,`ready`,`completed`,`cancelled`) | ดู §4.1 |
@@ -384,8 +386,8 @@ stateDiagram-v2
 
 ```mermaid
 stateDiagram-v2
-    available --> occupied: มี table_session เปิดขึ้น<br/>(ผลข้างเคียงของออเดอร์แรก US-04)
-    occupied --> available: bill ถูกปิด → table_session.status='closed'<br/>(US-19 เท่านั้น)
+    available --> occupied: มี visit_session เปิดขึ้น<br/>(ผลข้างเคียงของออเดอร์แรก US-04)
+    occupied --> available: bill ถูกปิด → visit_session.status='closed'<br/>(US-19 เท่านั้น)
     available --> retired: แอดมินปลดระวาง (US-42)
     retired --> available: กู้คืนโดยแอดมิน
 ```
@@ -393,7 +395,7 @@ stateDiagram-v2
 **วิธี implement ที่ทำให้ "ห้ามเป็น manual toggle" เป็นจริงเชิงโครงสร้าง ไม่ใช่แค่ข้อตกลง:**
 
 ```sql
-CREATE VIEW table_status_v AS
+CREATE VIEW service_point_status_v AS
 SELECT t.id,
        t.display_name,
        t.zone_id,
@@ -404,30 +406,30 @@ SELECT t.id,
          ELSE 'available'
        END AS status,
        ts.id AS open_session_id
-FROM shop_table t
-LEFT JOIN table_session ts
-  ON ts.table_id = t.id AND ts.status = 'open';
+FROM service_point t
+LEFT JOIN visit_session ts
+  ON ts.service_point_id = t.id AND ts.status = 'open';
 ```
 
-- **ไม่มี column `status` ใน `shop_table`** → ไม่มีอะไรให้ UPDATE → ไม่มี endpoint "เปิด/ปิดโต๊ะ" (BR ข้อ 11 บอกให้ไม่มี)
+- **ไม่มี column `status` ใน `service_point`** → ไม่มีอะไรให้ UPDATE → ไม่มี endpoint "เปิด/ปิดโต๊ะ" (BR ข้อ 11 บอกให้ไม่มี)
 - transition ที่ผิดกฎถูกกันด้วยโครงสร้าง ไม่ใช่ด้วยความตั้งใจของ developer
 
 | transition | ถูกกฎ? | เหตุผล |
 |---|---|---|
 | `available → occupied` โดยพนักงานกดปุ่ม | ❌ | ไม่มีปุ่มนี้ในระบบ |
-| `occupied → available` โดยไม่ปิดบิล | ❌ | ทางเดียวคือปิด `table_session` ซึ่งทำได้ผ่าน endpoint ปิดบิลเท่านั้น |
+| `occupied → available` โดยไม่ปิดบิล | ❌ | ทางเดียวคือปิด `visit_session` ซึ่งทำได้ผ่าน endpoint ปิดบิลเท่านั้น |
 | `occupied → retired` | ❌ | **ต้องปิดบิลก่อน** (US-42 AC) — 409 `TABLE_HAS_OPEN_BILL` |
 | `retired → occupied` | ❌ | โต๊ะที่ปลดระวางเปิด session ใหม่ไม่ได้ (สแกน QR เดิมได้ error ที่อ่านเข้าใจ) |
-| ลบแถว `shop_table` | ❌ | P3 soft delete — ประวัติออเดอร์ต้องอยู่ครบ (US-42 AC, เชื่อม US-17/US-25) |
+| ลบแถว `service_point` | ❌ | P3 soft delete — ประวัติออเดอร์ต้องอยู่ครบ (US-42 AC, เชื่อม US-17/US-25) |
 
 ### 4.3 สถานะบิล
 
 | จาก | ไป | ใคร/เมื่อไร |
 |---|---|---|
-| — | `open` | dine-in: ตอนเปิด table_session |
+| — | `open` | dine-in: ตอนเปิด visit_session |
 | — | `awaiting_payment` | counter: ตอนลูกค้ายืนยันออเดอร์ (US-28) |
 | `awaiting_payment` | `paid` | แคชเชียร์ยืนยันรับเงิน (US-29) หรือ US-30 ในทรานแซกชันเดียว |
-| `open` | `paid` | แคชเชียร์ปิดบิล (US-19) → ปิด table_session → โต๊ะกลับเป็นว่าง |
+| `open` | `paid` | แคชเชียร์ปิดบิล (US-19) → ปิด visit_session → โต๊ะกลับเป็นว่าง |
 | `awaiting_payment` | `voided` | ลูกค้าไม่จ่าย → ยกเลิก (US-20/US-29) |
 | `paid` | ❌ ไม่มี transition ออก | คืนเงินคือแถวใหม่ใน `payment` (US-22, Phase 1) |
 
@@ -439,14 +441,14 @@ LEFT JOIN table_session ts
 
 | ID | Invariant | บังคับด้วย |
 |---|---|---|
-| INV-1 | 1 โต๊ะมี `table_session` ที่ `open` ได้ไม่เกิน 1 รอบ | partial unique index |
+| INV-1 | 1 โต๊ะมี `visit_session` ที่ `open` ได้ไม่เกิน 1 รอบ | partial unique index |
 | INV-2 | 1 โต๊ะที่ยังไม่ปลดระวาง มี QR ที่ active ได้ 1 ใบเท่านั้น | partial unique index |
 | INV-3 | ออเดอร์ channel=`counter` จะออกจาก `awaiting_payment` ได้ต่อเมื่อ `bill.paid_at IS NOT NULL` | trigger `BEFORE UPDATE` บน `orders` |
 | INV-4 | ออเดอร์ channel=`table` ห้ามมีสถานะ `awaiting_payment` | CHECK constraint |
 | INV-5 | `orders.origin='staff_entered'` ⇒ `created_by_staff_id IS NOT NULL` | CHECK constraint |
 | INV-6 | `orders.status='cancelled'` ⇒ `cancel_reason IS NOT NULL` (BR ข้อ 5) | CHECK constraint |
-| INV-7 | สร้าง `table_session` ใหม่บนโต๊ะที่ `retired_at IS NOT NULL` ไม่ได้ | trigger |
-| INV-8 | ปิด `table_session` ไม่ได้ถ้า `bill.status` ยังไม่เป็น `paid` หรือ `voided` | trigger |
+| INV-7 | สร้าง `visit_session` ใหม่บนโต๊ะที่ `retired_at IS NOT NULL` ไม่ได้ | trigger |
+| INV-8 | ปิด `visit_session` ไม่ได้ถ้า `bill.status` ยังไม่เป็น `paid` หรือ `voided` | trigger |
 | INV-9 | `bill.total_satang` = Σ `order_item.line_total_satang` ที่ `status='active'` | คำนวณใน service layer ภายในทรานแซกชันเดียวกับที่แก้รายการ + มี job ตรวจสอบความสอดคล้องรายวัน |
 | INV-10 | `cart_item` unique ต่อ `(cart_id, line_signature)` | unique index (BR ข้อ 2) |
 
@@ -456,12 +458,12 @@ LEFT JOIN table_session ts
 
 | # | ข้อกำหนดที่ล็อกไว้ | รองรับด้วยอะไร | สถานะ |
 |---|---|---|---|
-| **1** | table entity แยก internal id (คงที่) ออกจากชื่อ/เลขโต๊ะที่แสดง (แก้ได้) — QR ผูกกับ id | `shop_table.id` (uuid immutable) กับ `shop_table.display_name` (แก้อิสระ) เป็นคนละ field · `qr_code.table_id` → `id` เท่านั้น · `qr_code.code` เป็นสตริงสุ่ม ไม่ผูกกับทั้ง id และชื่อ → เปลี่ยนชื่อโต๊ะไม่แตะ QR เลยแม้แต่ระดับ URL | ✅ ปิด |
+| **1** | table entity แยก internal id (คงที่) ออกจากชื่อ/เลขโต๊ะที่แสดง (แก้ได้) — QR ผูกกับ id | `service_point.id` (uuid immutable) กับ `service_point.display_name` (แก้อิสระ) เป็นคนละ field · `qr_code.service_point_id` → `id` เท่านั้น · `qr_code.code` เป็นสตริงสุ่ม ไม่ผูกกับทั้ง id และชื่อ → เปลี่ยนชื่อโต๊ะไม่แตะ QR เลยแม้แต่ระดับ URL | ✅ ปิด |
 | **2** | QR static 1:1 ต่อโต๊ะตลอดอายุร้าน ไม่มี flow regenerate | `qr_code` ไม่มี `expires_at`/`rotated_at` และไม่มี endpoint regenerate ใน [[api-design-v1|API Design v1]] · partial unique index INV-2 บังคับ 1:1 | ✅ ปิด |
-| **3** | สถานะโต๊ะ derive จากวงจรชีวิตออเดอร์เท่านั้น ห้าม manual toggle | **`shop_table` ไม่มี column `status` เลย** — อ่านจาก `table_status_v` (§4.2) · เปิดจาก `table_session` ที่ถูกสร้างเป็นผลข้างเคียงของออเดอร์แรก · ปิดจาก endpoint ปิดบิลเท่านั้น · ไม่มี API ให้เขียนสถานะโต๊ะ | ✅ ปิด |
-| **4** | ตะกร้า/session ต่อโต๊ะรองรับการเขียนพร้อมกันหลายคน/หลายอุปกรณ์ + ทุกจอ realtime | `cart` ผูกกับ `table_session` (ไม่ใช่กับอุปกรณ์) · หลาย `customer_session` ชี้ `table_session` เดียวกันได้ · `cart_item` unique ที่ `line_signature` + เพิ่มด้วย `ON CONFLICT DO UPDATE qty+` (commutative) · `version` สำหรับการตั้งจำนวนแบบ optimistic · realtime subscribe ที่ `cart_item`/`orders` filter ด้วย `table_session_id` | ✅ ปิด (ต้องผ่าน test 0% data loss ของ OKOYE ตาม UX §7) |
+| **3** | สถานะโต๊ะ derive จากวงจรชีวิตออเดอร์เท่านั้น ห้าม manual toggle | **`service_point` ไม่มี column `status` เลย** — อ่านจาก `service_point_status_v` (§4.2) · เปิดจาก `visit_session` ที่ถูกสร้างเป็นผลข้างเคียงของออเดอร์แรก · ปิดจาก endpoint ปิดบิลเท่านั้น · ไม่มี API ให้เขียนสถานะโต๊ะ | ✅ ปิด |
+| **4** | ตะกร้า/session ต่อโต๊ะรองรับการเขียนพร้อมกันหลายคน/หลายอุปกรณ์ + ทุกจอ realtime | `cart` ผูกกับ `visit_session` (ไม่ใช่กับอุปกรณ์) · หลาย `customer_session` ชี้ `visit_session` เดียวกันได้ · `cart_item` unique ที่ `line_signature` + เพิ่มด้วย `ON CONFLICT DO UPDATE qty+` (commutative) · `version` สำหรับการตั้งจำนวนแบบ optimistic · realtime subscribe ที่ `cart_item`/`orders` filter ด้วย `visit_session_id` | ✅ ปิด (ต้องผ่าน test 0% data loss ของ OKOYE ตาม UX §7) |
 | **5** | 2 channel กฎจ่ายเงินตรงข้ามกัน + origin field แยกจาก channel | `orders.channel` (`table`/`counter`) และ `orders.origin` (`customer_self`/`staff_entered`) เป็น**คนละคอลัมน์** · INV-3 บังคับ prepay ของ counter ที่ระดับ trigger · INV-4 กัน dine-in ไม่ให้มีสถานะรอจ่าย · ทั้ง 2 origin ใช้ `status` และคิวเดียวกัน ต่างแค่ป้าย (UX-10) | ✅ ปิด |
-| **6** | soft delete โต๊ะที่ปลดระวาง · ห้ามลบประวัติ · ห้ามแก้/ปลดโต๊ะที่มีบิลเปิดค้าง | `shop_table.retired_at` (ไม่มี DELETE ในทุก endpoint) · ประวัติอยู่ที่ `orders.table_id` ที่ยังชี้ได้เสมอ · INV-7 กันการเปิด session บนโต๊ะที่ปลดระวาง · การปลดระวางตรวจ `table_status_v.status='occupied'` → 409 | ✅ ปิด |
+| **6** | soft delete โต๊ะที่ปลดระวาง · ห้ามลบประวัติ · ห้ามแก้/ปลดโต๊ะที่มีบิลเปิดค้าง | `service_point.retired_at` (ไม่มี DELETE ในทุก endpoint) · ประวัติอยู่ที่ `orders.service_point_id` ที่ยังชี้ได้เสมอ · INV-7 กันการเปิด session บนโต๊ะที่ปลดระวาง · การปลดระวางตรวจ `service_point_status_v.status='occupied'` → 409 | ✅ ปิด |
 | **7** | option-group เป็นกลไกทั่วไป: fixed 5 ค่า default 50% · fixed 3 ค่า default กลาง · dynamic ผูก availability · นมโอ๊ต · แอดมินผูกสินค้ากับกลุ่มเองได้ | `option_group.source_type` (`fixed`/`dynamic`) + `selection_type` + `default_option_value_id` + `hide_when_empty` · `option_value.is_available` = กลไก "หมด" ระดับตัวเลือก (US-36) · `product_option_group` = แอดมินผูกเอง ไม่มี if ในโค้ด · **ไม่มีที่ไหนใน schema ที่เอ่ยถึงคำว่า "ความหวาน"/"การคั่ว"** ทั้งหมดเป็นข้อมูล ไม่ใช่โครงสร้าง | ✅ ปิดฝั่งกลไก · ⚠️ นมโอ๊ตยังไม่มี US รองรับ (หัวข้อ 8 ข้อ 3) |
 | **8** | race condition ของหมด — reject เฉพาะรายการ ไม่ล้มทั้งออเดอร์ ทั้งระดับสินค้าและระดับ option value | `order_item.status = 'rejected_unavailable'` เป็นสถานะระดับ **รายการ** ไม่ใช่ระดับออเดอร์ · ตรวจซ้ำทั้ง `product.is_available` และ `option_value.is_available` ในทรานแซกชันยืนยันออเดอร์ · `bill.total` นับเฉพาะ `status='active'` → ยอดถูกต้องอัตโนมัติ · contract ของ response อยู่ที่ [[api-design-v1|API Design v1]] §5.2 | ✅ ปิด |
 | **9** | 🔴 **กฎเปลี่ยนแล้ว 2026-08-16 — ข้อความในช่องขวายังเป็นของกฎเดิม** · กฎใหม่: Phase 0 เก็บข้อมูลส่วนบุคคลได้ **1 ชนิด คือชื่อเล่นผูกกับออเดอร์** เพื่อเรียกรับของคู่เลขคิว · ที่เหลือห้ามตามเดิม · แจ้งเตือนต้อง session-scoped **· รอ COULSON ออกแบบใหม่ ดูหมายเหตุที่ตาราง `customer_session`** | **ทั้ง schema ไม่มีตาราง `customer`** และไม่มี field ชื่อ/เบอร์โทร/อีเมล/device id ที่ข้ามครั้งการใช้บริการ · `customer_session` เก็บได้เฉพาะ id สุ่ม + เวลา + หมดอายุ + job ลบทิ้ง · ไม่มี push token/SMS field ใด ๆ (BR ข้อ 22) · **guardrail นี้ต้องถูกตรวจซ้ำทุกครั้งที่มีการเพิ่มคอลัมน์ในตารางกลุ่ม session/order** | ✅ ปิด (เป็น guardrail ต่อเนื่อง ไม่ใช่งานที่ทำครั้งเดียวจบ) |
@@ -482,7 +484,7 @@ LEFT JOIN table_session ts
 | `option_group` | ความหวาน (fixed, default 50%) · ระดับการคั่ว (fixed, default กลาง) · เมล็ดพิเศษ (dynamic, hide_when_empty) · ชนิดนม (fixed, default นมปกติ — **ยังไม่เปิดใช้ รอยืนยัน**) | |
 | `option_value` | หวาน 5 ค่า · คั่ว 3 ค่า · เมล็ดพิเศษตามที่ร้านมีจริง | |
 | `product_option_group` | ตามคอลัมน์ "ตัวเลือกที่มี" ของ [[../../01-requirements/01-spec/initial-menu-data-v1|Initial Menu Data v1]] | เอสเปรสโซ/อเมริกาโน่/ดริป/ซิกเนเจอร์ ไม่ผูกกลุ่มความหวาน |
-| `shop_table` + `qr_code` | โต๊ะตัวอย่างสำหรับทดสอบ | **จำนวนโต๊ะจริงเจ้าของร้านสร้างเองผ่าน US-42** ไม่ใช่ค่าคงที่ของระบบ |
+| `service_point` + `qr_code` | โต๊ะตัวอย่างสำหรับทดสอบ | **จำนวนโต๊ะจริงเจ้าของร้านสร้างเองผ่าน US-42** ไม่ใช่ค่าคงที่ของระบบ |
 | `qr_code` (counter) | 1 ใบ | |
 | `station` | "สถานีหน้าร้าน" 1 แถว | |
 | `staff_user` | บัญชีพนักงาน 1 + แอดมิน 1 | รหัสผ่านตั้งตอน provision ห้าม commit ลง repo |
@@ -501,6 +503,177 @@ LEFT JOIN table_session ts
 | 6 | **ยกเลิกออเดอร์หมดทุกใบแล้วโต๊ะควรว่างเองไหม** | ไม่มี transition นี้ใน §4.2 | ไม่ว่างเอง — ต้องปิดบิล (ยอด 0 บาทได้) เพราะ auto-close จะตัด session ลูกค้าที่ยังนั่งอยู่ |
 | 7 | **ระยะเวลาเก็บข้อมูลออเดอร์/ตะกร้าของ Phase 0** — BR ข้อ 17 พูดถึงเฉพาะข้อมูล loyalty (Phase 1) ไม่ครอบคลุมข้อมูลปฏิบัติการ | job ล้าง `customer_session`/`cart` | ล้าง session+cart ที่หมดอายุเกิน 24 ชม. · **เก็บ `orders`/`bill`/`payment` ไว้ไม่มีกำหนด** เพราะเป็นข้อมูลบัญชี/ภาษี ไม่ใช่ข้อมูลส่วนบุคคล (ควรให้นักบัญชียืนยันระยะเวลาที่ต้องเก็บจริง) · 🔴 **ข้อยกเว้นรายคอลัมน์ ใหม่ 2026-08-16: ช่องชื่อเล่นบนออเดอร์ต้องถูกล้างเป็น `NULL` เมื่อออเดอร์อายุครบ 90 วัน** — `UPDATE` เท่านั้น **ห้าม `DELETE` แถว** ดูหมายเหตุที่ตาราง `customer_session` · ทดสอบด้วย TC-072c |
 
+## 9. หลายร้านในฐานเดียว และแม่แบบตามชนิดร้าน (2026-08-20)
+
+ต่อจากคำตัดสินใน [[architecture-v1|Architecture v1]] §11.7 ว่าจะเปิดให้หลายร้านใช้เซิร์ฟเวอร์เดียวกัน · **ทำตอนนี้ตอนที่ยังไม่มีข้อมูลจริงสักแถว** เพราะทำทีหลังคือ migration บนระบบที่ร้านกำลังขายอยู่
+
+### 9.1 ตาราง `shop` และคอลัมน์ `shop_id`
+
+เพิ่ม entity ใหม่ 1 ตัว และ **ใส่ `shop_id` ลงทุกตารางที่เป็นของร้าน ไม่ใช่แค่ตารางแม่**
+
+| กลุ่ม | ตารางที่ต้องมี `shop_id` |
+|---|---|
+| เมนู | `category` · `product` · `option_group` · `option_value` · `product_option_group` |
+| ร้าน / จุดบริการ / QR | `zone` · `service_point` · `qr_code` · `station` |
+| session และตะกร้า | `visit_session` · `customer_session` · `cart` · `cart_item` · `cart_item_option` |
+| ออเดอร์และเงิน | `bill` · `orders` · `order_item` · `order_item_option` · `order_status_event` · `payment` |
+| พนักงาน | `staff_user` |
+
+ครบทั้ง 21 entity เดิม — **ไม่มีตารางไหนที่ไม่ใช่ของร้านใดร้านหนึ่ง**
+
+### 9.2 ทำไมใส่ทุกตาราง ทั้งที่ตารางลูกสืบทอดจากแม่ได้อยู่แล้ว
+
+แบบ normalize เต็มที่จะใส่ `shop_id` เฉพาะตารางแม่ แล้วให้ตารางลูกไปถึงร้านผ่าน join · **ปัญหาคือทุกคิวรีที่แตะตารางลูกต้อง join ขึ้นไปเพื่อตรวจว่าเป็นของร้านไหน และคิวรีที่ลืม join คือการรั่วข้ามร้านที่เงียบสนิท**
+
+ใส่ทุกตารางแลกมาด้วยคอลัมน์กับ index เพิ่ม แต่ได้สองอย่างที่คุ้มกว่ามาก
+
+1. **นโยบาย RLS เหมือนกันทุกตาราง** — บรรทัดเดียวต่อตาราง ไม่ต้องคิดเป็นราย ๆ
+2. **บังคับความถูกต้องด้วย FK ประกอบ ไม่ใช่ด้วยวินัย**
+
+```sql
+-- ลูกต้องอยู่ร้านเดียวกับแม่เสมอ บังคับที่ระดับ constraint
+ALTER TABLE order_item
+  ADD CONSTRAINT order_item_same_shop
+  FOREIGN KEY (shop_id, order_id) REFERENCES orders (shop_id, id);
+```
+
+> **นี่คือหลักเดียวกับ §4.2** ที่ทำให้สถานะโต๊ะแก้ด้วยมือไม่ได้เพราะไม่มีคอลัมน์ให้แก้ — การเอารายการของร้าน ก. ไปแปะกับออเดอร์ของร้าน ข. **ต้องเป็นสิ่งที่ฐานข้อมูลปฏิเสธ ไม่ใช่สิ่งที่เราตั้งใจจะไม่ทำ**
+
+### 9.3 กฎของ `{code}` ใน `qr_code`
+
+`code` ต้อง **unique ทั้งตาราง ไม่ใช่ unique ต่อร้าน** เพราะ QR ที่สแกนมาต้องบอกได้ด้วยตัวเองว่าเป็นของร้านไหนโดยไม่ต้องมีข้อมูลอื่นช่วย
+
+```sql
+CREATE UNIQUE INDEX qr_code_code_key ON qr_code (code);   -- ไม่มี shop_id ในคีย์
+```
+
+ตรงกับสัญญา URL ใน [[architecture-v1|Architecture v1]] §5.3 ที่แก้แล้วให้เป็นโดเมนเดียวสำหรับทุกร้าน
+
+### 9.4 🔴 เปลี่ยนชื่อ `shop_table` → `service_point`
+
+หลังจากที่ Touch ระบุว่าจะทำแม่แบบสำหรับร้านหลายชนิด — คาเฟ่ · ร้านอาหาร · นวด · ทำเล็บ · ทำหน้า — **คำว่า "โต๊ะ" จะผิดถาวรในร้านส่วนใหญ่ที่ไม่ใช่ร้านอาหาร**
+
+สิ่งที่ QR ผูกอยู่จริง ๆ คือ **จุดที่ลูกค้าอยู่** ซึ่งเป็นแนวคิดเดียวกันหมด เปลี่ยนแค่คำเรียก
+
+| ชนิดร้าน | จุดบริการคือ |
+|---|---|
+| คาเฟ่ · ร้านอาหาร | โต๊ะ |
+| นวด | ห้อง หรือ เตียง |
+| ทำเล็บ · ทำหน้า | เก้าอี้ หรือ สถานี |
+
+**เปลี่ยนตอนนี้ = แก้ชื่อในเอกสารที่ยังไม่มีข้อมูลสักแถว · เปลี่ยนทีหลัง = migration บนหลายร้านพร้อมกัน บวกไล่แก้ทุกคิวรีทุกหน้าจอ** เป็นเหตุผลชุดเดียวกับ `shop_id`
+
+- `service_point.display_name` มีอยู่แล้วต่อแถว ร้านตั้งชื่อเองได้ตามเดิม
+- เพิ่ม `shop.service_point_label` สำหรับคำเรียกรวมที่ใช้ทั้ง UI (`"โต๊ะ"` / `"ห้อง"` / `"เตียง"` / `"เก้าอี้"`)
+- `table_session` เปลี่ยนตามเป็น `visit_session` ด้วยเหตุผลเดียวกัน — มันคือหนึ่งรอบของลูกค้าหนึ่งชุด ไม่ได้ผูกกับโต๊ะโดยเฉพาะ
+
+### 9.5 `shop_type` และแม่แบบคืออะไรกันแน่
+
+```
+shop.shop_type = cafe | restaurant | service
+```
+
+**แม่แบบ = ชุดข้อมูลตั้งต้น ไม่ใช่ schema คนละชุด** ประกอบด้วย
+
+1. คำเรียกจุดบริการ (`service_point_label`)
+2. หมวดหมู่และรายการตั้งต้น (คาเฟ่ได้เมนูกาแฟ · ร้านนวดได้รายการบริการพร้อมระยะเวลา)
+3. กลุ่มตัวเลือกตั้งต้น (คาเฟ่ได้ความหวาน/ระดับคั่ว · ร้านนวดได้ระดับน้ำหนักมือ)
+4. ฟีเจอร์ที่เปิดหรือปิดของร้านชนิดนั้น
+
+> 🔴 **กับดักที่ต้องไม่เดินเข้าไป: อย่าสร้าง schema ที่พยายามรองรับทุกธุรกิจ** สิ่งที่ทำให้ระบบนี้แข็งแรงคือ invariant 22 ข้อกับ state machine ที่คมและเฉพาะเจาะจง ถ้าทำให้ทุกอย่างกลายเป็นของทั่วไปเพื่อรองรับธุรกิจที่ยังไม่มีลูกค้าสักราย จะเหลือแค่ตารางว่างที่ไม่บังคับอะไรเลย — **แม่แบบอยู่ที่ชั้นข้อมูลตั้งต้น ไม่ใช่ที่ชั้น schema**
+
+### 9.6 ขอบเขตของแม่แบบ — อะไรที่ยังทำไม่ได้และต้องพูดตรง ๆ
+
+รูปแบบที่ schema ปัจจุบัน**รองรับได้จริงทันที** คือ *ลูกค้าเดินเข้ามา อยู่ที่จุดบริการ เลือกบริการจากรายการ แล้วตั๋วไปโผล่ที่พนักงาน* — ครอบคาเฟ่และร้านอาหารได้เต็ม และครอบร้านบริการแบบ walk-in ได้
+
+รูปแบบที่**ยังทำไม่ได้และไม่ควรฝืนใน Phase 0**
+
+| ต้องการ | ทำไมถึงเป็นคนละโมเดล |
+|---|---|
+| จองล่วงหน้า | ออเดอร์เกิดตอนสั่ง แต่การจองเกิดก่อนลูกค้ามาถึง ทั้ง state machine เปลี่ยน |
+| ระยะเวลาบริการ | นวด 60 นาทีจองทรัพยากรเป็นช่วงเวลา ไม่ใช่คิวที่ทำเสร็จแล้วจบ |
+| ผูกพนักงานกับงาน | ต้องรู้ว่าใครว่างช่วงไหน ซึ่งเป็นตารางเวลา ไม่ใช่คิว |
+| ทรัพยากรที่ชนกันเอง | ห้องหนึ่งห้องรับได้ทีละคน แต่โต๊ะรับออเดอร์เพิ่มได้เรื่อย ๆ |
+
+**สรุป: แม่แบบคาเฟ่และร้านอาหารทำได้เลย · แม่แบบร้านบริการทำได้เฉพาะแบบ walk-in · ร้านที่ต้องจองคิวจริงเป็นงานคนละก้อนที่ต้องมี appointment model ของตัวเอง ไม่ใช่แม่แบบ**
+
+### 9.7 ผลต่อ invariant และ RLS
+
+- INV ทุกข้อใน §5 ต้องเติมเงื่อนไข `shop_id` เข้าไปในขอบเขตของมัน — เช่น "หนึ่งโต๊ะมี session เปิดได้ครั้งละหนึ่ง" กลายเป็น "หนึ่งจุดบริการของร้านหนึ่งมี session เปิดได้ครั้งละหนึ่ง"
+- **เปิด RLS ทุกตาราง** ตาม [[architecture-v1|Architecture v1]] §11.6 — เป็นแนวป้องกันชั้นสองที่ยังทำงานแม้คิวรีจะเขียนผิด และความผิดพลาดที่มันกันคือชนิดที่ทดสอบด้วยร้านเดียวไม่มีวันเจอ
+- 🔴 **ต้องมีเคสทดสอบที่ใช้สองร้านตั้งแต่ชุดแรก** — เคสที่ร้าน ก. พยายามอ่าน/แก้ข้อมูลของร้าน ข. แล้วต้องล้มเหลวทุกครั้ง · ชุดทดสอบที่มีร้านเดียวจะผ่านหมดทั้งที่ระบบรั่ว
+
+---
+
+## 10. ภาษีมูลค่าเพิ่ม — เปิดปิดได้ และเลือกรวม/ไม่รวมในราคา (2026-08-20)
+
+ร้านที่ยังไม่จด VAT กับร้านที่จดแล้วต้องใช้ระบบเดียวกันได้ · และร้านที่จดแล้วยังตั้งราคาคนละแบบ — บางร้านติดป้ายราคารวม VAT แล้ว บางร้านบวกตอนท้าย
+
+### 10.1 ตั้งค่าที่ระดับร้าน
+
+```
+shop.vat_enabled     boolean        เปิด/ปิด
+shop.vat_mode        include | exclude
+shop.vat_rate_bp     integer        หน่วยเป็น basis point (700 = 7.00%)
+shop.tax_id          text nullable  สำหรับใบกำกับภาษีใน Phase 1
+```
+
+เก็บอัตราเป็น **basis point จำนวนเต็ม ไม่ใช่ทศนิยม** ด้วยเหตุผลเดียวกับที่ทุกจำนวนเงินในระบบนี้เป็นสตางค์จำนวนเต็ม — ทศนิยมทำให้ยอดเพี้ยนแบบที่หาไม่เจอ
+
+เป็นข้อที่ 5 ของแม่แบบตาม §9.5 ด้วย — ร้านคนละชนิดตั้งค่า VAT เริ่มต้นคนละแบบได้
+
+### 10.2 🔴 VAT ต้อง snapshot ลงบิล ด้วยเหตุผลเดียวกับราคา
+
+R8 ใน [[architecture-v1|Architecture v1]] §6 บอกว่าต้อง snapshot ชื่อและราคาลง `order_item` เพราะเจ้าของร้านแก้ราคาระหว่างที่มีบิลเปิดค้างได้ · **การตั้งค่า VAT ก็แก้ได้ระหว่างที่มีบิลเปิดค้างเหมือนกัน และผลรุนแรงกว่าเพราะเป็นเรื่องภาษี**
+
+```
+bill.vat_enabled_snapshot   boolean
+bill.vat_mode_snapshot      include | exclude
+bill.vat_rate_bp_snapshot   integer
+bill.vat_amount_satang      integer
+```
+
+ร้านจด VAT กลางเดือนแล้วบิลของเมื่อวานเปลี่ยนยอดตามย้อนหลัง = ตัวเลขที่เคยบอกลูกค้าไปแล้วไม่ตรงกับที่บันทึกไว้ **บิลที่ปิดไปแล้วต้องนิ่งตลอดกาล**
+
+### 10.3 การคำนวณ — ปัดเศษที่ระดับบิล ไม่ใช่ระดับรายการ
+
+ทุกจำนวนเป็นสตางค์จำนวนเต็ม `subtotal` คือผลรวมของ `order_item.price_snapshot × qty` ทุกใบในบิล
+
+**exclude — ราคายังไม่รวม VAT**
+```
+vat   = round(subtotal × rate_bp / 10000)
+total = subtotal + vat
+```
+
+**include — ราคารวม VAT แล้ว**
+```
+total = subtotal
+vat   = round(subtotal × rate_bp / (10000 + rate_bp))
+net   = total − vat
+```
+
+> 🔴 **ปัดเศษครั้งเดียวที่ระดับบิล ห้ามปัดรายรายการแล้วเอามาบวกกัน** — ถ้าปัดทีละรายการ ผลรวมของรายการจะไม่เท่ากับยอดบิลในบางกรณี ซึ่งเป็นอาการที่ลูกค้าจับได้เองจากใบเสร็จและอธิบายยากมากหน้าร้าน
+
+**ปิด VAT** — `vat = 0` และ `total = subtotal` · หน้าจอต้องไม่แสดงบรรทัด VAT เลย ไม่ใช่แสดงเป็น 0 บาท
+
+### 10.4 สิ่งที่ต้องเห็นบนหน้าจอ
+
+| ที่ไหน | ปิด VAT | include | exclude |
+|---|---|---|---|
+| หน้าเมนู (C-01/C-02) | ราคาเฉย ๆ | ราคาเฉย ๆ + หมายเหตุ "ราคารวม VAT แล้ว" | ราคาเฉย ๆ + หมายเหตุ "ราคายังไม่รวม VAT" |
+| สรุปยอดโต๊ะ (C-06) | ยอดรวมอย่างเดียว | ยอดรวม + บรรทัด "รวม VAT 7% = X บาท" | ยอดก่อน VAT · บรรทัด VAT · ยอดสุทธิ |
+| หน้าปิดบิลพนักงาน (S-05) | เหมือนกัน | เหมือนกัน | เหมือนกัน — **ยอดที่แคชเชียร์เห็นต้องเป็นยอดสุทธิที่ต้องเก็บจริงเสมอ** |
+
+**ยอดที่ส่งใน `expected_total_satang` ตอนปิดบิล (api-design §5.3) คือยอดสุทธิหลัง VAT** ไม่ใช่ subtotal — ไม่งั้นการตรวจยอดชนกันจะเทียบคนละฐาน
+
+### 10.5 ขอบเขต — อะไรที่ยังไม่ทำ
+
+ใบกำกับภาษีเต็มรูปแบบ (เลขประจำตัวผู้เสียภาษีของลูกค้า · เลขที่ใบกำกับแบบเรียงลำดับห้ามข้าม · สำเนา) **เป็นงานของ US-21 ใน Phase 1** ไม่ใช่ Phase 0 · Phase 0 แค่คำนวณและแสดงให้ถูก
+
+⚠️ **ยังไม่มี US รองรับข้อนี้** — เป็นข้อกำหนดที่เข้ามาหลัง backlog ปิดไปแล้ว ต้องเปิด US ใหม่ใน [[../../01-requirements/01-spec/product-backlog-v1|Product Backlog v1]] ก่อนนับเป็นสโคป Phase 0 อย่างเป็นทางการ
+
+---
+
 ---
 
 ส่งงาน — COULSON → ทัช (งาน / ผลลัพธ์ / ค้าง-เสี่ยง / skill ที่ใช้)
@@ -509,6 +682,6 @@ LEFT JOIN table_session ts
 
 **ผลลัพธ์:** `docs/02-design/02-technical/data-model-v1.md` — **21 entity** ใน 5 กลุ่ม (เมนู 5 · ร้าน/โต๊ะ/QR 5 · session/ตะกร้า 5 · ออเดอร์/เงิน 5 · พนักงาน 1) พร้อม field/type/ความสัมพันธ์/index, state machine ของออเดอร์และโต๊ะที่ระบุ transition ที่ถูกกฎ **และที่ผิดกฎพร้อมเหตุผล**, **invariant 10 ข้อที่บังคับที่ระดับฐานข้อมูล** (ไม่ใช่แค่ที่ UI), ตารางไล่ข้อกำหนด 12 ข้อทีละข้อ, seed data ของ Phase 0
 
-**ค้าง/เสี่ยง:** การตัดสินใจที่มีน้ำหนักที่สุดคือ **สถานะโต๊ะไม่มีคอลัมน์เก็บเลย** — อ่านจาก view ที่คำนวณจาก `table_session` ทำให้ BR ข้อ 11 ("ห้ามเป็น manual toggle") บังคับได้เชิงโครงสร้าง ไม่ใช่แค่ข้อตกลงที่รอวันมีคนเผลอ UPDATE · ผลข้างเคียงที่ต้องยอมรับคือหน้าจอสถานีต้อง join view ทุกครั้ง (คุ้มมาก เทียบกับความเสี่ยงข้อมูลไม่ตรง) · **12/12 ข้อที่ล็อกไว้รองรับครบ** แต่มี **7 ประเด็นที่ต้องได้คำตอบก่อน finalize** โดย 3 ข้อแรกกระทบ schema จริง: ความหมายของ "รอเสิร์ฟ" (XAVIER flag ไว้เองแล้ว), เมนูร้อน/เย็นเป็น 1 หรือ 2 สินค้า (**requirement ขัดกันเอง** — หมวดหมู่เป็นร้อน/เย็นแต่ตารางเมนูให้ราคา 2 คอลัมน์ในแถวเดียว), และตัวเลือกนมโอ๊ตที่ถูกใส่ไว้ในเมนู 9 รายการทั้งที่ยังไม่มี US รองรับ
+**ค้าง/เสี่ยง:** การตัดสินใจที่มีน้ำหนักที่สุดคือ **สถานะโต๊ะไม่มีคอลัมน์เก็บเลย** — อ่านจาก view ที่คำนวณจาก `visit_session` ทำให้ BR ข้อ 11 ("ห้ามเป็น manual toggle") บังคับได้เชิงโครงสร้าง ไม่ใช่แค่ข้อตกลงที่รอวันมีคนเผลอ UPDATE · ผลข้างเคียงที่ต้องยอมรับคือหน้าจอสถานีต้อง join view ทุกครั้ง (คุ้มมาก เทียบกับความเสี่ยงข้อมูลไม่ตรง) · **12/12 ข้อที่ล็อกไว้รองรับครบ** แต่มี **7 ประเด็นที่ต้องได้คำตอบก่อน finalize** โดย 3 ข้อแรกกระทบ schema จริง: ความหมายของ "รอเสิร์ฟ" (XAVIER flag ไว้เองแล้ว), เมนูร้อน/เย็นเป็น 1 หรือ 2 สินค้า (**requirement ขัดกันเอง** — หมวดหมู่เป็นร้อน/เย็นแต่ตารางเมนูให้ราคา 2 คอลัมน์ในแถวเดียว), และตัวเลือกนมโอ๊ตที่ถูกใส่ไว้ในเมนู 9 รายการทั้งที่ยังไม่มี US รองรับ
 
 **skill ที่ใช้:** scrutinize (ไล่ตรวจว่ากฎธุรกิจแต่ละข้อ *บังคับได้จริง* ที่ระดับ constraint/trigger หรือเป็นแค่ความตั้งใจที่รอคนทำผิด — เป็นที่มาของตาราง invariant 10 ข้อ และของการตัดคอลัมน์ `status` ออกจากตารางโต๊ะ, และเป็นตัวจับความขัดแย้งเรื่องหมวดหมู่ร้อน/เย็น vs ราคา 2 คอลัมน์), management-talk (แยกสิ่งที่ปิดแล้วออกจากสิ่งที่ต้องให้ Touch ตัดสิน และบอกตรง ๆ ว่าข้อไหนยังไม่ปิดแทนที่จะเขียนให้ดูเหมือนครบ)

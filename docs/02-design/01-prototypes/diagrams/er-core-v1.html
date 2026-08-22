@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ER แกนเงิน · data-model §2</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&family=Noto+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--paper:#f5f5f5;--paper-2:#ececec;--ink:#2d3142;--muted:#4f5d75;--soft:#7a8399;--rule:rgba(45,49,66,0.12);--rule-solid:#bfc0c0;--accent:#eb6c36;--accent-tint:rgba(235,108,54,0.08);--link:#2e5aa8;
+    --sans:'Geist','IBM Plex Sans Thai','Noto Sans Thai','Sukhumvit Set','Thonburi',sans-serif;
+    --mono:'Geist Mono','IBM Plex Sans Thai','Noto Sans Thai',monospace;--serif:'Instrument Serif',Georgia,serif;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;padding:3rem 2rem}
+  .wrap{max-width:1280px;margin:0 auto}
+  .eyebrow{font-family:var(--mono);font-size:8px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin:0 0 0.5rem}
+  h1{font-family:var(--serif);font-size:1.75rem;font-weight:400;margin:0 0 0.5rem;line-height:1.2}
+  .subtitle{color:var(--muted);font-size:0.875rem;margin:0 0 2rem;max-width:64ch;line-height:1.6}
+  .diagram{margin:0 0 2.5rem}
+  svg{display:block;width:100%;height:auto}
+  .cards{display:grid;grid-template-columns:1.1fr 1fr 0.9fr;gap:1rem;margin-bottom:2.5rem}
+  .card{background:#fff;border:1px solid var(--rule);border-radius:6px;padding:1.25rem}
+  .card-header{display:flex;align-items:center;gap:0.5rem;margin:0 0 0.75rem}
+  .card-dot{width:7px;height:7px;border-radius:50%;flex:none}
+  .dot-coral{background:var(--accent)}.dot-ink{background:var(--ink)}.dot-soft{background:var(--soft)}
+  .card h3{font-size:0.875rem;font-weight:600;margin:0}
+  .card ul{margin:0;padding-left:1.1rem;color:var(--muted);font-size:0.8125rem;line-height:1.7}
+  code{font-family:var(--mono);font-size:0.75rem;background:rgba(45,49,66,0.05);padding:1px 4px;border-radius:3px}
+  footer{border-top:1px solid var(--rule);padding-top:1rem;font-family:var(--mono);font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:var(--soft)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="eyebrow">DATA MODEL · §2 · ER OVERVIEW</p>
+  <h1>แกนเงิน — 8 ตารางที่บิลต้องพึ่ง</h1>
+  <p class="subtitle">schema เต็มมี 21 entity ภาพนี้ตัดเหลือเส้นทางเดียวที่เงินเดินผ่าน ตั้งแต่โต๊ะจนถึงการรับชำระ หัวใจอยู่ที่ table_session ซึ่งเป็นทั้งตัวผูกรอบลูกค้าเข้ากับบิล และเป็นแถวที่ทั้งการสั่งเพิ่มและการปิดบิลต้องแย่งล็อกกัน</p>
+
+  <div class="diagram">
+  <svg viewBox="0 0 1280 880" role="img" aria-labelledby="er-core-v1-title er-core-v1-desc" xmlns="http://www.w3.org/2000/svg">
+    <title id="er-core-v1-title">แผนภาพความสัมพันธ์ของ 8 ตารางหลักบนเส้นทางการเงิน</title>
+    <desc id="er-core-v1-desc">โต๊ะหนึ่งตัวมีได้หลายรอบลูกค้าใน table_session แต่ละรอบมีตะกร้าหนึ่งใบและบิลหนึ่งใบ บิลหนึ่งใบมีได้หลายออเดอร์และหลายแถวการชำระเงินซึ่งทำหน้าที่เป็น ledger ออเดอร์หนึ่งใบมีหลายรายการ และแต่ละรายการเก็บสำเนาชื่อกับราคาสินค้าไว้ในตัวเอง ทำให้การแก้ราคาในเมนูภายหลังไม่กระทบบิลที่สั่งไปแล้ว</desc>
+    <defs>
+      <marker id="er-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+      <marker id="er-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#eb6c36"/></marker>
+      <marker id="er-arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/></marker>
+    </defs>
+    <rect width="100%" height="100%" fill="#f5f5f5"/>
+
+    <!-- relationships (straight lines only) -->
+    <g stroke="#4f5d75" stroke-width="1">
+      <line x1="260" y1="152" x2="340" y2="152"/>
+      <line x1="540" y1="136" x2="620" y2="136"/>
+      <line x1="440" y1="204" x2="440" y2="280"/>
+      <line x1="540" y1="340" x2="620" y2="340"/>
+      <line x1="820" y1="340" x2="900" y2="340"/>
+      <line x1="1000" y1="400" x2="1000" y2="480"/>
+      <line x1="440" y1="400" x2="440" y2="480"/>
+    </g>
+
+    <!-- cardinality -->
+    <g font-family="'Geist Mono',monospace" font-size="8" fill="#7a8399" letter-spacing="0.08em">
+      <text x="272" y="148">1</text><text x="328" y="148" text-anchor="end">N</text>
+      <text x="552" y="132">1</text><text x="608" y="132" text-anchor="end">1</text>
+      <text x="448" y="222">1</text><text x="448" y="272">1</text>
+      <text x="552" y="336">1</text><text x="608" y="336" text-anchor="end">N</text>
+      <text x="832" y="336">1</text><text x="888" y="336" text-anchor="end">N</text>
+      <text x="1008" y="422">N</text><text x="1008" y="472">1</text>
+      <text x="448" y="422">1</text><text x="448" y="472">N</text>
+    </g>
+
+    <!-- relationship labels -->
+    <g font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai',sans-serif" font-size="12" fill="#7a8399">
+      <rect x="316" y="232" width="112" height="16" rx="2" fill="#f5f5f5"/><text x="428" y="244" text-anchor="end">1 รอบ = 1 บิล</text>
+      <rect x="308" y="424" width="120" height="16" rx="2" fill="#f5f5f5"/><text x="428" y="436" text-anchor="end">ledger หลายแถว</text>
+      <rect x="1012" y="424" width="88" height="16" rx="2" fill="#f5f5f5"/><text x="1012" y="436">snapshot</text>
+    </g>
+
+    <!-- entities -->
+    <g font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai',sans-serif">
+      <!-- shop_table -->
+      <rect x="60" y="100" width="200" height="104" rx="6" fill="#f5f5f5"/>
+      <rect x="60" y="100" width="200" height="104" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <line x1="60" y1="128" x2="260" y2="128" stroke="#2d3142" stroke-width="1"/>
+      <text x="72" y="120" font-size="12" font-weight="600" fill="#2d3142">shop_table</text>
+      <g font-family="'Geist Mono',monospace" font-size="8" fill="#4f5d75">
+        <text x="72" y="148"># id</text><text x="72" y="164">display_name</text>
+        <text x="72" y="180">→ zone_id</text><text x="72" y="196">retired_at</text>
+      </g>
+
+      <!-- table_session · FOCAL -->
+      <rect x="340" y="100" width="200" height="104" rx="6" fill="#f5f5f5"/>
+      <rect x="340" y="100" width="200" height="104" rx="6" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="1"/>
+      <line x1="340" y1="128" x2="540" y2="128" stroke="#eb6c36" stroke-width="1"/>
+      <text x="352" y="120" font-size="12" font-weight="600" fill="#2d3142">table_session</text>
+      <g font-family="'Geist Mono',monospace" font-size="8" fill="#4f5d75">
+        <text x="352" y="148"># id</text><text x="352" y="164">→ table_id</text>
+        <text x="352" y="180">status  open | closed</text><text x="352" y="196">opened_at</text>
+      </g>
+
+      <!-- cart -->
+      <rect x="620" y="100" width="200" height="72" rx="6" fill="#f5f5f5"/>
+      <rect x="620" y="100" width="200" height="72" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <line x1="620" y1="128" x2="820" y2="128" stroke="#2d3142" stroke-width="1"/>
+      <text x="632" y="120" font-size="12" font-weight="600" fill="#2d3142">cart</text>
+      <g font-family="'Geist Mono',monospace" font-size="8" fill="#4f5d75">
+        <text x="632" y="148"># id</text><text x="632" y="164">→ table_session_id</text>
+      </g>
+
+      <!-- bill -->
+      <rect x="340" y="280" width="200" height="120" rx="6" fill="#f5f5f5"/>
+      <rect x="340" y="280" width="200" height="120" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <line x1="340" y1="308" x2="540" y2="308" stroke="#2d3142" stroke-width="1"/>
+      <text x="352" y="300" font-size="12" font-weight="600" fill="#2d3142">bill</text>
+      <g font-family="'Geist Mono',monospace" font-size="8" fill="#4f5d75">
+        <text x="352" y="328"># id</text><text x="352" y="344">→ table_session_id</text>
+        <text x="352" y="360">status</text><text x="352" y="376">total_satang</text><text x="352" y="392">paid_at</text>
+      </g>
+
+      <!-- orders -->
+      <rect x="620" y="280" width="200" height="120" rx="6" fill="#f5f5f5"/>
+      <rect x="620" y="280" width="200" height="120" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <line x1="620" y1="308" x2="820" y2="308" stroke="#2d3142" stroke-width="1"/>
+      <text x="632" y="300" font-size="12" font-weight="600" fill="#2d3142">orders</text>
+      <g font-family="'Geist Mono',monospace" font-size="8" fill="#4f5d75">
+        <text x="632" y="328"># id</text><text x="632" y="344">→ bill_id</text>
+        <text x="632" y="360">channel  table | counter</text><text x="632" y="376">origin</text><text x="632" y="392">status</text>
+      </g>
+
+      <!-- order_item -->
+      <rect x="900" y="280" width="200" height="120" rx="6" fill="#f5f5f5"/>
+      <rect x="900" y="280" width="200" height="120" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <line x1="900" y1="308" x2="1100" y2="308" stroke="#2d3142" stroke-width="1"/>
+      <text x="912" y="300" font-size="12" font-weight="600" fill="#2d3142">order_item</text>
+      <g font-family="'Geist Mono',monospace" font-size="8" fill="#4f5d75">
+        <text x="912" y="328"># id</text><text x="912" y="344">→ order_id</text>
+        <text x="912" y="360">→ product_id</text><text x="912" y="376">name_snapshot</text><text x="912" y="392">price_snapshot</text>
+      </g>
+
+      <!-- product -->
+      <rect x="900" y="480" width="200" height="104" rx="6" fill="#f5f5f5"/>
+      <rect x="900" y="480" width="200" height="104" rx="6" fill="rgba(45,49,66,0.05)" stroke="#4f5d75" stroke-width="1"/>
+      <line x1="900" y1="508" x2="1100" y2="508" stroke="#4f5d75" stroke-width="1"/>
+      <text x="912" y="500" font-size="12" font-weight="600" fill="#2d3142">product</text>
+      <g font-family="'Geist Mono',monospace" font-size="8" fill="#4f5d75">
+        <text x="912" y="528"># id</text><text x="912" y="544">→ category_id</text>
+        <text x="912" y="560">name</text><text x="912" y="576">price_satang</text>
+      </g>
+
+      <!-- payment -->
+      <rect x="340" y="480" width="200" height="104" rx="6" fill="#f5f5f5"/>
+      <rect x="340" y="480" width="200" height="104" rx="6" fill="rgba(45,49,66,0.05)" stroke="#4f5d75" stroke-width="1"/>
+      <line x1="340" y1="508" x2="540" y2="508" stroke="#4f5d75" stroke-width="1"/>
+      <text x="352" y="500" font-size="12" font-weight="600" fill="#2d3142">payment</text>
+      <g font-family="'Geist Mono',monospace" font-size="8" fill="#4f5d75">
+        <text x="352" y="528"># id</text><text x="352" y="544">→ bill_id</text>
+        <text x="352" y="560">→ staff_user_id</text><text x="352" y="576">amount_satang</text>
+      </g>
+    </g>
+
+    <line x1="40" y1="792" x2="1240" y2="792" stroke="rgba(45,49,66,0.10)" stroke-width="0.8"/>
+    <text x="40" y="812" fill="#4f5d75" font-size="8" font-family="'Geist Mono',monospace" letter-spacing="0.14em">LEGEND</text>
+    <g font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai',sans-serif" font-size="12" fill="#4f5d75">
+      <rect x="140" y="802" width="24" height="12" rx="2" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="0.8"/><text x="176" y="812">แถวที่ทุกฝ่ายต้องแย่งล็อก</text>
+      <rect x="412" y="802" width="24" height="12" rx="2" fill="#ffffff" stroke="#2d3142" stroke-width="0.8"/><text x="448" y="812">ตารางบนเส้นทางเงิน</text>
+      <rect x="652" y="802" width="24" height="12" rx="2" fill="rgba(45,49,66,0.05)" stroke="#4f5d75" stroke-width="0.8"/><text x="688" y="812">ตารางอ้างอิงจากภายนอกแกน</text>
+      <text x="960" y="812" font-family="'Geist Mono',monospace" font-size="8" letter-spacing="0.08em" fill="#7a8399"># = PK    → = FK</text>
+    </g>
+  </svg>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <p class="eyebrow">THE LOCK ROW</p>
+      <div class="card-header"><span class="card-dot dot-coral"></span><h3>ทำไม table_session ถึงเป็นศูนย์กลาง</h3></div>
+      <ul>
+        <li>ผูกโต๊ะเข้ากับหนึ่งรอบลูกค้า และหนึ่งรอบมีบิลใบเดียวกับตะกร้าใบเดียว</li>
+        <li>เป็นแถวที่ <code>POST /orders</code> และ <code>POST /bills/{id}/close</code> ต้อง <code>SELECT … FOR UPDATE</code> ทั้งคู่ ดู <code>race-close-bill-v1</code></li>
+        <li>ปิด session คือสิ่งเดียวที่ทำให้โต๊ะกลับเป็นว่าง ดู <code>table-state-v1</code></li>
+      </ul>
+    </div>
+    <div class="card">
+      <p class="eyebrow">SNAPSHOT</p>
+      <div class="card-header"><span class="card-dot dot-ink"></span><h3>ราคาในบิลไม่ผูกกับเมนู</h3></div>
+      <ul>
+        <li><code>order_item</code> เก็บ <code>name_snapshot</code> และ <code>price_snapshot</code> ไว้ในตัวเอง</li>
+        <li>เจ้าของร้านแก้ราคาระหว่างที่มีบิลเปิดค้าง ยอดบิลเดิมไม่ขยับ — กันความเสี่ยง R8</li>
+        <li><code>payment</code> เป็น ledger หลายแถวต่อหนึ่งบิล การคืนเงินจึงเป็นแถวใหม่ ไม่ใช่การแก้ของเดิม</li>
+      </ul>
+    </div>
+    <div class="card">
+      <p class="eyebrow">FIDELITY</p>
+      <div class="card-header"><span class="card-dot dot-soft"></span><h3>ตัดอะไรออกไปบ้าง</h3></div>
+      <ul>
+        <li>21 entity → 8 (เพดาน ER คือ 8) · 24 ความสัมพันธ์ → 7</li>
+        <li>ตัดออกทั้งกลุ่ม: เมนู/ตัวเลือก (<code>category</code>, <code>option_group</code>, <code>option_value</code>, <code>product_option_group</code>)</li>
+        <li>ตัดออก: <code>zone</code>, <code>qr_code</code>, <code>customer_session</code>, <code>cart_item</code>, <code>cart_item_option</code>, <code>order_item_option</code>, <code>order_status_event</code>, <code>station</code>, <code>staff_user</code></li>
+        <li>ถ้าต้องการกลุ่มเมนูหรือกลุ่ม session แบบเต็ม ต้องแยกเป็นภาพที่สอง</li>
+      </ul>
+    </div>
+  </div>
+
+  <footer>DIAGRAM DESIGN · ER · DOC-WIDE · BALANCED · ENGINEER · REDRAWN FROM DATA-MODEL-V1.MD §2</footer>
+</div>
+</body>
+</html>

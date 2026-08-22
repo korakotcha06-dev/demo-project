@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>J3 · พนักงานคีย์ออเดอร์แทนลูกค้า</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&family=Noto+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--paper:#f5f5f5;--ink:#2d3142;--muted:#4f5d75;--soft:#7a8399;--rule:rgba(45,49,66,0.12);--accent:#eb6c36;
+    --sans:'Geist','IBM Plex Sans Thai','Noto Sans Thai','Sukhumvit Set','Thonburi',sans-serif;
+    --mono:'Geist Mono','IBM Plex Sans Thai','Noto Sans Thai',monospace;--serif:'Instrument Serif',Georgia,serif;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;padding:3rem 2rem}
+  .wrap{max-width:1280px;margin:0 auto}
+  .eyebrow{font-family:var(--mono);font-size:8px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin:0 0 0.5rem}
+  h1{font-family:var(--serif);font-size:1.75rem;font-weight:400;margin:0 0 0.5rem;line-height:1.2}
+  .subtitle{color:var(--muted);font-size:0.875rem;margin:0 0 2rem;max-width:64ch;line-height:1.6}
+  .diagram{margin:0 0 2.5rem}
+  svg{display:block;width:100%;height:auto}
+  .cards{display:grid;grid-template-columns:1.1fr 1fr 0.9fr;gap:1rem;margin-bottom:2.5rem}
+  .card{background:#fff;border:1px solid var(--rule);border-radius:6px;padding:1.25rem}
+  .card-header{display:flex;align-items:center;gap:0.5rem;margin:0 0 0.75rem}
+  .card-dot{width:7px;height:7px;border-radius:50%;flex:none}
+  .dot-coral{background:var(--accent)}.dot-ink{background:var(--ink)}.dot-soft{background:var(--soft)}
+  .card h3{font-size:0.875rem;font-weight:600;margin:0}
+  .card ul{margin:0;padding-left:1.1rem;color:var(--muted);font-size:0.8125rem;line-height:1.7}
+  code{font-family:var(--mono);font-size:0.75rem;background:rgba(45,49,66,0.05);padding:1px 4px;border-radius:3px}
+  footer{border-top:1px solid var(--rule);padding-top:1rem;font-family:var(--mono);font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:var(--soft)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="eyebrow">USER FLOW · PHASE 0 · J3</p>
+  <h1>พนักงานคีย์ออเดอร์แทนลูกค้าที่สั่งด้วยวาจา</h1>
+  <p class="subtitle">เส้นทางกู้สถานการณ์เมื่อสั่งเองผ่าน QR ไม่สำเร็จ พนักงานคีย์ให้โดยไม่แตะอุปกรณ์ของลูกค้าเลย รับเงินในขั้นตอนเดียว แล้วเข้าคิวเดียวกับ J2 จุดที่ยังไม่มีคำตอบคือลูกค้าจะรู้ได้อย่างไรว่าของเสร็จ เพราะเส้นทางนี้ลูกค้าไม่มีหน้าจอติดตามสถานะอยู่ในมือ</p>
+
+  <div class="diagram">
+  <svg viewBox="0 0 1280 780" role="img" aria-labelledby="j3-flow-v1-title j3-flow-v1-desc" xmlns="http://www.w3.org/2000/svg">
+    <title id="j3-flow-v1-title">แผนภาพลำดับขั้น J3 — พนักงานคีย์ออเดอร์แทนลูกค้าที่สั่งด้วยวาจา</title>
+    <desc id="j3-flow-v1-desc">ลูกค้าเข้าร้านและเห็น QR ถ้าสั่งเองได้จะไปต่อที่เส้นทาง J1 หรือ J2 ตามปกติ ถ้าสั่งเองไม่ได้ไม่ว่าจะเพราะสแกนไม่เป็น อ่านเมนูบนจอไม่ออก ไม่มั่นใจกลัวกดผิด หรือ QR ใช้ไม่ได้ ลูกค้าจะเรียกพนักงานหรือพนักงานสังเกตเห็นเอง พนักงานคีย์ออเดอร์แทนที่หน้าจอ S-04 โดยไม่ต้องใช้อุปกรณ์ของลูกค้า และรับชำระเงินในขั้นตอนเดียวกัน ออเดอร์เข้าคิวเตรียมของร่วมกับ J2 ตั๋วขึ้นบนกระดานพร้อมป้ายบอกที่มา เมื่อทำเสร็จแล้วในเฟส 0 พนักงานต้องเรียกด้วยเสียงเพราะลูกค้าไม่มีหน้าจอติดตามสถานะ ซึ่งเป็นคำถามที่ยังรอคำตอบ</desc>
+    <defs>
+      <marker id="j3f-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+      <marker id="j3f-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#eb6c36"/></marker>
+      <marker id="j3f-arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/></marker>
+    </defs>
+    <rect width="100%" height="100%" fill="#f5f5f5"/>
+
+    <g fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#j3f-arrow)">
+      <path d="M 220 120 V 152"/>
+      <path d="M 220 248 V 296" stroke-dasharray="4,3"/>
+      <path d="M 320 200 H 452 A 8 8 0 0 0 460 192 V 116 A 8 8 0 0 1 468 108 H 540"/>
+      <path d="M 640 144 V 192"/>
+      <path d="M 640 264 V 312"/>
+      <path d="M 740 348 H 852 A 8 8 0 0 0 860 340 V 116 A 8 8 0 0 1 868 108 H 940"/>
+      <path d="M 1060 144 V 192"/>
+      <path d="M 1060 264 V 312"/>
+      <path d="M 1060 368 V 408"/>
+      <path d="M 1060 484 V 528"/>
+      <path d="M 740 208 H 792 A 8 8 0 0 1 800 216 V 240 A 8 8 0 0 1 792 248 H 740"/>
+    </g>
+
+    <g font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai',sans-serif" font-size="12" fill="#7a8399">
+      <rect x="232" y="256" width="40" height="16" rx="2" fill="#f5f5f5"/><text x="236" y="268">ได้</text>
+      <rect x="330" y="174" width="184" height="16" rx="2" fill="#f5f5f5"/><text x="422" y="186" text-anchor="middle">สั่งเองไม่ได้ · 4 สาเหตุ</text>
+      <rect x="748" y="256" width="88" height="16" rx="2" fill="#f5f5f5"/><text x="792" y="268" text-anchor="middle">คิวต่อเนื่อง</text>
+    </g>
+
+    <g font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai','Sukhumvit Set',sans-serif" text-anchor="middle">
+      <rect x="120" y="72" width="200" height="48" rx="20" fill="#f5f5f5"/>
+      <rect x="120" y="72" width="200" height="48" rx="20" fill="rgba(79,93,117,0.10)" stroke="#7a8399" stroke-width="1"/>
+      <text x="220" y="100" font-size="12" font-weight="600" fill="#2d3142">ลูกค้าเข้าร้าน เห็น QR</text>
+
+      <polygon points="220,152 320,200 220,248 120,200" fill="#f5f5f5"/>
+      <polygon points="220,152 320,200 220,248 120,200" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="220" y="204" font-size="12" font-weight="600" fill="#2d3142">สั่งเองผ่าน QR ได้?</text>
+
+      <rect x="120" y="296" width="200" height="56" rx="20" fill="#f5f5f5"/>
+      <rect x="120" y="296" width="200" height="56" rx="20" fill="rgba(45,49,66,0.02)" stroke="rgba(45,49,66,0.20)" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="220" y="320" font-size="12" font-weight="600" fill="#4f5d75">ไปต่อที่ J1 หรือ J2</text>
+      <text x="220" y="336" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">NOT THIS JOURNEY</text>
+
+      <rect x="540" y="72" width="200" height="72" rx="6" fill="#f5f5f5"/>
+      <rect x="540" y="72" width="200" height="72" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="640" y="96" font-size="12" font-weight="600" fill="#2d3142">เรียกพนักงาน</text>
+      <text x="640" y="116" font-size="12" fill="#4f5d75">หรือพนักงานสังเกตเห็นเอง</text>
+      <text x="640" y="132" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">MUST FEEL NORMAL</text>
+
+      <rect x="540" y="192" width="200" height="72" rx="6" fill="#f5f5f5"/>
+      <rect x="540" y="192" width="200" height="72" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="640" y="216" font-size="12" font-weight="600" fill="#2d3142">S-04 พนักงานคีย์แทน</text>
+      <text x="640" y="236" font-size="12" fill="#4f5d75">ไม่แตะอุปกรณ์ของลูกค้าเลย</text>
+      <text x="640" y="252" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">US-30 · SAME OPTIONS</text>
+
+      <rect x="540" y="312" width="200" height="72" rx="6" fill="#f5f5f5"/>
+      <rect x="540" y="312" width="200" height="72" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="640" y="336" font-size="12" font-weight="600" fill="#2d3142">รับเงินในขั้นตอนเดียว</text>
+      <text x="640" y="356" font-size="12" fill="#4f5d75">ไม่แยก 2 ขั้นแบบ J2</text>
+      <text x="640" y="372" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">ORIGIN = STAFF_ENTERED</text>
+
+      <rect x="940" y="72" width="200" height="72" rx="6" fill="#f5f5f5"/>
+      <rect x="940" y="72" width="200" height="72" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="1040" y="96" font-size="12" font-weight="600" fill="#2d3142">เข้าคิวเตรียมของ</text>
+      <text x="1040" y="116" font-size="12" fill="#4f5d75">คิวเดียวกับ J2 ไม่แยกตามที่มา</text>
+      <text x="1040" y="132" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">BR 12</text>
+
+      <rect x="940" y="192" width="200" height="72" rx="6" fill="#f5f5f5"/>
+      <rect x="940" y="192" width="200" height="72" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="1040" y="216" font-size="12" font-weight="600" fill="#2d3142">S-01 ตั๋วขึ้นพร้อมป้ายที่มา</text>
+      <text x="1040" y="236" font-size="12" fill="#4f5d75">ต้องแยกออกในพริบตา</text>
+      <text x="1040" y="252" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">UX-10</text>
+
+      <rect x="940" y="312" width="200" height="56" rx="6" fill="#f5f5f5"/>
+      <rect x="940" y="312" width="200" height="56" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="1040" y="336" font-size="12" font-weight="600" fill="#2d3142">S-02 เปลี่ยนสถานะจนเสร็จ</text>
+      <text x="1040" y="352" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">US-14</text>
+
+      <rect x="940" y="408" width="200" height="76" rx="6" fill="#f5f5f5"/>
+      <rect x="940" y="408" width="200" height="76" rx="6" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="1"/>
+      <text x="1040" y="432" font-size="12" font-weight="600" fill="#2d3142">ลูกค้าไม่มีจอติดตามสถานะ</text>
+      <text x="1040" y="452" font-size="12" fill="#4f5d75">Phase 0 พนักงานเรียกด้วยเสียง</text>
+      <text x="1040" y="472" font-size="8" fill="#eb6c36" font-family="'Geist Mono',monospace" letter-spacing="0.08em">OPEN QUESTION · NO ANSWER YET</text>
+
+      <rect x="940" y="528" width="200" height="48" rx="20" fill="#f5f5f5"/>
+      <rect x="940" y="528" width="200" height="48" rx="20" fill="rgba(79,93,117,0.10)" stroke="#7a8399" stroke-width="1"/>
+      <text x="1040" y="556" font-size="12" font-weight="600" fill="#2d3142">รับที่ปลายเคาน์เตอร์</text>
+    </g>
+
+    <line x1="40" y1="712" x2="1240" y2="712" stroke="rgba(45,49,66,0.10)" stroke-width="0.8"/>
+    <text x="40" y="732" fill="#4f5d75" font-size="8" font-family="'Geist Mono',monospace" letter-spacing="0.14em">LEGEND</text>
+    <g font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai',sans-serif" font-size="12" fill="#4f5d75">
+      <rect x="140" y="722" width="24" height="12" rx="6" fill="rgba(79,93,117,0.10)" stroke="#7a8399" stroke-width="0.8"/><text x="172" y="732">เริ่ม / จบ</text>
+      <rect x="272" y="722" width="24" height="12" rx="2" fill="#ffffff" stroke="#2d3142" stroke-width="0.8"/><text x="304" y="732">ขั้นตอน</text>
+      <polygon points="428,720 444,728 428,736 412,728" fill="#ffffff" stroke="#2d3142" stroke-width="0.8"/><text x="452" y="732">จุดตัดสินใจ</text>
+      <rect x="576" y="722" width="24" height="12" rx="2" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="0.8"/><text x="608" y="732">ช่องโหว่ที่ยังไม่มีคำตอบ</text>
+      <rect x="808" y="722" width="24" height="12" rx="2" fill="rgba(45,49,66,0.02)" stroke="rgba(45,49,66,0.20)" stroke-width="0.8" stroke-dasharray="4,3"/><text x="840" y="732">ออกไปเส้นทางอื่น</text>
+    </g>
+  </svg>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <p class="eyebrow">OPEN QUESTION</p>
+      <div class="card-header"><span class="card-dot dot-coral"></span><h3>ข้อที่ยังไม่มีคำตอบ</h3></div>
+      <ul>
+        <li>ลูกค้าใน J3 <strong>ไม่มีหน้าจอติดตามสถานะอยู่ในมือ</strong> — เส้นทางนี้เริ่มจากคนที่ใช้ QR ไม่ได้ตั้งแต่แรก</li>
+        <li>Phase 0 แก้ด้วยการเรียกด้วยเสียงที่ปลายเคาน์เตอร์ ซึ่งเป็นสิ่งเดียวกับที่ระบบตั้งใจจะกำจัด</li>
+        <li>เป็นคำถามข้อ 1 ท้าย user-flow และยังรอ Touch ตัดสิน</li>
+      </ul>
+    </div>
+    <div class="card">
+      <p class="eyebrow">DESIGN INTENT</p>
+      <div class="card-header"><span class="card-dot dot-ink"></span><h3>สิ่งที่เส้นทางนี้ต้องรักษา</h3></div>
+      <ul>
+        <li>ต้องรู้สึกเป็นเรื่องปกติ ไม่ใช่ทางออกที่น่าอาย — ป้าน้อยต้องไม่รู้สึกว่าตัวเองใช้ระบบไม่เป็น</li>
+        <li>พนักงานคีย์ได้ครบทุกตัวเลือกเหมือนฝั่งลูกค้า ความหวาน ระดับคั่ว เมล็ดพิเศษ</li>
+        <li>ตั๋วต้องมีป้ายบอกที่มา แยกออกในพริบตา ไม่งั้นพนักงานสับสนช่วง peak</li>
+        <li>คีย์ของคนถัดไปได้ทันที แต่ละออเดอร์ track แยกกัน</li>
+      </ul>
+    </div>
+    <div class="card">
+      <p class="eyebrow">FIDELITY</p>
+      <div class="card-header"><span class="card-dot dot-soft"></span><h3>ถูกยุบจากต้นฉบับ</h3></div>
+      <ul>
+        <li>15 node → 11 · 18 เส้น → 11</li>
+        <li>สาเหตุที่สั่งเองไม่ได้ 4 เส้น รวมเป็นเส้นเดียว</li>
+        <li>บันทึกออเดอร์ กับ เข้าคิว ยุบเป็นกล่องเดียว</li>
+      </ul>
+    </div>
+  </div>
+
+  <footer>DIAGRAM DESIGN · FLOWCHART · DOC-WIDE · BALANCED · MIXED · REDRAWN FROM USER-FLOW-V1.MD §3</footer>
+</div>
+</body>
+</html>

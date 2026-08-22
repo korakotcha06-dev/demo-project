@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ผังหน้าจอทั้งหมด · screen-inventory</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&family=Noto+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--paper:#f5f5f5;--paper-2:#ececec;--ink:#2d3142;--muted:#4f5d75;--soft:#7a8399;--rule:rgba(45,49,66,0.12);--rule-solid:#bfc0c0;--accent:#eb6c36;--accent-tint:rgba(235,108,54,0.08);--link:#2e5aa8;
+    --sans:'Geist','IBM Plex Sans Thai','Noto Sans Thai','Sukhumvit Set','Thonburi',sans-serif;
+    --mono:'Geist Mono','IBM Plex Sans Thai','Noto Sans Thai',monospace;--serif:'Instrument Serif',Georgia,serif;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;padding:3rem 2rem}
+  .wrap{max-width:1280px;margin:0 auto}
+  .eyebrow{font-family:var(--mono);font-size:8px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin:0 0 0.5rem}
+  h1{font-family:var(--serif);font-size:1.75rem;font-weight:400;margin:0 0 0.5rem;line-height:1.2}
+  .subtitle{color:var(--muted);font-size:0.875rem;margin:0 0 2rem;max-width:64ch;line-height:1.6}
+  .diagram{margin:0 0 2.5rem}
+  svg{display:block;width:100%;height:auto}
+  .cards{display:grid;grid-template-columns:1.1fr 1fr 0.9fr;gap:1rem;margin-bottom:2.5rem}
+  .card{background:#fff;border:1px solid var(--rule);border-radius:6px;padding:1.25rem}
+  .card-header{display:flex;align-items:center;gap:0.5rem;margin:0 0 0.75rem}
+  .card-dot{width:7px;height:7px;border-radius:50%;flex:none}
+  .dot-coral{background:var(--accent)}.dot-ink{background:var(--ink)}.dot-soft{background:var(--soft)}
+  .card h3{font-size:0.875rem;font-weight:600;margin:0}
+  .card ul{margin:0;padding-left:1.1rem;color:var(--muted);font-size:0.8125rem;line-height:1.7}
+  code{font-family:var(--mono);font-size:0.75rem;background:rgba(45,49,66,0.05);padding:1px 4px;border-radius:3px}
+  footer{border-top:1px solid var(--rule);padding-top:1rem;font-family:var(--mono);font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:var(--soft)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="eyebrow">PROTOTYPES · SCREEN INVENTORY</p>
+  <h1>หน้าจอทั้งหมดของ Phase 0</h1>
+  <p class="subtitle">23 หน้าจอ กระจายบนสาม surface ที่ใช้ codebase เดียวกัน สองจอที่ทำเครื่องหมายไว้คือหน้าหลักของแต่ละฝั่ง — จอที่ลูกค้าเห็นทันทีหลังสแกน และจอที่พนักงานเปิดค้างไว้ตลอดกะ ทั้งคู่ห้ามมีอะไรมาคั่นก่อนถึง</p>
+
+  <div class="diagram">
+  <svg viewBox="0 0 1280 700" role="img" aria-labelledby="sitemap-v1-title sitemap-v1-desc" xmlns="http://www.w3.org/2000/svg">
+    <title id="sitemap-v1-title">ผังหน้าจอทั้งหมด 23 จอของเฟส 0 แบ่งตามสาม surface</title>
+    <desc id="sitemap-v1-desc">ฝั่งลูกค้ามือถือมี 7 จอ ตั้งแต่หน้าแจ้ง QR ใช้ไม่ได้ หน้าเมนู รายละเอียดสินค้า ตะกร้าของโต๊ะ ยืนยันส่งออเดอร์ ติดตามสถานะ และสรุปยอดรวม ฝั่งสถานีพนักงานมี 8 จอ ตั้งแต่เข้าสู่ระบบ กระดานออเดอร์ ตั๋วและการเปลี่ยนสถานะ คิวรอยืนยันการชำระเงิน การคีย์ออเดอร์แทนลูกค้า ผังโต๊ะและการปิดบิล การยกเลิกที่บังคับกรอกเหตุผล และการมาร์กสินค้าหมด ฝั่งแอดมินมี 8 จอ ตั้งแต่เข้าสู่ระบบ หน้าแรก การจัดการเมนู การเพิ่มแก้ไขสินค้า หมวดหมู่ เมล็ดกาแฟพิเศษ ผังโต๊ะ และคิวอาร์ของโต๊ะกับเคาน์เตอร์</desc>
+    <defs>
+      <marker id="sm-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+      <marker id="sm-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#eb6c36"/></marker>
+      <marker id="sm-arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/></marker>
+    </defs>
+    <rect width="100%" height="100%" fill="#f5f5f5"/>
+
+    <rect x="44" y="100" width="392" height="436" rx="8" fill="rgba(45,49,66,0.02)" stroke="rgba(45,49,66,0.10)" stroke-width="0.8"/>
+    <rect x="60" y="104" width="160" height="12" rx="2" fill="#f5f5f5"/>
+    <text x="140" y="113" fill="rgba(45,49,66,0.40)" font-size="7" font-family="'Geist Mono',monospace" text-anchor="middle" letter-spacing="0.14em">SURFACE A · GUEST MOBILE</text>
+    <rect x="444" y="100" width="392" height="492" rx="8" fill="rgba(45,49,66,0.02)" stroke="rgba(45,49,66,0.10)" stroke-width="0.8"/>
+    <rect x="460" y="104" width="166" height="12" rx="2" fill="#f5f5f5"/>
+    <text x="543" y="113" fill="rgba(45,49,66,0.40)" font-size="7" font-family="'Geist Mono',monospace" text-anchor="middle" letter-spacing="0.14em">SURFACE B · STAFF STATION</text>
+    <rect x="844" y="100" width="392" height="492" rx="8" fill="rgba(45,49,66,0.02)" stroke="rgba(45,49,66,0.10)" stroke-width="0.8"/>
+    <rect x="860" y="104" width="118" height="12" rx="2" fill="#f5f5f5"/>
+    <text x="919" y="113" fill="rgba(45,49,66,0.40)" font-size="7" font-family="'Geist Mono',monospace" text-anchor="middle" letter-spacing="0.14em">SURFACE C · ADMIN</text>
+    <rect x="68" y="132" width="344" height="44" rx="6" fill="#f5f5f5"/>
+    <rect x="68" y="132" width="344" height="44" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+    <text x="80" y="159" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">C-00</text>
+    <text x="132" y="160" font-size="12" font-weight="600" fill="#2d3142" font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai','Sukhumvit Set',sans-serif">QR ใช้ไม่ได้ หรือไม่พบโต๊ะ</text>
+    <rect x="68" y="188" width="344" height="44" rx="6" fill="#f5f5f5"/>
+    <rect x="68" y="188" width="344" height="44" rx="6" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="1"/>
+    <text x="80" y="215" font-size="8" fill="#eb6c36" font-family="'Geist Mono',monospace" letter-spacing="0.08em">C-01</text>
+    <text x="132" y="216" font-size="12" font-weight="600" fill="#2d3142" font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai','Sukhumvit Set',sans-serif">หน้าเมนู — เห็นทันทีหลังสแกน</text>
+    <rect x="68" y="244" width="344" height="44" rx="6" fill="#f5f5f5"/>
+    <rect x="68" y="244" width="344" height="44" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+    <text x="80" y="271" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">C-02</text>
+    <text x="132" y="272" font-size="12" font-weight="600" fill="#2d3142" font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai','Sukhumvit Set',sans-serif">รายละเอียดสินค้า และตัวเลือก</text>
+    <rect x="68" y="300" width="344" height="44" rx="6" fill="#f5f5f5"/>
+    <rect x="68" y="300" width="344" height="44" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+    <text x="80" y="327" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">C-03</text>
+    <text x="132" y="328" font-size="12" font-weight="600" fill="#2d3142" font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai','Sukhumvit Set',sans-serif">ตะกร้าของโต๊ะ</text>
+    <rect x="68" y="356" width="344" height="44" rx="6" fill="#f5f5f5"/>
+    <rect x="68" y="356" width="344" height="44" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+    <text x="80" y="383" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">C-04</text>
+    <text x="132" y="384" font-size="12" font-weight="600" fill="#2d3142" font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai','Sukhumvit Set',sans-serif">ยืนยันส่งออเดอร์</text>
+    <rect x="68" y="412" width="344" height="44" rx="6" fill="#f5f5f5"/>
+    <rect x="68" y="412" width="344" height="44" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+    <text x="80" y="439" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">C-05</text>
+    <text x="132" y="440" font-size="12" font-weight="600" fill="#2d3142" font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai','Sukhumvit Set',sans-serif">ติดตามสถานะออเดอร์</text>
+    <rect x="68" y="468" width="344" height="44" rx="6" fill="#f5f5f5"/>
+    <rect x="68" y="468" width="344" height="44" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+    <text x="80" y="495" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">C-06</text>
+    <text x="132" y="496" font-size="12" font-weight="600" fill="#2d3142" font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai','Sukhumvit Set',sans-serif">สรุปยอดรวมของโต๊ะ</text>
+    <rect x="468" y="132" width="344" height="44" rx="6" fill="#f5f5f5"/>
+    <rect x="468" y="132" width="344" height="44" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+    <text x="480" y="159" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">S-00</text>
+    <text x="532" y="160" font-size="12" font-weight="600" fill="#2d3142" font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai','Sukhumvit Set',sans-serif">เข้าสู่ระบบ สถานี</text>
+    <rect x="468" y="188" width="344" height="44" rx="6" fill="#f5f5f5"/>
+    <rect x="468" y="188" width="344" height="44" rx="6" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="1"/>
+    <text x="480" y="215" font-size="8" fill="#eb6c36" font-family="'Geist Mono',monospace" letter-spacing="0.08em">S-01</text>
+    <text x="532" y="216" font-size="12" font-weight="600" fill="#2d3142" font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai','Sukhumvit Set',sans-serif">กระดานออเดอร์ — เปิดค้างตลอดกะ</text>
+    <rect x="468" y="244" width="344" height="44" rx="6" fill="#f5f5f5"/>
+    <rect x="468" y="244" width="344" height="44" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+    <text x="480" y="271" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">S-02</text>
+    <text x="532" y="272" font-size="12" font-weight="600" fill="#2d3142" font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai','Sukhumvit Set',sans-serif">ตั๋วออเดอร์ และเปลี่ยนสถานะ</text>
+    <rect x="468" y="300" width="344" height="44" rx="6" fill="#f5f5f5"/>
+    <rect x="468" y="300" width="344" height="44" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+    <text x="480" y="327" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">S-03</text>
+    <text x="532" y="328" font-size="12" font-weight="600" fill="#2d3142" font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai','Sukhumvit Set',sans-serif">คิวรอยืนยันการชำระเงิน</text>
+    <rect x="468" y="356" width="344" height="44" rx="6" fill="#f5f5f5"/>
+    <rect x="468" y="356" width="344" height="44" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+    <text x="480" y="383" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">S-04</text>
+    <text x="532" y="384" font-size="12" font-weight="600" fill="#2d3142" font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai','Sukhumvit Set',sans-serif">คีย์ออเดอร์แทนลูกค้า</text>
+    <rect x="468" y="412" width="344" height="44" rx="6" fill="#f5f5f5"/>
+    <rect x="468" y="412" width="344" height="44" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+    <text x="480" y="439" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">S-05</text>
+    <text x="532" y="440" font-size="12" font-weight="600" fill="#2d3142" font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai','Sukhumvit Set',sans-serif">ผังโต๊ะ ยอดต่อโต๊ะ ปิดบิล</text>
+    <rect x="468" y="468" width="344" height="44" rx="6" fill="#f5f5f5"/>
+    <rect x="468" y="468" width="344" height="44" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+    <text x="480" y="495" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">S-06</text>
+    <text x="532" y="496" font-size="12" font-weight="600" fill="#2d3142" font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai','Sukhumvit Set',sans-serif">ยกเลิกออเดอร์ บังคับกรอกเหตุผล</text>
+    <rect x="468" y="524" width="344" height="44" rx="6" fill="#f5f5f5"/>
+    <rect x="468" y="524" width="344" height="44" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+    <text x="480" y="551" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">S-07</text>
+    <text x="532" y="552" font-size="12" font-weight="600" fill="#2d3142" font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai','Sukhumvit Set',sans-serif">มาร์กสินค้าหมดชั่วคราว</text>
+    <rect x="868" y="132" width="344" height="44" rx="6" fill="#f5f5f5"/>
+    <rect x="868" y="132" width="344" height="44" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+    <text x="880" y="159" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">A-00</text>
+    <text x="932" y="160" font-size="12" font-weight="600" fill="#2d3142" font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai','Sukhumvit Set',sans-serif">เข้าสู่ระบบ แอดมิน</text>
+    <rect x="868" y="188" width="344" height="44" rx="6" fill="#f5f5f5"/>
+    <rect x="868" y="188" width="344" height="44" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+    <text x="880" y="215" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">A-01</text>
+    <text x="932" y="216" font-size="12" font-weight="600" fill="#2d3142" font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai','Sukhumvit Set',sans-serif">หน้าแรกแอดมิน</text>
+    <rect x="868" y="244" width="344" height="44" rx="6" fill="#f5f5f5"/>
+    <rect x="868" y="244" width="344" height="44" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+    <text x="880" y="271" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">A-02</text>
+    <text x="932" y="272" font-size="12" font-weight="600" fill="#2d3142" font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai','Sukhumvit Set',sans-serif">จัดการเมนู รายการสินค้า</text>
+    <rect x="868" y="300" width="344" height="44" rx="6" fill="#f5f5f5"/>
+    <rect x="868" y="300" width="344" height="44" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+    <text x="880" y="327" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">A-03</text>
+    <text x="932" y="328" font-size="12" font-weight="600" fill="#2d3142" font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai','Sukhumvit Set',sans-serif">เพิ่ม และแก้ไขสินค้า</text>
+    <rect x="868" y="356" width="344" height="44" rx="6" fill="#f5f5f5"/>
+    <rect x="868" y="356" width="344" height="44" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+    <text x="880" y="383" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">A-04</text>
+    <text x="932" y="384" font-size="12" font-weight="600" fill="#2d3142" font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai','Sukhumvit Set',sans-serif">จัดการหมวดหมู่</text>
+    <rect x="868" y="412" width="344" height="44" rx="6" fill="#f5f5f5"/>
+    <rect x="868" y="412" width="344" height="44" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+    <text x="880" y="439" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">A-05</text>
+    <text x="932" y="440" font-size="12" font-weight="600" fill="#2d3142" font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai','Sukhumvit Set',sans-serif">จัดการเมล็ดกาแฟพิเศษ</text>
+    <rect x="868" y="468" width="344" height="44" rx="6" fill="#f5f5f5"/>
+    <rect x="868" y="468" width="344" height="44" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+    <text x="880" y="495" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">A-06</text>
+    <text x="932" y="496" font-size="12" font-weight="600" fill="#2d3142" font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai','Sukhumvit Set',sans-serif">ผังโต๊ะ เพิ่ม แก้ ปลดระวาง</text>
+    <rect x="868" y="524" width="344" height="44" rx="6" fill="#f5f5f5"/>
+    <rect x="868" y="524" width="344" height="44" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+    <text x="880" y="551" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">A-07</text>
+    <text x="932" y="552" font-size="12" font-weight="600" fill="#2d3142" font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai','Sukhumvit Set',sans-serif">QR ของโต๊ะและเคาน์เตอร์</text>
+
+    <line x1="40" y1="632" x2="1240" y2="632" stroke="rgba(45,49,66,0.10)" stroke-width="0.8"/>
+    <text x="40" y="652" fill="#4f5d75" font-size="8" font-family="'Geist Mono',monospace" letter-spacing="0.14em">LEGEND</text>
+    <g font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai',sans-serif" font-size="12" fill="#4f5d75">
+      <rect x="140" y="642" width="24" height="12" rx="2" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="0.8"/><text x="176" y="652">หน้าหลักของ surface นั้น</text>
+      <rect x="400" y="642" width="24" height="12" rx="2" fill="#ffffff" stroke="#2d3142" stroke-width="0.8"/><text x="436" y="652">หน้าจออื่น</text>
+      <rect x="580" y="642" width="24" height="12" rx="2" fill="rgba(45,49,66,0.02)" stroke="rgba(45,49,66,0.10)" stroke-width="0.8"/><text x="616" y="652">ขอบเขตของ surface</text>
+    </g>
+  </svg>
+  </div>
+  <div class="cards">
+    <div class="card">
+      <p class="eyebrow">TWO FRONT DOORS</p>
+      <div class="card-header"><span class="card-dot dot-coral"></span><h3>สองจอที่ห้ามมีอะไรมาคั่น</h3></div>
+      <ul>
+        <li><strong>C-01 หน้าเมนู</strong> — ต้องเห็นทันทีหลังสแกน ห้ามมี splash หรือหน้ากลาง มิฉะนั้นเหตุผลทั้งหมดที่ลูกค้าเลือกสั่งเองพังทันที</li>
+        <li><strong>S-01 กระดานออเดอร์</strong> — เปิดค้างไว้ตลอดกะ งานอื่นทุกอย่างของพนักงานแตกออกจากจอนี้</li>
+      </ul>
+    </div>
+    <div class="card">
+      <p class="eyebrow">DISTRIBUTION</p>
+      <div class="card-header"><span class="card-dot dot-ink"></span><h3>น้ำหนักงานอยู่ฝั่งไหน</h3></div>
+      <ul>
+        <li>ลูกค้า 7 จอ · พนักงาน 8 จอ · แอดมิน 8 จอ</li>
+        <li>ฝั่งลูกค้าน้อยที่สุดแต่เป็นฝั่งที่มีเกณฑ์ UX เข้มที่สุด</li>
+        <li>ฝั่งแอดมิน 4 ใน 8 จอเป็นงานจัดการเมนูล้วน ๆ</li>
+        <li>ทั้งสามฝั่งอยู่บน codebase เดียว แยกด้วย route group ไม่ใช่ 3 โปรเจกต์</li>
+      </ul>
+    </div>
+    <div class="card">
+      <p class="eyebrow">FIDELITY</p>
+      <div class="card-header"><span class="card-dot dot-soft"></span><h3>ขอบเขตของภาพนี้</h3></div>
+      <ul>
+        <li>23 จอครบตามต้นฉบับ ไม่มีการยุบหรือตัด — ใช้ระดับ faithful ซึ่งบังคับให้มี zone</li>
+        <li>เป็นผังรายการ ไม่ใช่ผังการเดินทาง เส้นทางระหว่างจออยู่ในภาพ J1 ถึง J4</li>
+        <li>ตารางตรวจความครบถ้วนกับ US ทั้ง 23 ตัว อยู่ในเอกสารต้นฉบับ ไม่ได้อยู่ในภาพ</li>
+      </ul>
+    </div>
+  </div>
+
+  <footer>DIAGRAM DESIGN · ZONED INVENTORY · DOC-WIDE · FAITHFUL · MIXED · DRAWN FROM SCREEN-INVENTORY-V1.MD</footer>
+</div>
+</body>
+</html>

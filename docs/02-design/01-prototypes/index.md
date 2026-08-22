@@ -18,8 +18,9 @@
 | [[screen-inventory-v1\|Screen Inventory v1]] | รายการหน้าจอทั้งหมดของ Phase 0 จำนวน 23 หน้าจอ แยก 3 surface (ลูกค้ามือถือ 7 · จอสถานีพนักงาน 8 · จอแอดมิน 8) พร้อม US ที่รองรับ, persona, สิ่งที่ต้องมีบนหน้าจอ, state ที่ต้องออกแบบ และ component ที่ใช้ | DRAFT |
 | [[user-flow-v1\|User Flow v1]] | User flow ของ Phase 0 — J1 dine-in · J2 takeaway เคาน์เตอร์ · J3 พนักงานคีย์แทน · J4 ฝั่งพนักงาน พร้อม state machine ของสถานะโต๊ะและสถานะออเดอร์ | DRAFT |
 | [[prototype-v1\|Prototype v1 — Thyna Cafe]] | **Interactive prototype ที่กดเดินได้จริง 2 ตัว** (ฝั่งลูกค้ามือถือ + ฝั่งร้าน POS) · แม็ปหน้าจอกลับไปหา `C-xx`/`S-xx`/`A-xx` ใน screen inventory และ US · **พร้อมรายการ 4 จุดที่โปรโตไทป์ขัดกับ requirement** | ใช้งานได้จริง |
+| [[diagrams/index\|Diagrams]] | แผนภาพทั้งหมด 17 ภาพที่วาดจากเอกสารในโปรเจกต์ — user flow, ผังหน้าจอ, สถาปัตยกรรม, ER, state machine, ความเสี่ยง และแผนเฟส | ใช้อยู่ |
 
-ลำดับการอ่าน: **Design System Adoption → Screen Inventory → User Flow → Prototype**
+ลำดับการอ่าน: **Design System Adoption → Screen Inventory → User Flow → Prototype** · แผนภาพประกอบทั้งหมดอยู่ที่ [[diagrams/index|Diagrams]]
 
 ## ไฟล์โปรโตไทป์ — เก็บนอก repo
 

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ความเสี่ยง v2 · หลังย้ายมา VPS</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&family=Noto+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--paper:#f5f5f5;--paper-2:#ececec;--ink:#2d3142;--muted:#4f5d75;--soft:#7a8399;--rule:rgba(45,49,66,0.12);--rule-solid:#bfc0c0;--accent:#eb6c36;--accent-tint:rgba(235,108,54,0.08);--link:#2e5aa8;
+    --sans:'Geist','IBM Plex Sans Thai','Noto Sans Thai','Sukhumvit Set','Thonburi',sans-serif;
+    --mono:'Geist Mono','IBM Plex Sans Thai','Noto Sans Thai',monospace;--serif:'Instrument Serif',Georgia,serif;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;padding:3rem 2rem}
+  .wrap{max-width:1280px;margin:0 auto}
+  .eyebrow{font-family:var(--mono);font-size:8px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin:0 0 0.5rem}
+  h1{font-family:var(--serif);font-size:1.75rem;font-weight:400;margin:0 0 0.5rem;line-height:1.2}
+  .subtitle{color:var(--muted);font-size:0.875rem;margin:0 0 2rem;max-width:64ch;line-height:1.6}
+  .diagram{margin:0 0 2.5rem}
+  svg{display:block;width:100%;height:auto}
+  .cards{display:grid;grid-template-columns:1.1fr 1fr 0.9fr;gap:1rem;margin-bottom:2.5rem}
+  .card{background:#fff;border:1px solid var(--rule);border-radius:6px;padding:1.25rem}
+  .card-header{display:flex;align-items:center;gap:0.5rem;margin:0 0 0.75rem}
+  .card-dot{width:7px;height:7px;border-radius:50%;flex:none}
+  .dot-coral{background:var(--accent)}.dot-ink{background:var(--ink)}.dot-soft{background:var(--soft)}
+  .card h3{font-size:0.875rem;font-weight:600;margin:0}
+  .card ul{margin:0;padding-left:1.1rem;color:var(--muted);font-size:0.8125rem;line-height:1.7}
+  code{font-family:var(--mono);font-size:0.75rem;background:rgba(45,49,66,0.05);padding:1px 4px;border-radius:3px}
+  footer{border-top:1px solid var(--rule);padding-top:1rem;font-family:var(--mono);font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:var(--soft)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="eyebrow">ARCHITECTURE · §9.5 · RISK REGISTER REVISED</p>
+  <h1>ความเสี่ยงหลังย้ายมา VPS</h1>
+  <p class="subtitle">การย้ายปิดความเสี่ยงเดิมไปสองข้อ แต่เปิดใหม่สามข้อ และข้อที่หนักที่สุดไม่ใช่เรื่องเทคนิค — เป็นเรื่องว่าใครจะดูแลมันจริง ๆ หลังเปิดร้าน สองจุดที่ทำเครื่องหมายไว้คือข้อที่ผลกระทบรุนแรงที่สุด และทั้งคู่จบที่ข้อมูลหายหรือขายไม่ได้ทั้งร้าน</p>
+
+  <div class="diagram">
+  <svg viewBox="0 0 1280 780" role="img" aria-labelledby="risk-quadrant-v2-title risk-quadrant-v2-desc" xmlns="http://www.w3.org/2000/svg">
+    <title id="risk-quadrant-v2-title">ผังสองแกนของความเสี่ยงทางเทคนิคฉบับแก้ไข หลังย้ายมาโฮสต์เอง</title>
+    <desc id="risk-quadrant-v2-desc">R1 เน็ตร้านล่ม และ R14 การสำรองข้อมูลที่กู้คืนไม่ได้จริง เป็นสองข้อที่ผลกระทบรุนแรงที่สุด R9 จอสถานีเป็นจุดพังจุดเดียว และ R13 ภาระงานดูแลระบบที่ย้ายมาอยู่กับผู้พัฒนา มีโอกาสเกิดสูงและผลกระทบสูง กลุ่ม R4 ตะกร้าแชร์ R5 ปิดบิลชนการสั่งเพิ่ม R8 แก้ราคาระหว่างบิลเปิด และ R15 เซิร์ฟเวอร์เครื่องเดียว อยู่ที่โอกาสกลางผลกระทบสูง ส่วน R3 R6 R12 อยู่ในระดับที่เบากว่า ความเสี่ยงเดิมสองข้อคือเพดานผู้ให้บริการและการผูกกับผู้ให้บริการถูกปิดไปแล้ว</desc>
+    <defs>
+      <marker id="rq2-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+      <marker id="rq2-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#eb6c36"/></marker>
+      <marker id="rq2-arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/></marker>
+    </defs>
+    <rect width="100%" height="100%" fill="#f5f5f5"/>
+
+    <line x1="200" y1="380" x2="1080" y2="380" stroke="#2d3142" stroke-width="1" marker-end="url(#rq2-arrow)"/>
+    <line x1="640" y1="640" x2="640" y2="120" stroke="#2d3142" stroke-width="1" marker-end="url(#rq2-arrow)"/>
+    <g font-family="'Geist Mono',monospace" font-size="9" fill="#4f5d75" letter-spacing="0.18em">
+      <text x="1100" y="384">IMPACT</text>
+      <text x="640" y="104" text-anchor="middle">LIKELIHOOD</text>
+    </g>
+
+    <g fill="#4f5d75">
+      <circle cx="856" cy="204" r="4"/><circle cx="924" cy="236" r="4"/><circle cx="520" cy="212" r="4"/>
+      <circle cx="836" cy="304" r="4"/><circle cx="908" cy="304" r="4"/>
+      <circle cx="836" cy="344" r="4"/><circle cx="908" cy="344" r="4"/>
+      <circle cx="720" cy="348" r="4"/><circle cx="700" cy="452" r="4"/><circle cx="720" cy="560" r="4"/>
+    </g>
+    <g fill="#eb6c36">
+      <circle cx="1040" cy="212" r="5"/><circle cx="1040" cy="356" r="5"/>
+    </g>
+
+    <g font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai',sans-serif" font-size="12" fill="#4f5d75">
+      <text x="1028" y="216" text-anchor="end" fill="#eb6c36" font-weight="600">R1 เน็ตร้านล่ม</text>
+      <text x="1028" y="360" text-anchor="end" fill="#eb6c36" font-weight="600">R14 backup ที่กู้ไม่ได้จริง</text>
+      <text x="856" y="184" text-anchor="middle">R9 สถานีเดียวคือจุดพัง</text>
+      <text x="936" y="240">R13 ภาระ ops มาอยู่ที่เรา</text>
+      <text x="520" y="192" text-anchor="middle">R7 บัญชีใช้ร่วมกัน</text>
+      <text x="824" y="288" text-anchor="end">R4 ตะกร้าแชร์ชนกัน</text>
+      <text x="920" y="288">R15 VPS เครื่องเดียว</text>
+      <text x="824" y="328" text-anchor="end">R5 ปิดบิลชนสั่งเพิ่ม</text>
+      <text x="920" y="328">R8 แก้ราคาระหว่างบิลเปิด</text>
+      <text x="720" y="368" text-anchor="middle">R3 cold start</text>
+      <text x="712" y="456">R6 QR คือกุญแจ</text>
+      <text x="732" y="564">R12 เขตเวลาเพี้ยน</text>
+    </g>
+
+    <rect x="140" y="480" width="360" height="96" rx="8" fill="#f5f5f5"/>
+    <rect x="140" y="480" width="360" height="96" rx="8" fill="rgba(45,49,66,0.02)" stroke="rgba(45,49,66,0.20)" stroke-width="1" stroke-dasharray="4,3"/>
+    <text x="164" y="508" font-size="12" font-weight="600" fill="#4f5d75" font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai',sans-serif">ปิดไปแล้วจากการย้าย</text>
+    <text x="164" y="530" font-size="12" fill="#7a8399" font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai',sans-serif">R2 เพดาน realtime ของผู้ให้บริการ</text>
+    <text x="164" y="550" font-size="12" fill="#7a8399" font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai',sans-serif">R10 vendor lock-in</text>
+    <text x="164" y="566" font-size="8" fill="#7a8399" font-family="'Geist Mono',monospace" letter-spacing="0.08em">R11 COST OVERRUN — MUCH LIGHTER, FIXED VPS PRICE</text>
+
+    <line x1="40" y1="712" x2="1240" y2="712" stroke="rgba(45,49,66,0.10)" stroke-width="0.8"/>
+    <text x="40" y="732" fill="#4f5d75" font-size="8" font-family="'Geist Mono',monospace" letter-spacing="0.14em">LEGEND</text>
+    <g font-family="'Geist','IBM Plex Sans Thai','Noto Sans Thai',sans-serif" font-size="12" fill="#4f5d75">
+      <circle cx="152" cy="728" r="5" fill="#eb6c36"/><text x="168" y="732">ผลกระทบรุนแรงที่สุด</text>
+      <circle cx="392" cy="728" r="4" fill="#4f5d75"/><text x="408" y="732">มีมาตรการแล้ว หรือยอมรับได้ในเฟส 0</text>
+      <rect x="744" y="722" width="24" height="12" rx="2" fill="rgba(45,49,66,0.02)" stroke="rgba(45,49,66,0.20)" stroke-width="0.8" stroke-dasharray="4,3"/><text x="780" y="732">ปิดแล้ว ไม่ต้องเฝ้าต่อ</text>
+    </g>
+  </svg>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <p class="eyebrow">NEW AND WORST</p>
+      <div class="card-header"><span class="card-dot dot-coral"></span><h3>R14 คือข้อที่ต้องกลัวที่สุด</h3></div>
+      <ul>
+        <li>ไม่ใช่ความเสี่ยงเชิงทฤษฎี — <strong>เคยเกิดจริงที่ระบบอื่นของ TNM</strong> สคริปต์ backup เงียบไปสิบคืนโดยไม่มีใครรู้ เพราะบั๊กใน shell ที่ทำให้ exit code หายไป</li>
+        <li>มาตรการที่ใช้ได้จริงคือ <strong>ทดสอบ restore จริง</strong> ไม่ใช่ดูว่าไฟล์ถูกสร้าง และต้องมี alert เมื่อ backup ไม่ผ่าน</li>
+        <li>เดิม Supabase ทำให้ฟรี ตอนนี้เป็นงานที่ต้องทำเองและต้องทำก่อนเปิดร้าน</li>
+      </ul>
+    </div>
+    <div class="card">
+      <p class="eyebrow">TRADE</p>
+      <div class="card-header"><span class="card-dot dot-ink"></span><h3>ปิดสอง เปิดสาม</h3></div>
+      <ul>
+        <li><strong>ปิด</strong> — R2 เพดาน realtime · R10 vendor lock-in · R11 เบาลงมากเพราะ VPS ราคาคงที่</li>
+        <li><strong>เปิด</strong> — R13 ภาระ ops · R14 backup · R15 เครื่องเดียวไม่มี redundancy</li>
+        <li>R13 กับ R15 คือสิ่งที่ managed service เคยทำให้ฟรี ตอนนี้เป็นราคาที่จ่ายแลกกับการควบคุมเต็มที่</li>
+      </ul>
+    </div>
+    <div class="card">
+      <p class="eyebrow">FIDELITY</p>
+      <div class="card-header"><span class="card-dot dot-soft"></span><h3>วิธีอ่านผังนี้</h3></div>
+      <ul>
+        <li>12 จุดในผัง · R2 R10 ปิดแล้ว · R11 ยกออกไปอยู่ในกล่องเพราะเบาลงจนไม่คุ้มพื้นที่</li>
+        <li>ระดับในเอกสารเป็นคำ ไม่ใช่ตัวเลข ตำแหน่งคือการแปลงคำเป็นพิกัด ข้อที่ได้ระดับเท่ากันถูกกระจายเล็กน้อย</li>
+        <li><strong>R3 cold start น่าจะลดลงมากบน process ที่รันยาว</strong> แต่ยังไม่ได้ประเมินใหม่อย่างเป็นทางการ ผังนี้จึงยังวางไว้ที่ระดับเดิม</li>
+      </ul>
+    </div>
+  </div>
+
+  <footer>DIAGRAM DESIGN · QUADRANT · DOC-WIDE · FAITHFUL · ENGINEER · DRAWN FROM ARCHITECTURE-V1.MD §6 + §9.5</footer>
+</div>
+</body>
+</html>

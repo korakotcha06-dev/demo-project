@@ -5,6 +5,8 @@
 > จัดทำโดย: COULSON (Web PM & Architect) — วันที่ 2026-08-15
 > เอกสารพี่น้อง: [[architecture-v1|Architecture v1]] · [[data-model-v1|Data Model v1]]
 
+> 🔴 **แก้ไข 2026-08-20** — เปลี่ยนชื่อตามที่ตัดสินใน [[data-model-v1|Data Model v1]] §9.4 · `table_session` → `visit_session` · `shop_table` → `service_point` **เปลี่ยนเฉพาะชื่อ ไม่มีตรรกะข้อไหนเปลี่ยน** · คำว่า "โต๊ะ" ในเนื้อความคงไว้เพราะเป็นคำเรียกของร้านกาแฟ ซึ่งอยู่ที่ `shop.service_point_label`
+
 กลับไปที่ [[index|02-technical]]
 
 ---
@@ -117,11 +119,11 @@ UX-08 ตั้งเกณฑ์ ≥95% ของผู้ทดสอบต้
 | `POST` | `/api/v1/staff/option-values/{id}/availability` | `{is_available}` | 200 | US-36 · BR ข้อ 4 (ระดับตัวเลือก) |
 | `GET` | `/api/v1/staff/tables` | — | โต๊ะทั้งหมด + สถานะจาก `table_status_v` + ยอดค้างต่อโต๊ะ | US-18 · BR ข้อ 11 |
 | `GET` | `/api/v1/staff/bills/{id}` | — | ทุกออเดอร์ของบิล + ยอดรวมสุทธิ | US-18 |
-| `POST` | `/api/v1/staff/bills/{id}/close` | `{expected_total_satang, method, force?}` | 200 · ปิดบิล + ปิด table_session + โต๊ะกลับเป็นว่าง \| 409 | US-19 · §5.3 |
+| `POST` | `/api/v1/staff/bills/{id}/close` | `{expected_total_satang, method, force?}` | 200 · ปิดบิล + ปิด visit_session + โต๊ะกลับเป็นว่าง \| 409 | US-19 · §5.3 |
 | `POST` | `/api/v1/staff/bills/{id}/payment` | `Idempotency-Key` · `{method, amount_satang}` | 200 · counter: `awaiting_payment → queued` | US-29 · §5.5 |
 | `POST` | `/api/v1/staff/counter-orders` | `Idempotency-Key` · `{items[], method, amount_satang}` | `201 {order}` สถานะ `queued` ทันที | US-30 · §4.2 |
 
-**หมายเหตุ US-19 (`close`):** ไม่มี endpoint ใดในระบบที่เขียนสถานะโต๊ะได้ — โต๊ะกลับเป็น "ว่าง" เป็น **ผลข้างเคียง**ของการปิด `table_session` ในทรานแซกชันนี้เท่านั้น (BR ข้อ 11)
+**หมายเหตุ US-19 (`close`):** ไม่มี endpoint ใดในระบบที่เขียนสถานะโต๊ะได้ — โต๊ะกลับเป็น "ว่าง" เป็น **ผลข้างเคียง**ของการปิด `visit_session` ในทรานแซกชันนี้เท่านั้น (BR ข้อ 11)
 
 **หมายเหตุ US-30 (`counter-orders`):** สร้างออเดอร์ + `payment` + เลื่อนสถานะเป็น `queued` **ในทรานแซกชันเดียว** ตาม AC ที่ระบุว่ารับเงินเป็นส่วนหนึ่งของขั้นตอนเดียวกัน ไม่ใช่ 2 ขั้นแบบ US-28/US-29 · แคชเชียร์เรียกซ้ำต่อเนื่องได้ (คิว walk-in) โดยแต่ละครั้งเป็นคนละ `Idempotency-Key` → ออเดอร์แยกกันไม่ปน
 
@@ -185,12 +187,12 @@ WHERE id=$2 AND version=$3;   -- 0 rows → 409
 **กฎที่ห้ามผิด: reject เฉพาะรายการนั้น ไม่ปฏิเสธทั้งออเดอร์** และต้องครอบคลุม **ทั้งระดับสินค้าและระดับ option value** (เมล็ดพิเศษหมด)
 
 **ลำดับใน `POST /api/v1/orders` — ทรานแซกชันเดียว:**
-1. `SELECT ... FOR UPDATE` บน `table_session` (กันชนกับการปิดบิล — §5.3)
+1. `SELECT ... FOR UPDATE` บน `visit_session` (กันชนกับการปิดบิล — §5.3)
 2. ตรวจ `Idempotency-Key` ซ้ำ → ถ้าเคยสำเร็จแล้ว คืนผลเดิม (กัน double-submit ตาม UX §5)
 3. อ่าน `cart_item` ทั้งหมด แล้ว **ตรวจ availability ใหม่ ณ วินาทีนี้** (ไม่เชื่อค่าที่ client เห็นตอนกดเพิ่มลงตะกร้า):
    - `product.is_available = false` → รายการนั้น `rejected_unavailable`
    - มี `option_value.is_available = false` อยู่ในรายการนั้น → รายการนั้น `rejected_unavailable`
-4. ถ้ามีรายการที่ผ่านอย่างน้อย 1 → สร้าง `orders` + `order_item` (snapshot ชื่อ/ราคา/ตัวเลือก) และเปิด `table_session` ถ้ายังไม่มี (BR ข้อ 11)
+4. ถ้ามีรายการที่ผ่านอย่างน้อย 1 → สร้าง `orders` + `order_item` (snapshot ชื่อ/ราคา/ตัวเลือก) และเปิด `visit_session` ถ้ายังไม่มี (BR ข้อ 11)
 5. ถ้า **ทุกรายการถูก reject** → ไม่สร้างออเดอร์ คืน `409 ALL_ITEMS_UNAVAILABLE`
 6. ล้าง cart_item ที่ถูกส่งไปแล้ว **แต่คงรายการที่ถูก reject ไว้ในตะกร้า** เพื่อให้ลูกค้าเห็นว่าอะไรไม่ผ่านและเลือกใหม่ได้ทันที
 
@@ -220,7 +222,7 @@ WHERE id=$2 AND version=$3;   -- 0 rows → 409
 **การออกแบบ — ทั้งสอง path ล็อกแถวเดียวกัน:**
 ```sql
 -- ทั้ง POST /orders และ POST /bills/{id}/close เริ่มด้วยบรรทัดนี้
-SELECT * FROM table_session WHERE id = $1 FOR UPDATE;
+SELECT * FROM visit_session WHERE id = $1 FOR UPDATE;
 ```
 | ใครชนะ | ผลของอีกฝ่าย |
 |---|---|
@@ -254,11 +256,11 @@ transition ที่ผิดกฎตาม [[data-model-v1|Data Model v1]] §4
 ### 5.6 ปลดระวางโต๊ะชนกับบิลที่เปิดค้าง (US-42)
 
 ```sql
-UPDATE shop_table SET retired_at = now()
+UPDATE service_point SET retired_at = now()
 WHERE id = $1
   AND retired_at IS NULL
   AND NOT EXISTS (
-    SELECT 1 FROM table_session
+    SELECT 1 FROM visit_session
     WHERE table_id = $1 AND status = 'open');
 ```
 0 row → `409 TABLE_HAS_OPEN_BILL` · `message_th`: "โต๊ะนี้ยังมีบิลที่เปิดค้างอยู่ กรุณาปิดบิลก่อนจึงจะปลดระวางได้" (US-42 AC)
@@ -271,8 +273,8 @@ WHERE id = $1
 
 | ช่อง | ผู้ subscribe | เนื้อหา | US/UX |
 |---|---|---|---|
-| `cart:{table_session_id}` | guest (dine-in) | `cart_item` เปลี่ยน | UX-06 ≤5 วิ |
-| `orders:{table_session_id}` / `orders:{customer_session_id}` | guest | `orders.status` เปลี่ยน | US-05, UX-04 ≤5 วิ |
+| `cart:{visit_session_id}` | guest (dine-in) | `cart_item` เปลี่ยน | UX-06 ≤5 วิ |
+| `orders:{visit_session_id}` / `orders:{customer_session_id}` | guest | `orders.status` เปลี่ยน | US-05, UX-04 ≤5 วิ |
 | `station:orders` | staff | ออเดอร์ใหม่ + สถานะเปลี่ยน + ออเดอร์ `awaiting_payment` | US-13, US-15 |
 | `menu:availability` | ทุกคน | `product.is_available`, `option_value.is_available` | US-16, US-36 |
 
