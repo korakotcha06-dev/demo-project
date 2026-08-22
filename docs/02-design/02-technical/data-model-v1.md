@@ -608,8 +608,26 @@ shop.shop_type = cafe | restaurant | service
 shop.vat_enabled     boolean        เปิด/ปิด
 shop.vat_mode        include | exclude
 shop.vat_rate_bp     integer        หน่วยเป็น basis point (700 = 7.00%)
-shop.tax_id          text nullable  สำหรับใบกำกับภาษีใน Phase 1
+shop.tax_id          text nullable  13 หลัก (CHECK) — บังคับเมื่อ vat_enabled
 ```
+
+> 🔴 **เพิ่ม 2026-08-22 (migration 016)** — ตามคำสั่งของ Touch ว่า *"ต้องออกแบบให้
+> เปิดและปิดได้ เมื่อถึงเวลาที่จด VAT"* · เดิมมี `vat_enabled` แต่ **ไม่มีโค้ดที่ไหน
+> เขียนมันเลย** เปิด VAT ได้ด้วย SQL มือเท่านั้น
+>
+> ```
+> shop.vat_registered_on   date nullable   วันที่จดตาม ภ.พ.20 (≠ วันกดสวิตช์)
+> shop.branch_no           text nullable   5 หลัก · 00000 = สำนักงานใหญ่
+> shop.tax_invoice_prefix  text nullable   ตัวนำเลขที่ใบกำกับ เช่น THY
+>
+> shop_vat_change          append-only     ประวัติเปิด/ปิด + ผู้ทำ + เหตุผล
+> tax_invoice_series       ตัวนับเลขที่เอกสารต่อร้าน — **ห้ามรีเซ็ต**
+> bill.tax_invoice_no      unique ต่อร้าน **ตลอดกาล** · NULL = บิลก่อนจด VAT
+> ```
+>
+> CHECK `vat_on_requires_registration` — **เปิด VAT โดยไม่มีข้อมูลผู้ประกอบการครบไม่ได้**
+> บังคับที่ฐานข้อมูล เพราะใบกำกับที่ขาดเลขผู้เสียภาษีคือเอกสารที่ใช้ไม่ได้
+> และจะรู้ตัวตอนลูกค้าเอาไปยื่นภาษีแล้ว · รายละเอียดใน changelog 2026-08-22
 
 เก็บอัตราเป็น **basis point จำนวนเต็ม ไม่ใช่ทศนิยม** ด้วยเหตุผลเดียวกับที่ทุกจำนวนเงินในระบบนี้เป็นสตางค์จำนวนเต็ม — ทศนิยมทำให้ยอดเพี้ยนแบบที่หาไม่เจอ
 
