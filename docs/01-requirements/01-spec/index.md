@@ -14,6 +14,7 @@
 - [[product-backlog-v1|Product Backlog v1]] — actor, user story ครบทุกบทบาท (ลูกค้า/ครัว-บาร์/แคชเชียร์/แอดมิน), acceptance criteria, business rules, และขอบเขตงาน (in/out of scope) ของระบบสั่งอาหารด้วย QR code
 - [[feature-list-v1|Feature List v1]] — **สถานะ DRAFT** feature hierarchy เต็มระบบ (feature → sub-feature → capability) แม็ปกับ US-01 ถึง US-45 ครบทุกตัว พร้อม coverage check, gap check ย้อนกลับ, ความสามารถที่ซ้ำซ้อนข้าม story, และข้อเสนอ backlog item ใหม่ (US-46 ถึง US-49 — รอ XAVIER/Touch อนุมัติ) จัดทำโดย PEGGY
 - [[initial-menu-data-v1|Initial Menu Data v1]] — **สถานะ DRAFT** เมนูและราคาตั้งต้น 19 รายการ หมวด **ร้อน / เย็น** (ตัดหมวดปั่นออกตามคำสั่ง Touch) พร้อม option group (ความหวาน 5 ระดับ 0/25/50/75/100% default 50% — US-43, ระดับการคั่ว US-35, เมล็ดพิเศษ US-36) — ราคาอ้างอิงจาก UNO Coffee ผ่านรีวิว/สื่อ **ไม่ใช่เมนูทางการ** ทุกตัวเลขกำกับที่มาไว้ครบ รอ Touch เคาะราคาขายจริง
+- [[nfr-v1|NFR v1]] — **ข้อกำหนดเชิงคุณภาพ 20 ข้อ** ใน 6 หมวด (ความเร็ว / ทำงานพร้อมกัน / อยู่รอดตลอดกะ / สิทธิ์ / ความเป็นส่วนตัว / เข้าถึงง่าย) พร้อมเกณฑ์วัดผลที่ทดสอบได้ทุกข้อ · หัวข้อ 7 คือสถานะการออกแบบที่ [[../../02-design/02-technical/architecture-v1|architecture-v1]] §10 และ diagram `nfr-status-v1` อ้างถึง · **สร้างย้อนหลัง 2026-08-22** เพราะเอกสารอื่นอ้างถึงไฟล์นี้อยู่แล้วแต่ไฟล์ไม่มีจริง — ดูที่มาของการกู้คืนในหัวข้อ 0.1
 
 ### ชุดเอกสาร UX (Week 3) — สถานะ DRAFT รออนุมัติจาก Touch
 
