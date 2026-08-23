@@ -10,12 +10,13 @@
 
 - GitHub: <https://github.com/korakotcha06-dev/qr-order-app> (private)
 - local: `/Users/korakotchangpan/Documents/ADT-AI/Classwork/qr-order-app`
-- 🔴 **branch: `feat/unified-shell` — ยังไม่ merge เข้า `main`** (2026-08-23)
-  งานทั้งหมดของวันที่ 2026-08-23 อยู่บน branch นี้ · ใครเปิด `main` จะไม่เห็นอะไรเลย
-  (เปลือกเดียวรวมพนักงาน+แอดมิน · รวมหน้าเมนู/หมวด/ตัวเลือก · ป้าย QR · พร้อมเพย์ · ฯลฯ)
+- ✅ **`main` เป็นล่าสุดแล้ว** — งานทั้งหมดของวันที่ 2026-08-23 (31 commit) merge เข้า `main`
+  แล้วที่ PR #1 เมื่อ 2026-08-23 · `main` มีครบทั้งเปลือกเดียวรวมพนักงาน+แอดมิน ·
+  รวมหน้าเมนู/หมวด/ตัวเลือก · ป้าย QR ตั้งหน้าตาได้ · พร้อมเพย์
+- 🔴 **หลัง pull ต้องรัน `pnpm migrate`** — มี migration ใหม่ 7 ตัว (017–023)
 
-**vault เอกสารนี้เองก็อยู่บน branch เหมือนกัน** — `claude/app-web-design-phase-6178f6`
-ที่ <https://github.com/korakotcha06-dev/demo-project.git> ไม่ใช่ `main`
+**vault เอกสารนี้ยังอยู่บน branch** — `claude/app-web-design-phase-6178f6`
+ที่ <https://github.com/korakotcha06-dev/demo-project.git> รอ merge ที่ PR #13
 
 🔴 **การแยกสองรีโปเป็นการตัดสินใจที่ Touch เคาะแล้ว (2026-08-23) — อย่าเสนอให้รวมอีก**
 เหตุผลและตัวเลขที่ใช้ตัดสินอยู่ใน `docs/05-log/changelog.md` วันที่ 2026-08-23
