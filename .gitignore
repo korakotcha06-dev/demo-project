@@ -2,6 +2,13 @@
 .obsidian/workspace*
 .claude/settings.local.json
 
+# ภาพหน้าจอชั่วคราวของ session (ไม่ใช่เอกสาร)
+.screens/
+
 # ไฟล์ mockup/handoff ขนาดใหญ่ — repo นี้เป็น docs vault ไม่ใช่ที่เก็บ asset
 POS coffee shop UI mockups*.zip
 pos-coffee-shop-ui-mockups/
+
+# worktree ชั่วคราวที่ agent สร้างระหว่างทำงาน — อยู่ใต้รีโปแต่ไม่ใช่เนื้อหาของรีโป
+# ถ้าไม่ ignore ทุกครั้งที่มี worktree ค้างอยู่ `git status` ของ checkout หลักจะสกปรกทันที
+.claude/worktrees/
