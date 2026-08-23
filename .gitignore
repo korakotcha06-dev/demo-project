@@ -1,3 +1,7 @@
 .DS_Store
 .obsidian/workspace*
 .claude/settings.local.json
+
+# ไฟล์ mockup/handoff ขนาดใหญ่ — repo นี้เป็น docs vault ไม่ใช่ที่เก็บ asset
+POS coffee shop UI mockups*.zip
+pos-coffee-shop-ui-mockups/
