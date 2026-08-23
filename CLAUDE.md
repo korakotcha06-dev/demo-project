@@ -48,10 +48,16 @@
 | **COULSON** (โควสัน) | `02-design` — architecture, DB schema, API design ต่อจาก backlog ที่ XAVIER ส่งมอบ | global |
 | **SHURI** (ชูริ) | `02-design/01-prototypes` + frontend build (รายงานต่อ COULSON) | global |
 | **BANNER** (แบนเนอร์) | backend/API/DB ของระบบสั่งอาหาร (รายงานต่อ COULSON) | global |
-| **OKOYE** (โอโคเย) | `03-testing` — test plan/test result, ด่านสุดท้ายก่อน deploy (รายงานต่อ COULSON) | global |
+| **OKOYE** (โอโคเย) | `03-testing` — **Test Analyst & QA Lead** เจ้าของทั้ง `01-test-plan` (AC testability audit, test case, test data, RTM, UAT, เกณฑ์ผ่าน-ไม่ผ่าน) และ `02-test-result` (ผลจริง, bug log, GO/NO-GO) · ด่านสุดท้ายก่อนขึ้นจริง | `.claude/agents/okoye.md` (project — **override ตัว global**) |
 | **JARVIS** (จาร์วิส) | ผู้ประสานงานข้ามทีมเมื่องานสเปน ≥2 แผนก | global |
 
 ลำดับการส่งงาน: **XAVIER** ปิด backlog ใน `01-requirements` ก่อน → ส่งต่อ **COULSON** เริ่ม `02-design` → ทีม SHURI/BANNER ทำตาม scope ที่ COULSON แตกให้ → **OKOYE** เป็นด่านสุดท้ายก่อนขึ้นจริง
+
+**ข้อควรระวังเรื่องความเป็นเจ้าของเอกสาร:**
+
+- **OKOYE ตัว project override ตัว global โดยตั้งใจ** — ตัว global เป็น pre-deploy web QA checklist runner สำหรับเว็บไซต์ลูกค้า TNM ซึ่งเป็นคนละบทบาทกับ test analyst ที่ทำงานในไปป์ไลน์เอกสารแบบนี้
+- **AC เป็นของ XAVIER ไม่ใช่ OKOYE** — OKOYE เจอ AC ที่วัดผลไม่ได้ ให้เขียนเป็น *ข้อเสนอ* ลงหัวข้อ 6 ของ `01-spec/acceptance-criteria-v1.md` แล้วส่งคืน XAVIER/Touch เคาะ **ห้ามแก้เอง** (กติกาเดียวกับ PEGGY)
+- 🔴 **agent global `design-syncer` ประกาศว่ารับงาน "สร้าง test plan / เขียน acceptance criteria" ด้วย — ชนกับ OKOYE และ XAVIER โดยตรง** · ในโปรเจกต์นี้ `03-testing` เป็นของ **OKOYE** และ AC เป็นของ **XAVIER** อย่าเรียก `design-syncer` มาทำสองชั้นนี้ ไม่งั้นจะมีสอง agent เขียนทับกัน
 
 ## Skill ของโปรเจกต์นี้
 
@@ -59,5 +65,9 @@
 |-------|-------------|--------|
 | `/product-backlog` | มี requirement ใหม่ที่ต้องแตกเป็น **user story + acceptance criteria + business rule + ลำดับความสำคัญ** ก่อนส่งเข้า `01-spec` / `02-plan` / `03-task` | `.claude/skills/product-backlog/SKILL.md` |
 | `/feature-journey` | ต้องการ **Feature List** (ภาพลำดับชั้นของฟีเจอร์ทั้งระบบ แม็ปกับ US ID) หรือ **User Journey เป็น Mermaid diagram** (เส้นทางของ persona พร้อมจุดที่อารมณ์ตก) | `.claude/skills/feature-journey/SKILL.md` |
+| `/test-design` | ต้องแปลง requirement เป็น **AC testability audit → test case → test data → traceability matrix → test plan → UAT scenario** · ใช้ตอนที่ยัง**ไม่มี**ระบบให้ทดสอบก็ได้ | `.claude/skills/test-design/SKILL.md` |
+| `/test-run` | **มีระบบจริงให้ทดสอบแล้ว** — รันเคส บันทึกผล `PASS`/`FAIL`/`BLOCKED`/`DEGRADED` เขียน bug log และตัดสิน **GO / NO-GO** | `.claude/skills/test-run/SKILL.md` |
 
-สอง skill นี้ทำคนละหน้าที่และใช้คู่กันได้: `/product-backlog` ให้ **รายการ story และลำดับ** ส่วน `/feature-journey` ให้ **ลำดับชั้น (มีอะไรบ้าง) และลำดับเวลา (เกิดอะไรขึ้นตามลำดับ)** ของ requirement ชุดเดียวกัน — ไม่ใช่อันใดอันหนึ่งแทนกัน
+สอง skill แรกทำคนละหน้าที่และใช้คู่กันได้: `/product-backlog` ให้ **รายการ story และลำดับ** ส่วน `/feature-journey` ให้ **ลำดับชั้น (มีอะไรบ้าง) และลำดับเวลา (เกิดอะไรขึ้นตามลำดับ)** ของ requirement ชุดเดียวกัน — ไม่ใช่อันใดอันหนึ่งแทนกัน
+
+`/test-design` กับ `/test-run` ก็แยกกันด้วยเหตุผลเดียวกัน — คนละเวลาและคนละโฟลเดอร์ปลายทาง (`01-test-plan` vs `02-test-result`) · **`/test-design` ห้ามแตะ `02-test-result` และ `/test-run` ห้ามแก้ test case ให้เข้ากับพฤติกรรมของระบบที่ผิด**
