@@ -54,19 +54,21 @@
 |-------|------------------|--------|
 | **XAVIER** (เอ็กซาเวียร์) | `01-requirements` — วิเคราะห์ requirement, เขียน user story/business rule, จัดลำดับ product backlog (P0/P1/P2 + MoSCoW) | `.claude/agents/xavier.md` (project) |
 | **PEGGY** (เพ็กกี้) | `01-requirements` — Feature List (feature → sub-feature → capability แม็ปกับ US ID) และ User Journey เป็น **Mermaid diagram** · ทำงานคู่กับ XAVIER แต่คนละมุม: XAVIER เขียน story/กฎ/ลำดับ · PEGGY ทำมุมมองลำดับชั้นและมุมมองเส้นทางของ persona | `.claude/agents/peggy.md` (project) |
-| **COULSON** (โควสัน) | `02-design` — architecture, DB schema, API design ต่อจาก backlog ที่ XAVIER ส่งมอบ | global |
+| **VISION** (วิชั่น) | `02-design/02-technical` — **High-Level Architecture เชิง conceptual** (logical component, trust boundary, data flow ตาม user journey) **ห้ามผูกกับเทคโนโลยี/vendor ใด ๆ** · เป็น peer ของ COULSON ไม่ใช่ลูกทีม · ส่งต่อโมเดล conceptual ให้ COULSON เลือก stack จริง | `.claude/agents/vision.md` (project) |
+| **COULSON** (โควสัน) | `02-design` — architecture ที่ผูกกับ stack จริง, DB schema, API design ต่อจาก backlog ที่ XAVIER ส่งมอบ **และ** conceptual model ที่ VISION ส่งมอบ | global |
 | **SHURI** (ชูริ) | `02-design/01-prototypes` + frontend build (รายงานต่อ COULSON) | global |
 | **BANNER** (แบนเนอร์) | backend/API/DB ของระบบสั่งอาหาร (รายงานต่อ COULSON) | global |
 | **OKOYE** (โอโคเย) | `03-testing` — **Test Analyst & QA Lead** เจ้าของทั้ง `01-test-plan` (AC testability audit, test case, test data, RTM, UAT, เกณฑ์ผ่าน-ไม่ผ่าน) และ `02-test-result` (ผลจริง, bug log, GO/NO-GO) · ด่านสุดท้ายก่อนขึ้นจริง | `.claude/agents/okoye.md` (project — **override ตัว global**) |
 | **JARVIS** (จาร์วิส) | ผู้ประสานงานข้ามทีมเมื่องานสเปน ≥2 แผนก | global |
 
-ลำดับการส่งงาน: **XAVIER** ปิด backlog ใน `01-requirements` ก่อน → ส่งต่อ **COULSON** เริ่ม `02-design` → ทีม SHURI/BANNER ทำตาม scope ที่ COULSON แตกให้ → **OKOYE** เป็นด่านสุดท้ายก่อนขึ้นจริง
+ลำดับการส่งงาน: **XAVIER** + **PEGGY** ปิด requirements ใน `01-requirements` ก่อน → **VISION** ทำ conceptual High-Level Architecture (ไม่ผูก stack) → ส่งต่อ **COULSON** ทำ `02-design` ที่ผูกกับ stack จริง → ทีม SHURI/BANNER ทำตาม scope ที่ COULSON แตกให้ → **OKOYE** เป็นด่านสุดท้ายก่อนขึ้นจริง
 
 **ข้อควรระวังเรื่องความเป็นเจ้าของเอกสาร:**
 
 - **OKOYE ตัว project override ตัว global โดยตั้งใจ** — ตัว global เป็น pre-deploy web QA checklist runner สำหรับเว็บไซต์ลูกค้า TNM ซึ่งเป็นคนละบทบาทกับ test analyst ที่ทำงานในไปป์ไลน์เอกสารแบบนี้
 - **AC เป็นของ XAVIER ไม่ใช่ OKOYE** — OKOYE เจอ AC ที่วัดผลไม่ได้ ให้เขียนเป็น *ข้อเสนอ* ลงหัวข้อ 6 ของ `01-spec/acceptance-criteria-v1.md` แล้วส่งคืน XAVIER/Touch เคาะ **ห้ามแก้เอง** (กติกาเดียวกับ PEGGY)
 - 🔴 **agent global `design-syncer` ประกาศว่ารับงาน "สร้าง test plan / เขียน acceptance criteria" ด้วย — ชนกับ OKOYE และ XAVIER โดยตรง** · ในโปรเจกต์นี้ `03-testing` เป็นของ **OKOYE** และ AC เป็นของ **XAVIER** อย่าเรียก `design-syncer` มาทำสองชั้นนี้ ไม่งั้นจะมีสอง agent เขียนทับกัน
+- **VISION กับ COULSON แบ่งกันด้วยระดับ ไม่ใช่ด้วยโฟลเดอร์** — ทั้งคู่เขียนลง `02-design/02-technical` แต่คนละไฟล์: VISION เขียนเฉพาะ `high-level-architecture-conceptual-*.md` (ห้ามมีชื่อเทคโนโลยี/vendor แม้แต่คำเดียว) ส่วน `architecture-v1.md` / `data-model-v1.md` / `api-design-v1.md` เป็นของ COULSON เท่านั้น **VISION ห้ามแก้ไฟล์ของ COULSON และ COULSON ห้ามแก้ไฟล์ของ VISION** — ถ้า COULSON เลือก stack ที่ขัดกับ capability ที่ VISION ระบุไว้ ต้อง flag กลับ ไม่ใช่แก้เอกสารของอีกฝ่ายเงียบ ๆ
 
 ## Skill ของโปรเจกต์นี้
 
@@ -74,9 +76,12 @@
 |-------|-------------|--------|
 | `/product-backlog` | มี requirement ใหม่ที่ต้องแตกเป็น **user story + acceptance criteria + business rule + ลำดับความสำคัญ** ก่อนส่งเข้า `01-spec` / `02-plan` / `03-task` | `.claude/skills/product-backlog/SKILL.md` |
 | `/feature-journey` | ต้องการ **Feature List** (ภาพลำดับชั้นของฟีเจอร์ทั้งระบบ แม็ปกับ US ID) หรือ **User Journey เป็น Mermaid diagram** (เส้นทางของ persona พร้อมจุดที่อารมณ์ตก) | `.claude/skills/feature-journey/SKILL.md` |
+| `/high-level-architecture` | ต้องการสร้าง/ปรับปรุง **High-Level Architecture เชิง conceptual** — logical component, trust boundary, data flow ตาม user journey — **ห้ามผูกกับเทคโนโลยี/vendor** ใช้ก่อน COULSON เลือก stack จริง | `.claude/skills/high-level-architecture/SKILL.md` |
 | `/test-design` | ต้องแปลง requirement เป็น **AC testability audit → test case → test data → traceability matrix → test plan → UAT scenario** · ใช้ตอนที่ยัง**ไม่มี**ระบบให้ทดสอบก็ได้ | `.claude/skills/test-design/SKILL.md` |
 | `/test-run` | **มีระบบจริงให้ทดสอบแล้ว** — รันเคส บันทึกผล `PASS`/`FAIL`/`BLOCKED`/`DEGRADED` เขียน bug log และตัดสิน **GO / NO-GO** | `.claude/skills/test-run/SKILL.md` |
 
 สอง skill แรกทำคนละหน้าที่และใช้คู่กันได้: `/product-backlog` ให้ **รายการ story และลำดับ** ส่วน `/feature-journey` ให้ **ลำดับชั้น (มีอะไรบ้าง) และลำดับเวลา (เกิดอะไรขึ้นตามลำดับ)** ของ requirement ชุดเดียวกัน — ไม่ใช่อันใดอันหนึ่งแทนกัน
+
+`/high-level-architecture` กิน input จาก `/product-backlog` และ `/feature-journey` แล้วส่งต่อให้ COULSON เลือก stack จริง — **ห้ามใช้แทน** การเขียน `architecture-v1.md` ของ COULSON และห้าม COULSON ใช้ skill นี้เพื่อ "รีบข้าม" ไปเขียนเอกสารที่ผูกกับ stack ทันที
 
 `/test-design` กับ `/test-run` ก็แยกกันด้วยเหตุผลเดียวกัน — คนละเวลาและคนละโฟลเดอร์ปลายทาง (`01-test-plan` vs `02-test-result`) · **`/test-design` ห้ามแตะ `02-test-result` และ `/test-run` ห้ามแก้ test case ให้เข้ากับพฤติกรรมของระบบที่ผิด**
