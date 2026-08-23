@@ -219,16 +219,59 @@ Touch (2026-08-23): *"ใส่เป็นเบอร์เราได้ ห
 
 ---
 
-## 4. Deploy รอบถัดไป
+## 4. Deploy รอบถัดไป — ลำดับที่ใช้จริงบน VPS
 
 ```bash
-git pull
+TS=$(date +%Y%m%d%H%M%S)
+cd /var/www/thyna
+git clone -q --depth 1 --branch main git@github-thyna:korakotcha06-dev/qr-order-app.git releases/$TS
+cd releases/$TS
+ln -sf /var/www/thyna/shared/.env .env
+
+mkdir -p public/signage        # 🔴 ต้องเป็นโฟลเดอร์จริงตอน build — ดูเหตุผลข้างล่าง
 pnpm install --frozen-lockfile
-pnpm migrate            # 🔴 ก่อน build เสมอ — โค้ดใหม่คาดหวัง schema ใหม่
+pnpm migrate                   # 🔴 ก่อน build เสมอ — โค้ดใหม่คาดหวัง schema ใหม่
 pnpm build
-# restart ทั้งสองโปรเซส
-pnpm check:invariants   # ตรวจว่าข้อมูลยังไม่ขัดกันเอง
+
+# ใส่ symlink หลัง build เท่านั้น
+rm -rf public/signage && ln -sfn /var/www/thyna/shared/signage public/signage
+
+ln -sfn /var/www/thyna/releases/$TS /var/www/thyna/current
+systemctl restart thyna-web
+pnpm check:invariants
 ```
+
+🔴 **`pnpm migrate` ต้องมาก่อน `pnpm build`/restart เสมอ** — โค้ดใหม่คาดหวังตารางใหม่
+ถ้ารันสลับลำดับ ระบบจะขึ้นแล้วพังตอนมีคนเปิดหน้าที่ใช้ตารางนั้น ซึ่งแปลว่า**พังตอนมีคนใช้จริง
+ไม่ใช่ตอน deploy**
+
+### 🔴 ทำไม `public/signage` ต้องเป็นโฟลเดอร์จริงตอน build
+
+ไฟล์ที่ผู้ใช้อัปโหลดถูกเก็บไว้นอกโฟลเดอร์ release ที่ `/var/www/thyna/shared/signage`
+แล้ว symlink เข้ามา — **ไม่งั้น deploy ใหม่ = รูปหายทุกครั้ง** (เจอจริงตอน deploy รอบสอง)
+
+แต่ **Turbopack ปฏิเสธ symlink ที่ชี้ออกนอกโฟลเดอร์โปรเจกต์** และ**ล้มทั้ง build**:
+
+```
+Symlink [project]/public/signage/... is invalid, it points out of the filesystem root
+```
+
+symlink จำเป็นแค่**ตอนเสิร์ฟไฟล์** ไม่ใช่ตอน build → **build ด้วยโฟลเดอร์เปล่า
+แล้วค่อยสลับเป็น symlink ก่อนสลับ `current`**
+
+### rollback
+
+```bash
+ln -sfn /var/www/thyna/releases/<ตัวก่อนหน้า> /var/www/thyna/current
+systemctl restart thyna-web
+```
+
+**ของเดิมเสิร์ฟอยู่ตลอดจนถึงวินาทีที่สลับ symlink** — build ล้มไม่ทำให้เว็บล่ม
+(บทเรียนจาก `nkmedic-web` ที่เคยล่ม 12 นาทีเพราะชี้ตรงไปที่ `.next` ในรีโป)
+
+### เก็บ release เก่าไว้ 2–3 ชุด
+
+ลบของเก่ากว่านั้นทิ้งเพื่อไม่ให้ดิสก์เต็ม — แต่ละ release กิน ~1GB (มี `node_modules` + `.next`)
 
 🔴 **`pnpm migrate` ต้องมาก่อน `pnpm build`/restart เสมอ** — โค้ดใหม่คาดหวังตารางใหม่
 ถ้ารันสลับลำดับ ระบบจะขึ้นแล้วพังตอนมีคนเปิดหน้าที่ใช้ตารางนั้น ซึ่งแปลว่า**พังตอนมีคนใช้จริง
