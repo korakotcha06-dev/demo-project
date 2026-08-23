@@ -22,13 +22,6 @@
 
 ลำดับการอ่าน: **Design System Adoption → Screen Inventory → User Flow → Prototype** · แผนภาพประกอบทั้งหมดอยู่ที่ [[diagrams/index|Diagrams]]
 
-<<<<<<< HEAD
-**ยังไม่ได้ทำในรอบนี้ (งานถัดไปของ SHURI):** wireframe/mockup รายหน้าจอ, prototype แบบกดผ่านได้, และ design token ที่ implement จริงเป็นโค้ด
-
-## บันทึกการตรวจ mockup
-
-- [[mockup-thyna-pos-v1|Mockup Review — Thyna Cafe POS v1]] — ตรวจ mockup ชุด Thyna ที่ Touch ชี้ให้ดู (2026-08-22) · **ปิดช่องว่างที่ [[design-system-adoption-v1|design-system-adoption-v1]] §6.1 บันทึกว่า theme ไม่มีหน้าจอพนักงานเลย** · 5 จุดที่ยืนยันว่าออกแบบถูกทาง · 1 จุดที่รับมาใช้แล้ว (กระดาน 3 คอลัมน์) · **11 จุดที่ไม่รับมาพร้อมเหตุผล** โดยเรื่องใหญ่สุดคือ mockup แสดงชื่อลูกค้าบนตั๋วซึ่งขัด Business Rule ข้อ 14 ตรง ๆ
-=======
 ## ไฟล์โปรโตไทป์ — เก็บนอก repo
 
 ตัวไฟล์ HTML **ไม่ได้ commit เข้ามา** เพราะรวมกัน 5 MB (ฝังรูป base64 ไว้ในตัว) หนักเกินไปสำหรับ vault ที่เป็นเอกสารล้วน · อยู่ที่ `Classwork/picture coffee/`
@@ -42,5 +35,8 @@
 
 > 🔴 **อ่าน [[prototype-v1|Prototype v1]] หัวข้อ 4 ก่อนเอาโปรโตไทป์ไปสร้างจริง** — หน้าแรกฝั่งลูกค้าถามชื่อเล่น ซึ่งขัดกับ `NFR-17`, BR ข้อ 14 และ test case **TC-072 / TC-055b** ที่เป็น P0 ทั้งคู่ · เมนูและราคาก็ยังไม่ตรงกับ [[../../01-requirements/01-spec/initial-menu-data-v1|Initial Menu Data v1]]
 
+## บันทึกการตรวจ mockup
+
+- [[mockup-thyna-pos-v1|Mockup Review — Thyna Cafe POS v1]] — ตรวจ mockup ชุด Thyna ที่ Touch ชี้ให้ดู (2026-08-22) · **ปิดช่องว่างที่ [[design-system-adoption-v1|design-system-adoption-v1]] §6.1 บันทึกว่า theme ไม่มีหน้าจอพนักงานเลย** · 5 จุดที่ยืนยันว่าออกแบบถูกทาง · 1 จุดที่รับมาใช้แล้ว (กระดาน 3 คอลัมน์) · **11 จุดที่ไม่รับมาพร้อมเหตุผล** โดยเรื่องใหญ่สุดคือ mockup แสดงชื่อลูกค้าบนตั๋วซึ่งขัด Business Rule ข้อ 14 ตรง ๆ
+
 **ยังไม่ได้ทำในรอบนี้ (งานถัดไปของ SHURI):** wireframe/mockup รายหน้าจอที่ยังไม่มีในโปรโตไทป์ (`C-00`, `C-05`, `C-06`, `S-06`, `S-07`) และ design token ที่ implement จริงเป็นโค้ด
->>>>>>> origin/main

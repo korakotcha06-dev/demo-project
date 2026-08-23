@@ -1,11 +1,18 @@
-# Test Plan v1 — Phase 0 เส้นทาง J1 (dine-in)
+# Test Plan v1 — Phase 0 เส้นทาง J1 (dine-in) [ARCHIVED]
 
-> **สถานะ: ใช้งานอยู่** — ครอบเฉพาะขอบเขตที่ build เสร็จแล้วในรอบแรก (2026-08-22)
-> ต้นทาง: [[../../02-design/02-technical/api-design-v1|API Design v1]] §5 · §7 · [[../../02-design/02-technical/data-model-v1|Data Model v1]] §5 · §9.7 · [[../../01-requirements/01-spec/ux-requirements-v1|UX Requirements v1]] §7
+> 🔴 **สถานะ: ถูกแทนที่แล้ว (superseded) 2026-08-23** — เขียนขึ้นในอีก worktree ที่ลงมือ build โค้ดจริงคู่ขนาน
+> โดยไม่รู้จักอีกฝั่งที่กำลังตั้งโครงสร้าง `03-testing` แบบ 5 เอกสารผ่าน skill `/test-design` (OKOYE) พร้อมกัน —
+> ตอน merge PR #13 เลือกใช้โครงสร้าง 5 เอกสารเป็นหลักเพราะละเอียดกว่าและมี traceability matrix
+> ย้ายไฟล์นี้มาเก็บที่นี่แทนการลบทิ้ง (57 เคสยังมีค่าอ้างอิงย้อนหลัง โดยเฉพาะเคสสองร้านและ
+> พนักงาน 3 เครื่องที่ชุด 124 TC ยังไม่ครอบทุกฟีเจอร์ที่ worktree นี้ build จริงแล้ว) ดูตัวที่ใช้งานอยู่ที่
+> [[../03-testing/01-test-plan/index|03-testing/01-test-plan]]
+>
+> **สถานะเดิมก่อนถูกแทนที่:** ใช้งานอยู่ — ครอบเฉพาะขอบเขตที่ build เสร็จแล้วในรอบแรก (2026-08-22)
+> ต้นทาง: [[../02-design/02-technical/api-design-v1|API Design v1]] §5 · §7 · [[../02-design/02-technical/data-model-v1|Data Model v1]] §5 · §9.7 · [[../01-requirements/01-spec/ux-requirements-v1|UX Requirements v1]] §7
 > ส่งถึง: OKOYE (ด่านสุดท้ายก่อนขึ้นจริง)
 > โค้ดที่ทดสอบ: <https://github.com/korakotcha06-dev/qr-order-app> (private) · local `/Users/korakotchangpan/Documents/ADT-AI/Classwork/qr-order-app`
 
-กลับไปที่ [[index|01-test-plan]]
+กลับไปที่ [[index|00-archived]]
 
 ---
 
@@ -154,7 +161,7 @@ realtime + fallback · การรั่วข้ามร้าน · หน�
 
 ## 3. ทดสอบกับผู้ใช้จริง (ยังไม่ได้ทำ — ต้องทำก่อนเปิดร้าน)
 
-ตาม [[../../01-requirements/01-spec/ux-requirements-v1|UX Requirements v1]] §7 — **persona P3 (ป้าน้อย)
+ตาม [[../01-requirements/01-spec/ux-requirements-v1|UX Requirements v1]] §7 — **persona P3 (ป้าน้อย)
 คือ validation gate ของทุก flow**
 
 - [ ] ลูกค้าที่ไม่เคยใช้ระบบสั่งได้เองจากป้าย QR โดยไม่มีคนอธิบาย
