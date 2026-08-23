@@ -10,6 +10,12 @@
 
 - GitHub: <https://github.com/korakotcha06-dev/qr-order-app> (private)
 - local: `/Users/korakotchangpan/Documents/ADT-AI/Classwork/qr-order-app`
+- 🔴 **branch: `feat/unified-shell` — ยังไม่ merge เข้า `main`** (2026-08-23)
+  งานทั้งหมดของวันที่ 2026-08-23 อยู่บน branch นี้ · ใครเปิด `main` จะไม่เห็นอะไรเลย
+  (เปลือกเดียวรวมพนักงาน+แอดมิน · รวมหน้าเมนู/หมวด/ตัวเลือก · ป้าย QR · พร้อมเพย์ · ฯลฯ)
+
+**vault เอกสารนี้เองก็อยู่บน branch เหมือนกัน** — `claude/app-web-design-phase-6178f6`
+ที่ <https://github.com/korakotcha06-dev/demo-project.git> ไม่ใช่ `main`
 
 คำสั่ง build/test/dev ทั้งหมดอยู่ใน `CLAUDE.md` ของ repo นั้น (`pnpm dev:all`, `pnpm migrate`, `pnpm seed`, `pnpm test`, `pnpm check:invariants`) · **เอกสารใน `docs/` ของ vault นี้ยังเป็น source of truth ของโค้ดนั้นอยู่** — โค้ดขัดกับเอกสารเมื่อไหร่ให้ทำตามเอกสาร แล้วบันทึกเหตุผลไว้ใน `docs/05-log/changelog.md`
 
