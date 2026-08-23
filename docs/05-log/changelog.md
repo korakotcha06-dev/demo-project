@@ -1794,6 +1794,15 @@ local: `/Users/korakotchangpan/Documents/ADT-AI/Classwork/qr-order-app`
 
 ---
 
+## 2026-08-23 — เพิ่ม Detailed Design v1 (COULSON) + sync `nfr-v1` §7 กับการปิด NFR-06/NFR-10/NFR-11 ที่ทำไปแล้วตั้งแต่ 2026-08-20 (doc drift ธรรมดา)
+
+- **COULSON เพิ่ม [[../02-design/02-technical/detailed-design-v1|Detailed Design v1]]** — แตกชั้น "Route Handlers" ของ architecture-v1 เป็น 10 module โดเมน + 6 platform module พร้อม dependency rule, โครงร่าง request-handling 7 ขั้นที่ endpoint ทุกตัวใช้ร่วมกัน, กลไกระดับ implementation (argon2id, rate limit, sliding session, idempotency, LISTEN/NOTIFY, VAT rounding, tenancy guard) และพบ **11 จุดที่ architecture/data-model/api-design ไม่ตรงกัน** ระหว่างเขียน (2 จุดเป็นบั๊กเรื่องเงินที่ต้องแก้ก่อนเริ่ม build จริง — ดู §6 ของไฟล์) · แผนภาพประกอบยังไม่วาดเพราะชน API session limit
+- **พบ doc drift ที่ [[../01-requirements/01-spec/nfr-v1|nfr-v1]] §7:** ยังระบุ NFR-06/NFR-10/NFR-11 เป็น Design ❌ ทั้งที่ [[../02-design/02-technical/architecture-v1|architecture-v1]] §10 (คำตัดสินกลไกยืนยันตัวตนของพนักงาน/แอดมิน, 2026-08-20) ปิดครบทั้งสามข้อไปแล้ว — ทะเบียนตามไม่ทันการปิดจริงมา 3 วัน ไม่ใช่ปัญหาการออกแบบ · แก้ไว้ในไฟล์นั้นแล้ว (ตารางภาพรวม §7.1 เพิ่มแถววันที่ปิด 2026-08-20 พร้อมโน้ตอธิบาย ไม่สร้างตารางสรุปตามหมวดซ้ำกับ §7.2 ที่มีอยู่แล้ว)
+- **แยกให้ชัดว่าไม่เกี่ยวกับ NEED-INPUT ที่ยังเปิดอยู่:** architecture-v1 §10.7 มีทางเลือกเสริม "ผูก PIN กับคนแทนสถานี" รอ Touch ตัดสินอยู่ต่างหาก — เป็นการปรับปรุงเสริมของ R7/US-27 ไม่ใช่เงื่อนไขที่ NFR-06/10/11 ต้องรอ
+- ไม่แตะ `architecture-v1.md` (เป็นของ COULSON เท่านั้น), ไม่เปลี่ยนเลข ID ของ NFR ใด ๆ
+
+---
+
 ## 2026-08-23 — เพิ่ม agent VISION + skill `/high-level-architecture` และเอกสาร High-Level Architecture (Conceptual) v1 ฉบับแรก
 
 - **Touch ขอให้มี agent+skill แยกสำหรับ High-Level Architecture เชิง conceptual** — ไม่ผูกกับเทคโนโลยี/vendor เพื่อไม่ให้ปนกับการตัดสินใจเรื่อง stack ที่ [[../02-design/02-technical/architecture-v1|Architecture v1]] ของ COULSON ทำอยู่แล้ว (เอกสารนั้นเคยเปลี่ยน stack มาแล้วครั้งหนึ่งในหัวข้อ 9 — เป็นเหตุผลที่ทำให้เห็นว่าภาพรวมเชิงแนวคิดควรอยู่แยกเอกสารถาวร)
