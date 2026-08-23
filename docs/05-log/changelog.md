@@ -6,6 +6,18 @@
 
 ---
 
+## 2026-08-23 — เพิ่ม agent VISION + skill `/high-level-architecture` และเอกสาร High-Level Architecture (Conceptual) v1 ฉบับแรก
+
+- **Touch ขอให้มี agent+skill แยกสำหรับ High-Level Architecture เชิง conceptual** — ไม่ผูกกับเทคโนโลยี/vendor เพื่อไม่ให้ปนกับการตัดสินใจเรื่อง stack ที่ [[../02-design/02-technical/architecture-v1|Architecture v1]] ของ COULSON ทำอยู่แล้ว (เอกสารนั้นเคยเปลี่ยน stack มาแล้วครั้งหนึ่งในหัวข้อ 9 — เป็นเหตุผลที่ทำให้เห็นว่าภาพรวมเชิงแนวคิดควรอยู่แยกเอกสารถาวร)
+- **ตัดสินใจ 3 เรื่องผ่าน AskUserQuestion กับ Touch ก่อนสร้าง:** (1) agent ใหม่เป็น **peer ของ COULSON** ไม่ใช่ลูกทีม (2) เอกสารใหม่แยกไฟล์ต่างหาก ไม่แตะเอกสารเดิมของ COULSON เลย (3) ตั้งชื่อ agent ว่า **VISION** (วิชั่น) ตามธรรมเนียมตัวละคร Marvel ของ Touch
+- **สร้าง `.claude/agents/vision.md`** — Conceptual/High-Level Architecture Analyst มีกฎเหล็ก "ห้ามเอ่ยชื่อเทคโนโลยี/vendor แม้แต่คำเดียว" และห้ามแก้ไฟล์ของ COULSON (`architecture-v1.md`/`data-model-v1.md`/`api-design-v1.md`)
+- **สร้าง `.claude/skills/high-level-architecture/SKILL.md`** — โครงสร้างเอกสาร 8 หัวข้อ (system context, logical component, data flow ต่อ user journey, conceptual data domain, trust boundary, cross-cutting capability table, non-goals, open questions) พร้อมกฎถาวรว่าเมื่อเจอจุดไม่ชัดเจนต้องเสนอ ≥3 ทางเลือกพร้อมข้อดี-ข้อเสียให้ Touch เลือก ไม่ใช่ตัดสินใจเงียบ ๆ
+- **อัปเดต `CLAUDE.md`** — เพิ่ม VISION ในตารางทีม agent, เพิ่ม skill ในตารางทีม skill, ปรับลำดับส่งงานเป็น XAVIER+PEGGY → VISION → COULSON → SHURI/BANNER → OKOYE, เพิ่มข้อควรระวังว่า VISION กับ COULSON แบ่งกันด้วยไฟล์ในโฟลเดอร์เดียวกัน (`02-technical`) ไม่ใช่ด้วยโฟลเดอร์
+- **สร้าง `docs/02-design/02-technical/high-level-architecture-conceptual-v1.md` ฉบับแรก** — อ่านครบทั้ง backlog/persona/journey/feature-list/UX/NFR ฝั่ง XAVIER, screen-inventory/user-flow/prototype/diagram ฝั่ง SHURI, และ `architecture-v1.md` ทั้งฉบับ (เฉพาะดึง capability ไม่เอาคำตอบทางเทคนิค) ได้ 9 logical component (8 อยู่ใน Phase 0 + Multi-Shop Boundary ที่ flag เป็น forward-looking ยังไม่อนุมัติ), data flow ของ J1-J4 บวก QR-entry branching และ concurrent-cart, ตาราง cross-cutting capability 15 แถวที่โยงกลับ US/BR/NFR/UX จริงทุกแถว
+- 🔴 **ค้าง:** Multi-Shop Boundary capability มาจากคำตัดสินใจของ Touch ที่บันทึกอยู่ใน `architecture-v1.md` §11.7 เท่านั้น ยังไม่เป็น NFR/BR อย่างเป็นทางการใน backlog — เสนอให้ XAVIER พิจารณาเปิดเป็นรายการทางการ · และยังไม่ได้ให้ COULSON ยืนยันว่าตารางความสามารถ 15 แถวถูกตอบครบใน `architecture-v1.md` หรือไม่
+
+---
+
 ## 2026-08-16 — US-52 จ่ายด้วยพร้อมเพย์ QR + Business Rule ข้อ 28 + test spec รายเส้นทาง 4 ฉบับ
 
 - **Touch เสนอและตัดสินเอง:** ช่องทางเคาน์เตอร์จ่ายด้วย **พร้อมเพย์ QR ที่ฝังยอดมาแล้ว** — เปิด **US-52 (P0 / Phase 0)** · เหตุผลที่ตั้งเป็น P0 ทั้งที่เป็นของใหม่: ต้นทุนต่ำผิดสัดส่วนกับผลที่ได้ ลูกค้าไม่ต้องพิมพ์ยอดเอง และตัดความผิดพลาดเรื่องยอดออกทั้งเส้น
