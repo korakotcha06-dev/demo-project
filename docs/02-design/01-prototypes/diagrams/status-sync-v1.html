@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>สถานะเอกสารเทียบระบบจริง</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&family=Noto+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper:       #f5f5f5;
+      --color-paper-2:     #ececec;
+      --color-ink:         #2d3142;
+      --color-muted:       #4f5d75;
+      --color-soft:        #7a8399;
+      --color-rule:        rgba(45,49,66,0.12);
+      --color-accent:      #eb6c36;
+      --color-link:        #2e5aa8;
+      --font-sans:   'Geist', 'IBM Plex Sans Thai', 'Noto Sans Thai', 'Sukhumvit Set', 'Thonburi', system-ui, sans-serif;
+      --font-serif:  'Instrument Serif', 'Times New Roman', serif;
+      --font-mono:   'Geist Mono', 'IBM Plex Sans Thai', 'Noto Sans Thai', ui-monospace, Menlo, monospace;
+    }
+    body { font-family: var(--font-sans); background: var(--color-paper); min-height: 100vh; padding: 3rem 2rem; color: var(--color-ink); }
+    .container { max-width: 1200px; margin: 0 auto; }
+    .header { margin-bottom: 2.5rem; }
+    .header-eyebrow { font-family: var(--font-mono); font-size: 0.66rem; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; color: var(--color-muted); margin-bottom: 0.75rem; }
+    h1 { font-family: var(--font-serif); font-size: clamp(1.75rem, 3vw + 1rem, 2.5rem); font-weight: 400; letter-spacing: -0.02em; line-height: 1.2; color: var(--color-ink); margin-bottom: 0.5rem; }
+    .subtitle { font-size: 1rem; line-height: 1.6; color: var(--color-muted); max-width: 60ch; }
+    .diagram-container { background: transparent; border: none; padding: 0; overflow-x: auto; }
+    svg { width: 100%; min-width: 900px; display: block; }
+    .cards { display: grid; grid-template-columns: 1.05fr 1fr 1.15fr; gap: 1rem; margin-top: 1.5rem; }
+    @media (max-width: 900px) { .cards { grid-template-columns: 1fr; } }
+    .card { background: #ffffff; border-radius: 6px; border: 1px solid var(--color-rule); padding: 1.25rem; }
+    .card-header { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.875rem; padding-bottom: 0.875rem; border-bottom: 1px solid rgba(45,49,66,0.08); }
+    .card-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .card-dot.ink { background: var(--color-ink); }
+    .card-dot.muted { background: var(--color-muted); }
+    .card-dot.coral { background: var(--color-accent); }
+    .card h3 { font-size: 0.9375rem; font-weight: 600; color: var(--color-ink); }
+    .eyebrow { font-family: var(--font-mono); font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--color-soft); margin-bottom: 0.5rem; }
+    .card ul { list-style: none; color: var(--color-muted); font-size: 0.875rem; line-height: 1.6; }
+    .card li { margin-bottom: 0.4rem; padding-left: 0.875rem; position: relative; }
+    .card li::before { content: '—'; position: absolute; left: 0; color: rgba(45,49,66,0.25); font-size: 0.75rem; }
+    .footer { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid rgba(45,49,66,0.10); font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.06em; color: var(--color-soft); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <div class="header">
+      <p class="header-eyebrow">QR Ordering · 28 ส.ค. 2569</p>
+      <h1>เอกสารเทียบระบบจริง</h1>
+      <p class="subtitle">vault เอกสารกับรีโปโค้ดถูกแยกกันตั้งแต่ 23 ส.ค. ทุกชั้นของ SDLC จึงเลื่อนออกจากของจริงคนละระยะ ภาพนี้บอกว่าชั้นไหนตรงแล้ว ชั้นไหนเพิ่งถูกดึงกลับมาตรงวันนี้ และชั้นไหนเคยเป็นคอขวด</p>
+    </div>
+
+    <div class="diagram-container">
+      <svg viewBox="0 0 1000 560" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="status-sync-v1-title status-sync-v1-desc">
+        <title id="status-sync-v1-title">สถานะการ sync เอกสารกับระบบจริง</title>
+        <desc id="status-sync-v1-desc">ชั้นเอกสาร SDLC ห้าชั้นเรียงจากความตั้งใจลงมาถึงโค้ดจริง แต่ละชั้นกำกับตัวเลขของจริงกับสถานะการ sync โดยชั้นการทดสอบเป็นชั้นที่ค้างนานที่สุดและเพิ่งถูกเติมผลจริงในวันนี้</desc>
+        <defs>
+          <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/>
+          </marker>
+          <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#eb6c36"/>
+          </marker>
+          <marker id="arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/>
+          </marker>
+        </defs>
+
+        <rect width="100%" height="100%" fill="#f5f5f5"/>
+
+        <!-- ตัวบอกทิศทางนอกกอง -->
+        <line x1="72" y1="132" x2="72" y2="348" stroke="#7a8399" stroke-width="1" marker-end="url(#arrow)"/>
+        <text x="60" y="112" fill="#7a8399" font-size="12" font-family="'Geist', 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif" text-anchor="middle">ความ</text>
+        <text x="60" y="128" fill="#7a8399" font-size="12" font-family="'Geist', 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif" text-anchor="middle">ตั้งใจ</text>
+        <text x="60" y="372" fill="#7a8399" font-size="12" font-family="'Geist', 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif" text-anchor="middle">ของจริง</text>
+
+        <!-- L1 -->
+        <rect x="120" y="60" width="800" height="72" fill="#f5f5f5" stroke="#2d3142" stroke-width="1"/>
+        <text x="136" y="84" fill="#7a8399" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.12em">L1</text>
+        <text x="136" y="104" fill="#2d3142" font-size="16" font-weight="600" font-family="'Geist', 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif">สเปก และ backlog</text>
+        <text x="136" y="122" fill="#4f5d75" font-size="12" font-family="'Geist', 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif">US-01 ถึง US-54 · กฎธุรกิจ 31 ข้อ · NFR 20 ข้อ</text>
+        <text x="904" y="96" fill="#4f5d75" font-size="12" font-family="'Geist', 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif" text-anchor="end">ตรงแล้ว</text>
+        <text x="904" y="114" fill="#7a8399" font-size="12" font-family="'Geist', 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif" text-anchor="end">ดึง US-53 และ US-54 เข้าสายหลักวันนี้</text>
+
+        <!-- L2 -->
+        <rect x="120" y="132" width="800" height="72" fill="#ececec" stroke="#2d3142" stroke-width="1"/>
+        <text x="136" y="156" fill="#7a8399" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.12em">L2</text>
+        <text x="136" y="176" fill="#2d3142" font-size="16" font-weight="600" font-family="'Geist', 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif">แผนงาน และงานย่อย</text>
+        <text x="136" y="194" fill="#4f5d75" font-size="12" font-family="'Geist', 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif">3 เฟส · งานกลุ่ม A ถึง F</text>
+        <text x="904" y="168" fill="#4f5d75" font-size="12" font-family="'Geist', 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif" text-anchor="end">เพิ่งดึงกลับมาตรงวันนี้</text>
+        <text x="904" y="186" fill="#7a8399" font-size="12" font-family="'Geist', 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif" text-anchor="end">เคยประกาศตัวเองว่ายังไม่เริ่ม ทั้งที่สร้างไปเกือบครบ</text>
+
+        <!-- L3 -->
+        <rect x="120" y="204" width="800" height="72" fill="#f5f5f5" stroke="#2d3142" stroke-width="1"/>
+        <text x="136" y="228" fill="#7a8399" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.12em">L3</text>
+        <text x="136" y="248" fill="#2d3142" font-size="16" font-weight="600" font-family="'Geist', 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif">ออกแบบ · หน้าจอ ข้อมูล และ API</text>
+        <text x="136" y="266" fill="#4f5d75" font-size="12" font-family="'Geist', 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif">25 หน้าจอ · 29 ตาราง · 54 route 71 method</text>
+        <text x="904" y="240" fill="#4f5d75" font-size="12" font-family="'Geist', 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif" text-anchor="end">เพิ่งดึงกลับมาตรงวันนี้</text>
+        <text x="904" y="258" fill="#7a8399" font-size="12" font-family="'Geist', 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif" text-anchor="end">เคยเขียนไว้ 21 ตาราง และ 35 endpoint</text>
+
+        <!-- L4 focal -->
+        <rect x="120" y="276" width="800" height="72" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="1"/>
+        <text x="136" y="300" fill="#eb6c36" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.12em">L4</text>
+        <text x="136" y="320" fill="#2d3142" font-size="16" font-weight="600" font-family="'Geist', 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif">การทดสอบ</text>
+        <text x="136" y="338" fill="#4f5d75" font-size="12" font-family="'Geist', 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif">แผน 124 เคส · อัตโนมัติจริง 301 เคส ผ่านหมด</text>
+        <text x="904" y="312" fill="#eb6c36" font-size="12" font-weight="600" font-family="'Geist', 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif" text-anchor="end">ชั้นที่ค้างนานที่สุด</text>
+        <text x="904" y="330" fill="#7a8399" font-size="12" font-family="'Geist', 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif" text-anchor="end">หยุดนิ่งตั้งแต่ 16 ส.ค. ก่อนวันเขียนโค้ดบรรทัดแรก</text>
+
+        <!-- L5 -->
+        <rect x="120" y="348" width="800" height="72" fill="rgba(45,49,66,0.05)" stroke="#2d3142" stroke-width="1"/>
+        <text x="136" y="372" fill="#7a8399" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.12em">L5</text>
+        <text x="136" y="392" fill="#2d3142" font-size="16" font-weight="600" font-family="'Geist', 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif">โค้ดจริง</text>
+        <text x="136" y="410" fill="#4f5d75" font-size="12" font-family="'Geist', 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif">14 route หน้าจอ · migration ถึง 024 · RLS ทุกตาราง</text>
+        <text x="904" y="384" fill="#4f5d75" font-size="12" font-family="'Geist', 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif" text-anchor="end">แหล่งความจริง</text>
+        <text x="904" y="402" fill="#7a8399" font-size="12" font-family="'Geist', 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif" text-anchor="end">รีโปแยก qr-order-app ผูกกลับด้วยเลข commit 20 จุด</text>
+
+        <!-- legend -->
+        <line x1="120" y1="464" x2="920" y2="464" stroke="rgba(45,49,66,0.10)" stroke-width="0.8"/>
+        <text x="120" y="484" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">LEGEND</text>
+        <rect x="200" y="492" width="16" height="12" fill="#f5f5f5" stroke="#2d3142" stroke-width="1"/>
+        <text x="224" y="502" fill="#4f5d75" font-size="12" font-family="'Geist', 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif">ชั้นเอกสารใน vault</text>
+        <rect x="404" y="492" width="16" height="12" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="1"/>
+        <text x="428" y="502" fill="#4f5d75" font-size="12" font-family="'Geist', 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif">ชั้นที่เป็นคอขวด</text>
+        <rect x="588" y="492" width="16" height="12" fill="rgba(45,49,66,0.05)" stroke="#2d3142" stroke-width="1"/>
+        <text x="612" y="502" fill="#4f5d75" font-size="12" font-family="'Geist', 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif">ระบบจริงที่รันอยู่</text>
+      </svg>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <p class="eyebrow">งานวันนี้</p>
+        <div class="card-header"><span class="card-dot ink"></span><h3>สามบล็อกที่ลงมือ</h3></div>
+        <ul>
+          <li>ดึง US-53 แดชบอร์ดวิเคราะห์ และ US-54 เข้าสายหลัก หลังค้างบน branch แยก</li>
+          <li>sync เอกสารตามโค้ด: ข้อมูล 29 ตาราง · API 54 route 71 method · เพิ่มหน้าจอ A-08 และ A-09</li>
+          <li>เติมชั้นทดสอบด้วยผลจริง พร้อมคำตัดสิน demo ผ่านแบบมีเงื่อนไข เปิดร้านจริงยังไม่ผ่าน</li>
+          <li>สร้างหน้ารายงานยอดขาย A-09 ปิด US-25 พร้อมเทสใหม่ 33 เคส</li>
+          <li>เทสทั้งชุดหลังรวมงาน 301 เคส ผ่านหมด typecheck และ lint สะอาด</li>
+        </ul>
+      </div>
+      <div class="card">
+        <p class="eyebrow">ช่องว่างที่ปิดแล้ว</p>
+        <div class="card-header"><span class="card-dot muted"></span><h3>เอกสารเคยบอกผิด</h3></div>
+        <ul>
+          <li>ข้อมูล 21 ตาราง ของจริง 29</li>
+          <li>API 35 endpoint ของจริง 54 route 71 method</li>
+          <li>เทส เอกสารบอกยังไม่รันสักเคส ของจริงผ่าน 268 เคส</li>
+          <li>งานย่อยบอกยังไม่เริ่ม ของจริงสร้างเกือบครบเฟส 0</li>
+          <li>ช่องทางเคาน์เตอร์ เอกสารบอกยังไม่เปิด ของจริงใช้ได้ครบวง</li>
+        </ul>
+      </div>
+      <div class="card">
+        <p class="eyebrow">ต้องคิดต่อ</p>
+        <div class="card-header"><span class="card-dot coral"></span><h3>รอคนตัดสิน</h3></div>
+        <ul>
+          <li>บิลที่ยอดเหลือศูนย์ปิดไม่ได้เลย โต๊ะจึงปลดไม่ได้ตามไปด้วย ระดับ S1 ยังเปิดค้าง</li>
+          <li>สถานะรอเสิร์ฟที่เกณฑ์รับงานติ๊กว่าเสร็จแล้ว ไม่มีอยู่ในโค้ดแม้แต่จุดเดียว</li>
+          <li>งานล้างชื่อเล่นลูกค้าเมื่อครบเก้าสิบวันไม่มีจริง เป็นความเสี่ยงตรงเรื่องข้อมูลส่วนบุคคล</li>
+          <li>เวลาปิดร้านที่ใช้ตัดขอบวันธุรกิจ ยังไม่มีหน้าตั้งค่า แก้ได้ทาง SQL เท่านั้น</li>
+          <li>ฟังก์ชันดูรายละเอียดบิลเขียนไว้แล้วแต่ไม่มีทางเรียก เป็นโค้ดตาย ต่อสายหรือลบทิ้ง</li>
+          <li>ยังไม่มีการสำรองฐานข้อมูลอัตโนมัติ และไม่เคยทดสอบกู้คืนจริงสักครั้ง</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer">
+      <span>vault: demo-coffee-store · โค้ด: qr-order-app</span>
+      <span>28 ส.ค. 2569</span>
+    </div>
+
+  </div>
+</body>
+</html>
