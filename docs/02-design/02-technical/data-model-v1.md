@@ -7,6 +7,8 @@
 
 > 🔴 **แก้ไข 2026-08-20** — เพิ่มหัวข้อ 9 (หลายร้าน + แม่แบบ) และหัวข้อ 10 (VAT) · และ**เปลี่ยนชื่อทั้งฉบับตามหัวข้อ 9.4** — `shop_table` → `service_point` · `table_session` → `visit_session` · `table_id` → `service_point_id` · `table_status_v` → `service_point_status_v` · **เปลี่ยนเฉพาะชื่อ ไม่มี invariant หรือ state machine ข้อไหนเปลี่ยน** · คำว่า "โต๊ะ" ในเนื้อความคงไว้ เพราะเป็นคำเรียกของร้านกาแฟ ซึ่งเก็บที่ `shop.service_point_label`
 
+> 🔴 **sync กับ schema จริง ณ 2026-08-28 (migration ถึง 023)** — โค้ดถูกสร้างไปแล้วตั้งแต่ 2026-08-22 และผ่านเทส 268 เคส แต่ 7 ตารางที่ถูกเพิ่มระหว่างทาง (`shop`, `staff_session`, `shop_vat_change`, `tax_invoice_series`, `category_option_group`, `option_value_group_block`, `option_value_restriction`) ไม่เคยถูกบันทึกกลับมาไว้ในเอกสารฉบับนี้ · รอบนี้จึงเป็นการ **แก้เอกสารตามโค้ด** ซึ่งกลับทิศจากกฎปกติของ vault (ปกติโค้ดต้องตามเอกสาร) — เหตุผลที่กลับทิศคือโค้ดถูกสร้างและตรวจผ่านไปแล้วจริง การบังคับให้โค้ดถอยกลับมาหาเอกสารเก่าจะทำลายของที่ใช้งานได้จริงโดยไม่ได้อะไรกลับมา ส่วนที่แก้ไว้ในรอบนี้: (1) เพิ่ม 7 entity ที่ขาด (2) แก้ตัวเลขสรุปจำนวนตารางเป็น 29 (3) ชี้ชัดว่า INV-9 เป็นข้อเดียวที่บังคับที่ระดับ DB ไม่ได้ (4) สรุป constraint ที่ไม่ได้ตั้งเลข INV และสรุป RLS · เนื้อหาเดิมไม่ถูกลบ มีแต่การมาร์กจุดที่ล้าสมัยพร้อมเหตุผล
+
 กลับไปที่ [[index|02-technical]]
 
 ---
@@ -54,13 +56,79 @@ erDiagram
     station ||--o{ orders : "สถานีที่รับผิดชอบ"
     staff_user ||--o{ payment : "ผู้รับเงิน"
     staff_user ||--o{ order_status_event : "ผู้เปลี่ยนสถานะ"
+    shop ||--o{ category : "shop_id ทุกตาราง (§9.1)"
+    staff_user ||--o{ staff_session : "หลายเครื่องพร้อมกัน (§10.5)"
+    station ||--o{ staff_session : "ผูกสถานี"
+    shop ||--o{ shop_vat_change : "ประวัติเปิด/ปิด VAT (append-only)"
+    shop ||--|| tax_invoice_series : "ตัวนับเลขที่เอกสาร"
+    category ||--o{ category_option_group : "ค่าตั้งต้นตัวเลือกของหมวด"
+    option_group ||--o{ category_option_group : ""
+    option_value ||--o{ option_value_restriction : "parent จำกัด child ในกลุ่มอื่น"
+    option_value ||--o{ option_value_group_block : "parent บล็อกทั้งกลุ่ม"
+    option_group ||--o{ option_value_group_block : "กลุ่มที่ถูกบล็อก"
 ```
 
 **รวม 21 entity** แบ่งเป็น 5 กลุ่ม: เมนู (5) · ร้าน/โต๊ะ/QR (5) · session/ตะกร้า (5) · ออเดอร์/เงิน (5) · พนักงาน (1)
 
+> 🔴 **แก้ไข 2026-08-28** — ตัวเลข "21 entity" ข้างบนเป็นของตอนเขียนเอกสารฉบับแรก (2026-08-15) เก็บไว้ตามเดิมเพื่อรักษาประวัติ (กฎ vault ห้ามลบเนื้อหาเดิม) **แต่ของจริงในโค้ดตอนนี้คือ 29 ตาราง นับจาก migration 001–023** (นับด้วย `grep -c CREATE TABLE` ตรง ๆ กับไฟล์ migration จริง ไม่ใช่ประมาณ) ต่างกัน 8 ตารางเพราะ 7 ตารางที่เพิ่มขึ้นหลัง 2026-08-15 ไม่เคยถูกบันทึกกลับมาที่นี่ (ดูรายละเอียดที่ §3.0 / ท้าย §3.1 / ท้าย §3.2 / §3.5 ใหม่) บวกกับตัวเลข "21" เดิมเองก็นับต่ำกว่าที่เอกสารฉบับแรกบรรยายไว้จริงอยู่แล้ว 1 ตาราง (เอกสารเดิมอธิบาย 22 ตารางแต่สรุปเป็น 21) — เป็นความคลาดเคลื่อนเดิมที่มีมาก่อนรอบ sync นี้ ไม่ได้แก้ในรอบนี้เพราะไม่กระทบ schema จริงใด ๆ<br>กลุ่มที่ตัวเลขเปลี่ยนจริงคือ: ร้าน/โต๊ะ/QR/พนักงาน (+2: `shop`, `staff_session`) · เมนู (+3: `category_option_group`, `option_value_group_block`, `option_value_restriction`) · ภาษี/VAT เป็นกลุ่มใหม่ (+2: `shop_vat_change`, `tax_invoice_series`)
+
 ---
 
 ## 3. รายละเอียดตาราง
+
+### 3.0 🔴 กลุ่ม multi-tenant (เพิ่ม 2026-08-28 — sync จาก migration 001) — รากของทุกตารางอื่น
+
+> เนื้อหาเชิงแนวคิดของ `shop` เขียนไว้แล้วเป็นร้อยแก้วที่ §9 (หลายร้านในฐานเดียว) และ §10.1 (VAT ระดับร้าน) ตั้งแต่ 2026-08-20 แต่ไม่เคยมีตาราง field แบบตารางอื่นใน §3 — เพิ่มให้ครบรูปแบบเดียวกันในรอบ sync นี้ ไม่มีเนื้อหาใหม่ทางธุรกิจ
+
+#### `shop` — ร้าน (รากของ multi-tenant, migration 001 + 016)
+| field | type | หมายเหตุ |
+|---|---|---|
+| `id` | uuid PK | ทุกตารางอื่นอ้างกลับมาที่นี่ผ่าน `shop_id` (§9.1) |
+| `name` | text NOT NULL | |
+| `shop_type` | enum(`cafe`,`restaurant`,`service`) NOT NULL default `cafe` | §9.5 — แม่แบบอยู่ที่ชั้นข้อมูลตั้งต้น ไม่ใช่ชั้น schema |
+| `service_point_label` | text NOT NULL default `'โต๊ะ'` | §9.4 — คำเรียกรวมที่ UI ใช้: โต๊ะ/ห้อง/เตียง/เก้าอี้ |
+| `vat_enabled` | boolean NOT NULL default false | §10.1 |
+| `vat_mode` | enum(`include`,`exclude`) NOT NULL default `include` | §10.1 |
+| `vat_rate_bp` | int NOT NULL default 700 CHECK 0-10000 | basis point จำนวนเต็ม (700 = 7.00%) — ห้ามทศนิยม เหตุผลเดียวกับสตางค์ |
+| `tax_id` | text NULL CHECK ตรง `^[0-9]{13}$` | เลขผู้เสียภาษี 13 หลัก บังคับกรอกเมื่อ `vat_enabled` |
+| `vat_registered_on` | date NULL | 🔴 เพิ่ม migration 016 — วันที่จด VAT ตาม ภ.พ.20 (**ต่างจาก**วันกดสวิตช์ในระบบ) |
+| `branch_no` | text NULL CHECK ตรง `^[0-9]{5}$` | 🔴 เพิ่ม 016 — 00000 = สำนักงานใหญ่ |
+| `tax_invoice_prefix` | text NULL CHECK ตรง `^[A-Z0-9-]{1,10}$` | 🔴 เพิ่ม 016 — ตัวนำเลขที่ใบกำกับ เช่น `THY` → `THY0001` |
+| `is_active` | boolean NOT NULL default true | |
+| `created_at` / `updated_at` | | |
+
+**Constraint สำคัญ (016):**
+```sql
+-- เปิด VAT โดยไม่มีข้อมูลผู้ประกอบการครบไม่ได้ — บังคับที่ DB เพราะใบกำกับที่ขาดเลขผู้เสียภาษี
+-- คือเอกสารที่ใช้ไม่ได้ และจะรู้ตัวตอนลูกค้าเอาไปยื่นภาษีแล้ว
+ALTER TABLE shop ADD CONSTRAINT vat_on_requires_registration CHECK (
+  NOT vat_enabled OR (tax_id IS NOT NULL AND branch_no IS NOT NULL
+    AND tax_invoice_prefix IS NOT NULL AND vat_registered_on IS NOT NULL)
+);
+```
+
+**RLS:** ตารางเดียวที่ policy กรองด้วย `id` แทน `shop_id` (เพราะตัวมันเองคือหน่วยของ tenant) — `shop_self_only`: `id = current_shop_id() OR app.bypass_rls = 'on'` (§9.7 / migration 009)
+
+#### `staff_session` — session ฝั่งพนักงาน (เพิ่ม 2026-08-28 — migration 004 + 014)
+| field | type | หมายเหตุ |
+|---|---|---|
+| `id` | uuid PK | |
+| `shop_id` | uuid FK → shop | |
+| `staff_user_id` | uuid FK (shop_id, staff_user_id) → staff_user | |
+| `token_hash` | text UNIQUE NOT NULL | token ทึบสุ่ม 256 บิต เก็บเฉพาะ hash — **ไม่ใช้ JWT โดยเจตนา** (§10.5): (1) 2-4 เครื่องพร้อมกันเป็นเรื่องปกติถ้า session เป็นแถว (2) แท็บเล็ตหายต้องเพิกถอนได้ทันที (3) token ที่ฝังอายุในตัวเองสร้างเซอร์ไพรส์เชิงปฏิบัติการเสมอ |
+| `station_id` | uuid NULL FK → station | |
+| `device_label` | text NULL | |
+| `created_at` / `last_seen_at` | timestamptz | อายุแบบเลื่อน: หมดอายุที่ `last_seen_at + 16 ชม.` |
+| `expires_at` | timestamptz NOT NULL | |
+| `revoked_at` | timestamptz NULL | |
+| `locked_at` | timestamptz NULL | 🔴 เพิ่ม 014 (NFR-11) — ล็อกด้วยมือก่อนเดินออกจากจอ |
+| `last_interaction_at` | timestamptz NOT NULL default now() | 🔴 เพิ่ม 014 — เวลาที่ "คน" แตะจอครั้งล่าสุด แยกจาก `last_seen_at` โดยเจตนา เพราะจอสถานี poll ทุก 5 วิ (ไม่ใช่การใช้งานของคน) ถ้าวัด idle จาก `last_seen_at` จอจะไม่ล็อกเลยตลอดกาล |
+| `pin_failed_count` | int NOT NULL default 0 CHECK ≥ 0 | 🔴 เพิ่ม 014 — จำกัดอัตราเดา PIN ผิด 5 ครั้งล็อก 60 วิ แล้วเพิ่มขึ้นเรื่อย ๆ เก็บบนแถว ไม่ใช่ในหน่วยความจำ เพราะ process restart ต้องไม่รีเซ็ตให้เดาต่อฟรี |
+| `pin_locked_until` | timestamptz NULL | 🔴 เพิ่ม 014 |
+
+**NFR-06 ปิดด้วยการไม่ทำฟีเจอร์:** ไม่มีอะไรไปลบแถวก่อนหน้า — เครื่องที่ 4 ล็อกอินคือการเพิ่มแถวที่ 4 ไม่เด้งเครื่องเก่าออก
+
+---
 
 ### 3.1 กลุ่มเมนู (รองรับ US-02, US-23, US-35, US-36, US-43)
 
@@ -135,6 +203,25 @@ erDiagram
 | มัทฉะลาเต้ | ความหวาน (ไม่มีคั่ว/เมล็ด เพราะไม่ใช่กาแฟ) |
 | บานอฟฟี่ ลาเต้ (SIG-01) | **ไม่มีเลย** — สูตรซิกเนเจอร์คงที่ |
 | ดริป Discovery / Exclusive | **ไม่มีเลย** — ชนิดเมล็ดคือตัวเมนูเอง |
+
+#### 🔴 เพิ่ม 2026-08-28 (sync จาก migration 021-023) — 3 ตารางกลไกจำกัดตัวเลือกข้ามกลุ่ม
+
+ทั้งสามตารางนี้เกิดจากคำสั่งของ Touch วันที่ 2026-08-23 หลัง Phase 0 build ไปแล้ว — เอกสารต้นฉบับ (2026-08-15) ไม่มีแนวคิดนี้เลยเพราะตอนนั้น "ระดับการคั่ว" กับ "เมล็ดพิเศษ" ยังเป็นสองกลุ่มที่ไม่รู้จักกัน
+
+##### `category_option_group` — ค่าตั้งต้นตัวเลือกตามหมวด (migration 023)
+`shop_id, category_id, option_group_id` PK ร่วม (composite) · `created_at`
+
+**นี่คือค่าตั้งต้นเท่านั้น ไม่ใช่กฎบังคับ** — ถูกอ่านตอน**สร้างเมนูใหม่**เท่านั้นเพื่อติ๊กตัวเลือกให้ล่วงหน้า ตัวที่ตัดสินจริงว่าสินค้าตัวไหนมีตัวเลือกอะไรยังเป็น `product_option_group` เหมือนเดิมทุกประการ — ที่ทำเป็นค่าตั้งต้นแทนการบังคับตามหมวดเพราะร้านจริงมีข้อยกเว้นเสมอ (เอสเปรสโซ/อเมริกาโน่อยู่หมวดเดียวกับลาเต้แต่ไม่ควรมีความหวาน) ตารางว่าง = ไม่มีค่าตั้งต้น = ฟอร์มเริ่มจากไม่ติ๊กอะไร (พฤติกรรมเดิมก่อน 023)
+
+##### `option_value_restriction` — parent จำกัด child ในกลุ่มอื่น (migration 021)
+`shop_id, parent_option_value_id, child_option_value_id` PK ร่วม · `created_at`
+
+ที่มา: "แต่ละเมล็ดอาจมีการคั่วที่ต่างกัน ต้องเซตที่เมล็ด" — เลือก parent (เช่นเมล็ดเอธิโอเปีย) แล้วกลุ่มของ child (เช่นระดับการคั่ว) จะเหลือเฉพาะ child ที่ระบุไว้ที่นี่ **ไม่มีแถว = ไม่จำกัด** · trigger บังคับว่า parent กับ child ต้องอยู่**คนละกลุ่ม** (จำกัดกลุ่มของตัวเองอ่านไม่ออกว่าแปลว่าอะไร) · ตารางว่างตั้งแต่วันสร้าง — ข้อมูลว่าเมล็ดไหนมีคั่วอะไรเป็นข้อมูลธุรกิจที่ร้านต้องกรอกเอง
+
+##### `option_value_group_block` — parent บล็อกทั้งกลุ่ม (migration 022)
+`shop_id, parent_option_value_id, blocked_option_group_id` PK ร่วม · `created_at`
+
+ที่มา: "เมล็ดพิเศษ ... ไม่มีเลือกนมที่เมล็ดพวกนี้" — คนละความหมายกับ `option_value_restriction` โดยเจตนา: restriction ไม่มีแถว = ไม่จำกัด (อนุญาตทุกค่า) แต่ที่นี่ต้องการสื่อ "ไม่อนุญาตอะไรเลยในกลุ่มนั้น" ซึ่งเขียนเป็นคู่ (parent, child ที่อนุญาต) แบบ restriction ไม่ได้ (จะชนความหมาย "ไม่มีแถว") จึงต้องแยกตารางแทนที่จะยัดความหมายที่สามลงตารางเดิม · เลือก parent แล้วกลุ่มที่ระบุหายไปทั้งกลุ่มจากหน้าลูกค้า (ไม่ใช่โผล่มาแบบว่างเปล่า) · trigger บังคับห้ามบล็อกกลุ่มของตัวเอง · ตารางว่าง = ไม่บล็อก
 
 ---
 
@@ -348,6 +435,38 @@ CREATE UNIQUE INDEX cart_item_line ON cart_item (cart_id, line_signature);
 
 ---
 
+### 3.5 🔴 กลุ่มภาษี/VAT (เพิ่ม 2026-08-28 — sync จาก migration 016) — คำสั่ง Touch 2026-08-22
+
+ตั้งค่า VAT ระดับร้าน (`shop.vat_enabled` ฯลฯ) มีอยู่แล้วตั้งแต่ §3.0/§10.1 แต่ **ไม่มีโค้ดที่ไหนเขียนมันเลย** ก่อน migration 016 — เปิด VAT ได้ด้วย SQL มือเท่านั้น สองตารางนี้ทำให้ "วันที่จด VAT" เป็นเหตุการณ์ที่มีวันที่และมีผู้รับผิดชอบ ไม่ใช่แค่ boolean
+
+#### `shop_vat_change` — ประวัติเปิด/ปิด VAT (append-only)
+| field | type | หมายเหตุ |
+|---|---|---|
+| `id` | uuid PK | |
+| `shop_id` | uuid FK → shop | |
+| `changed_at` | timestamptz NOT NULL default now() | |
+| `changed_by_staff_id` | uuid NOT NULL FK (shop_id, ..) → staff_user | |
+| `from_enabled` / `to_enabled` | boolean NOT NULL | |
+| `from_mode` / `to_mode` | vat_mode NOT NULL | |
+| `from_rate_bp` / `to_rate_bp` | int NOT NULL | |
+| `tax_id_snapshot` / `branch_no_snapshot` | text NULL | snapshot ข้อมูลผู้ประกอบการ ณ ตอนเปลี่ยน — ถ้าแก้ `tax_id` ทีหลัง ประวัติต้องยังบอกได้ว่าตอนนั้นใช้เลขอะไร |
+| `note` | text NULL | |
+
+**ทำไมต้องมีตารางแยก ทั้งที่ `bill` snapshot ค่า VAT ไว้แล้ว:** snapshot บอกได้ว่า "บิลใบนี้คิด VAT ไหม" แต่บอกไม่ได้ว่า **ใครเปลี่ยนค่าเมื่อไหร่** ซึ่งเป็นคำถามที่ต้องตอบได้ถ้าสรรพากรถามว่าทำไมบิลวันที่ 3 ไม่มี VAT แต่บิลวันที่ 4 มี — คำถามที่ตอบจาก snapshot ของบิลอย่างเดียวไม่ได้ เพราะบิลที่ไม่มีในวันนั้นก็ไม่มีหลักฐานอะไรเลย
+
+**append-only เหมือน `payment`:** CHECK `vat_change_actually_changed` (ต้องมีอย่างน้อย 1 ฟิลด์เปลี่ยนจริง) + trigger `forbid_hard_delete` และ `forbid_update` (ห้ามลบ/ห้ามแก้แถวเดิม)
+
+#### `tax_invoice_series` — ตัวนับเลขที่ใบกำกับภาษีต่อร้าน
+`shop_id` uuid PK (1 แถวต่อร้าน) FK → shop · `next_number` bigint NOT NULL default 1 CHECK ≥ 1 · `updated_at`
+
+**แยกเป็นตารางเพราะการออกเลขต้องล็อกแถวเดียวแล้ว `UPDATE ... RETURNING`** — ถ้าไปหา `max(tax_invoice_no)` จาก `bill` สองเครื่องที่ปิดบิลพร้อมกันจะได้เลขเดียวกันทั้งคู่ แล้วคนที่สองชน unique index → ปิดบิลล้มทั้งที่รับเงินแล้ว · **`next_number` ไม่รีเซ็ตเมื่อปิด VAT แล้วเปิดใหม่** — เลขที่ออกไปแล้วห้ามวนกลับมาใช้ซ้ำเด็ดขาด ต่อให้เว้นช่วงไปเป็นปี
+
+**เกี่ยวข้องกับคอลัมน์ที่เพิ่มบน `bill` ใน migration เดียวกัน** (ยังไม่เคยเขียนไว้ใน §3.4 ข้างบน — บันทึกรวมไว้ที่นี่แทนที่จะย้อนไปแก้ตารางเดิม): `bill.tax_invoice_no` text NULL (unique ต่อร้าน **ตลอดกาล** ไม่มีเงื่อนไขสถานะ ต่างจาก `queue_no_active_unique` ที่ unique เฉพาะใบที่ยังไม่จบ) และ `bill.tax_invoice_at` timestamptz NULL · CHECK `tax_invoice_requires_vat` (ออกเลขให้บิลที่ไม่คิด VAT ไม่ได้) และ `tax_invoice_at_shape` (มีเลขต้องมีเวลา คู่กันเสมอ) · NULL = บิลก่อนจดหรือบิลที่ไม่คิด VAT
+
+🔴 **สามชื่อที่ใช้แทนกันไม่ได้แม้แต่ตัวเดียว:** `orders.sequence_no` (ลำดับออเดอร์ในบิล เริ่มที่ 1 ทุกบิล) · `orders.queue_no` (เลขคิวรายวันที่วนใช้ซ้ำได้ US-45) · `bill.tax_invoice_no` (เรียงต่อกันตลอดอายุร้าน ห้ามซ้ำห้ามใช้ซ้ำ)
+
+---
+
 ## 4. State Machine
 
 ### 4.1 สถานะออเดอร์
@@ -452,6 +571,35 @@ LEFT JOIN visit_session ts
 | INV-9 | `bill.total_satang` = Σ `order_item.line_total_satang` ที่ `status='active'` | คำนวณใน service layer ภายในทรานแซกชันเดียวกับที่แก้รายการ + มี job ตรวจสอบความสอดคล้องรายวัน |
 | INV-10 | `cart_item` unique ต่อ `(cart_id, line_signature)` | unique index (BR ข้อ 2) |
 
+> 🔴 **ยืนยัน 2026-08-28 (sync จากโค้ดจริง):** **INV-9 เป็นข้อเดียวใน 10 ข้อที่บังคับที่ระดับฐานข้อมูลไม่ได้** — ยอดบิลเป็นผลรวมที่ต้องคำนวณใหม่ทุกครั้งที่รายการเปลี่ยน ไม่มี CHECK/trigger ตัวเดียวที่ตรวจ "ผลรวมถูกต้องเสมอ" ได้โดยไม่ทำให้ทุก UPDATE ของ `order_item` ช้าลงอย่างมีนัยสำคัญ กลไกทดแทนที่ใช้จริงมี 2 ชั้น: (1) **คำนวณในทรานแซกชันเดียวกับที่แก้รายการ** ที่ `src/server/billing.ts` (คอมเมนต์ในไฟล์อ้าง INV-9 ตรง ๆ) เพื่อไม่ให้มีช่วงเวลาที่ยอดไม่ตรง (2) **`scripts/check-invariants.ts`** เป็น job ตรวจสอบความสอดคล้องรายวัน — คอมเมนต์ในสคริปต์เขียนตรงว่า "INV-9 เป็น invariant เดียวใน 10 ข้อที่บังคับที่ระดับฐานข้อมูลไม่ได้" คิวรีของมันคือ `SUM(order_item.line_total_satang)` เทียบกับ `bill.subtotal_satang` ต่อบิล แล้ว flag บิลที่ตัวเลขไม่ตรงกัน — เป็นการตรวจจับย้อนหลัง ไม่ใช่การป้องกันที่ระดับ DB เหมือนอีก 9 ข้อ
+
+### 5.1 Constraint อื่นที่ไม่ได้ตั้งเลข INV (sync 2026-08-28)
+
+นอกจาก INV-1..INV-10 ยังมี CHECK constraint ระดับ "รูปทรงข้อมูล" (shape) และ FK guard แบบ composite key ที่ไม่ได้ถูกตั้งเลข INV เพราะเป็นการบังคับความสอดคล้องภายในตาราง/ระหว่างพ่อลูก ไม่ใช่กฎธุรกิจข้าม entity แบบ INV — แต่ก็บังคับที่ DB เหมือนกัน กันคนละแบบ:
+
+| constraint | ตาราง | บังคับอะไร |
+|---|---|---|
+| `qr_channel_shape` | `qr_code` | `channel='table'` ต้องมี `service_point_id` · `channel='counter'` ต้องไม่มี |
+| `cart_scope_shape` | `cart` | `scope` ต้องสอดคล้องกับว่าฟิลด์ FK ตัวไหนไม่ใช่ NULL (3 แบบ: `visit_session`/`customer_session`/`service_point` — ขยายเป็น 3 แบบใน migration 013) |
+| `bill_channel_shape` | `bill` | `channel='table'` ต้องมี `visit_session_id` · `channel='counter'` ต้องไม่มี |
+| `bill_paid_shape` | `bill` | `status='paid'` ต้องมี `paid_at` · สถานะอื่นต้องไม่มี (กัน `paid_at` โผล่มาลอย ๆ แล้ว INV-3 ผ่านฟรี) |
+| `tax_id_shape` | `shop` | `tax_id` ต้องเป็นเลข 13 หลักถ้าไม่ NULL |
+| `branch_no_shape` | `shop` | `branch_no` ต้องเป็นเลข 5 หลักถ้าไม่ NULL |
+
+**FK guard แบบ `*_same_shop`:** ทุกตารางลูกในระบบ multi-tenant มี FK ประกอบ (composite) รูปแบบ `FOREIGN KEY (shop_id, parent_id) REFERENCES parent (shop_id, id)` แทนที่จะ FK แค่ `parent_id` เฉย ๆ (ตัวอย่างจากโค้ดจริง: `order_item_same_shop`, `product_same_shop`, `visit_session_sp_same_shop` ฯลฯ — มีเกือบทุกตาราง) เพื่อบังคับว่า **ลูกต้องอยู่ร้านเดียวกับแม่เสมอที่ระดับ constraint ไม่ใช่ด้วยวินัยของคนเขียนคิวรี** (§9.2) การเอารายการของร้าน ก. ไปแปะกับออเดอร์ของร้าน ข. เป็นสิ่งที่ฐานข้อมูลปฏิเสธเอง
+
+### 5.2 Row Level Security (RLS) — เพิ่ม 2026-08-28
+
+`009_rls.sql` เปิด `ENABLE ROW LEVEL SECURITY` และ `FORCE ROW LEVEL SECURITY` บน **ทุกตารางที่มี `shop_id`** (ยืนยันแล้วว่าครบทั้ง 29 ตาราง นับรวมตารางที่เพิ่มเข้ามาทีหลังใน migration 016/021/022/023 ซึ่งแต่ละไฟล์เปิด RLS ของตัวเองตามรูปแบบเดียวกัน) บวกตาราง `shop` เองอีกหนึ่ง policy แยก (`shop_self_only` — กรองด้วย `id` แทน `shop_id` เพราะ `shop` คือหน่วยของ tenant เอง ไม่ใช่ลูกของใคร)
+
+**Policy เดียวกันทุกตาราง:**
+```sql
+USING      (shop_id = current_shop_id() OR current_setting('app.bypass_rls', true) = 'on')
+WITH CHECK (shop_id = current_shop_id() OR current_setting('app.bypass_rls', true) = 'on')
+```
+
+**Fail-closed โดยเจตนา:** `current_shop_id()` อ่านจาก `current_setting('app.shop_id', true)` ที่ชั้นแอปต้อง `SET LOCAL` ไว้ต้นทุกทรานแซกชัน — ถ้าไม่ได้ตั้งค่า จะได้ `NULL` และ policy ปฏิเสธทุกแถว (ไม่ใช่ปล่อยผ่านทุกแถว) ยกเว้นตอน migration/seed ที่ตั้ง `app.bypass_rls = 'on'` ไว้ชัดเจน — นี่คือแนวป้องกันชั้นที่สองที่ยังทำงานแม้คิวรีชั้นแอปจะลืมกรอง `shop_id` (§9.7) ซึ่งเป็นความผิดพลาดชนิดที่ทดสอบด้วยร้านเดียวไม่มีวันเจอ
+
 ---
 
 ## 6. schema นี้รองรับข้อกำหนดที่ล็อกไว้ 12 ข้ออย่างไร (ไล่ทีละข้อ)
@@ -520,6 +668,8 @@ LEFT JOIN visit_session ts
 | พนักงาน | `staff_user` |
 
 ครบทั้ง 21 entity เดิม — **ไม่มีตารางไหนที่ไม่ใช่ของร้านใดร้านหนึ่ง**
+
+> 🔴 **แก้ไข 2026-08-28** — รายการตารางข้างบนเก็บไว้ตามเดิม (เขียนไว้ตอน 2026-08-20 ก่อนที่ตัว `shop` เองจะได้ field table แบบตารางอื่น) ของจริงคือ **ทุกตารางที่มี `shop_id` มี 29 ตารางเต็ม ไม่ใช่ 21** — 7 ตารางที่เพิ่มเข้ามาทีหลัง (`staff_session`, `shop_vat_change`, `tax_invoice_series`, `category_option_group`, `option_value_group_block`, `option_value_restriction` มี `shop_id`; ส่วน `shop` เองไม่มี `shop_id` เพราะมันคือตัว tenant เอง กรองด้วย `id` แทน — ดู §3.0 และ §5.2) ก็ยังเป็นไปตามหลักการเดียวกันนี้ทุกตาราง ไม่มีข้อยกเว้น
 
 ### 9.2 ทำไมใส่ทุกตาราง ทั้งที่ตารางลูกสืบทอดจากแม่ได้อยู่แล้ว
 

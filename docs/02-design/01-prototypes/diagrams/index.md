@@ -51,6 +51,12 @@
 | `nfr-status-v1` | NFR 20 ข้อ ออกแบบรองรับแล้วแค่ไหน | [[../../../01-requirements/01-spec/nfr-v1\|NFR v1]] §7 |  |
 | `roadmap-phases-v1` | ลำดับสามเฟส | [[../../../01-requirements/02-plan/release-roadmap-v1\|Release Roadmap v1]] |  |
 
+## สถานะโปรเจกต์
+
+| ภาพ | เนื้อหา | ต้นทาง | สถานะ |
+|---|---|---|---|
+| `status-sync-v1` | ชั้น SDLC ห้าชั้นกับสถานะการ sync เทียบโค้ดจริง — ชั้นทดสอบเป็นคอขวด | [[../../../05-log/changelog\|Changelog]] 2026-08-28 | ใช้อยู่ |
+
 ---
 
 ## ข้อตกลงของโฟลเดอร์นี้

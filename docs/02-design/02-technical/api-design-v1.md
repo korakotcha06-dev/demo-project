@@ -7,6 +7,10 @@
 
 > 🔴 **แก้ไข 2026-08-20** — เปลี่ยนชื่อตามที่ตัดสินใน [[data-model-v1|Data Model v1]] §9.4 · `table_session` → `visit_session` · `shop_table` → `service_point` **เปลี่ยนเฉพาะชื่อ ไม่มีตรรกะข้อไหนเปลี่ยน** · คำว่า "โต๊ะ" ในเนื้อความคงไว้เพราะเป็นคำเรียกของร้านกาแฟ ซึ่งอยู่ที่ `shop.service_point_label`
 
+> 🔴 **Sync กับโค้ดจริง — 2026-08-28.** โค้ดของระบบ (`qr-order-app`, repo แยก — ดู `CLAUDE.md` ของ vault นี้) ถูกสร้างและผ่านชุดเทสแล้ว **268 เคส** ก่อนรอบ sync นี้จะเสร็จ — งานรอบนี้จึงเป็น **การแก้เอกสารให้ตรงกับโค้ด ซึ่งกลับทิศจากกฎปกติของ vault** (ปกติเอกสารเป็นต้นทาง โค้ดเดินตามเอกสาร) เหตุผลคือโค้ดที่ผ่านเทสจำนวนมากแล้วคือความจริงที่ยืนยันแล้ว ส่วนเอกสารเดิมเป็นแค่ร่างก่อนลงมือ ทุก endpoint ด้านล่างไล่อ่านจากไฟล์ `route.ts` จริงใต้ `src/app/api/v1/**` ทีละไฟล์ (54 ไฟล์ 71 method) ไม่ใช่จากความจำหรือสรุปที่มีมาก่อน · endpoint ที่เอกสารเดิมประกาศไว้แต่โค้ดไม่มี **ไม่ถูกลบทิ้ง** — มาร์กสถานะไว้ในตารางแทนตามกฎ "ห้ามลบเอกสารทิ้ง" ของ vault
+>
+> 🔴 **ข้อสังเกตเรื่องชื่อ:** โค้ดเปลี่ยนชื่อ resource จาก **"โต๊ะ" (tables)** เป็น **"จุดบริการ" (service-points)** เฉพาะใน endpoint ฝั่งแอดมิน (`/api/v1/admin/service-points/...`) และ view ที่อยู่เบื้องหลัง (`table_status_v` → `service_point_status_v`) แต่ **endpoint ฝั่งพนักงาน (staff) ยังใช้คำว่า `tables` ในตัว URL ตรง ๆ** (`/api/v1/staff/tables`, `/api/v1/staff/table-orders`) — ไม่ได้เปลี่ยนตาม เอกสารนี้เรียกตามโค้ดจริงทุกจุด (path คงคำว่า tables ตรงที่โค้ดใช้ tables, เปลี่ยนเป็น service-points ตรงที่โค้ดใช้ service-points) ส่วนคำว่า **"โต๊ะ"** ในเนื้อความยังคงไว้เหมือนเดิมเพราะเป็นคำเรียกของหน้าร้านตาม [[data-model-v1|Data Model v1]] §9.4
+
 กลับไปที่ [[index|02-technical]]
 
 ---
@@ -19,7 +23,7 @@
 | Format | JSON เท่านั้น · `Content-Type: application/json` |
 | เงิน | ทุก field เป็น **integer หน่วยสตางค์** ชื่อลงท้าย `_satang` — client เป็นผู้แปลงเป็นบาทตอนแสดงผล |
 | เวลา | ISO-8601 พร้อม offset (`2026-08-15T14:03:22+07:00`) |
-| การเขียนที่ไม่ idempotent โดยธรรมชาติ | ต้องส่ง header `Idempotency-Key` (UUID จาก client) — ใช้กับ `POST /orders`, `POST /counter-orders`, `POST /bills/{id}/payment` |
+| การเขียนที่ไม่ idempotent โดยธรรมชาติ | ต้องส่ง header `Idempotency-Key` (UUID จาก client) — ยืนยันจากโค้ดจริง (`requireIdempotencyKey`) ว่าใช้กับ `POST /orders`, `POST /counter-orders`, `POST /staff/counter-orders`, `POST /staff/table-orders`, `POST /staff/bills/{id}/close`, `POST /staff/counter/orders/{id}/payment` — 🔴 *เปลี่ยนจากร่างเดิมที่เขียนว่า `POST /bills/{id}/payment`* endpoint นั้นไม่มีในโค้ดจริง ดู §3 |
 | การอัปเดตที่แข่งกันได้ | ใช้ **conditional update**: ส่งสถานะ/เวอร์ชันที่ client เชื่อว่าเป็นจริงมาด้วย (`expected_status`, `expected_version`, `expected_total_satang`) → ไม่ตรงคืน `409` พร้อมสถานะปัจจุบัน **ห้ามเขียนทับเงียบ ๆ** |
 | Pagination | cursor-based (`?cursor=&limit=`) เฉพาะรายการประวัติ — คิวหน้าร้านไม่ต้องแบ่งหน้า |
 | ภาษาข้อความ | `message_th` เป็นข้อความที่แสดงต่อผู้ใช้จริง **ห้ามมีศัพท์เทคนิค** (UX §6) · `code` เป็นภาษาอังกฤษสำหรับ log/dev |
@@ -66,30 +70,33 @@ GET  https://<domain>/c/{code}    → หน้าเมนู takeaway  (US-28)
 |---|---|---|---|
 | ไม่พบ `code` | 404 | `QR_NOT_FOUND` | "ไม่พบข้อมูลโต๊ะจาก QR นี้ กรุณาแจ้งพนักงานเพื่อสั่งอาหาร" |
 | QR ถูกปิดใช้งาน | 410 | `QR_INACTIVE` | "QR นี้เลิกใช้งานแล้ว กรุณาแจ้งพนักงาน" |
-| โต๊ะถูกปลดระวาง (US-42) | 410 | `TABLE_RETIRED` | "โต๊ะนี้ไม่เปิดให้บริการแล้ว กรุณาแจ้งพนักงาน" |
+| โต๊ะ (จุดบริการ) ถูกปลดระวาง (US-42) | 410 | `TABLE_RETIRED` | "โต๊ะนี้ไม่เปิดให้บริการแล้ว กรุณาแจ้งพนักงาน" — 🔴 ชื่อ error code ในโค้ดจริงยังเป็น `TABLE_RETIRED` แม้ resource จะเปลี่ยนชื่อเป็น service point แล้ว (ยืนยันจาก `src/lib/errors.ts`) |
 | ร้านปิดรับออเดอร์ (เตรียมทาง US-26) | 200 | — | แสดงหน้า "ร้านปิดรับออเดอร์แล้ว" แทนเมนู ไม่มีปุ่มสั่ง (UX §5) |
 
 ทุกกรณี error ต้องแสดง **ทางออกที่ไม่ใช่การงมเอง** (UX principle ข้อ 3): ข้อความบอกให้แจ้งพนักงาน → พนักงานคีย์แทนผ่าน US-30
 
+> 🔴 **ตารางด้านล่างของหัวข้อ 2 ทวนกับไฟล์ `route.ts` จริงใต้ `src/app/api/v1/` ทีละไฟล์แล้ว (2026-08-28)** — คอลัมน์ "Auth guard" คือฟังก์ชันตรวจสิทธิ์ที่โค้ดเรียกจริง ไม่ใช่คำอธิบายจากร่างเดิม
+
 ### 2.2 เมนูและตะกร้า
 
-| Method | Path | ผู้เรียก | Input | Output | หมายเหตุ |
+| Method | Path | Auth guard | Input | Output | หมายเหตุ |
 |---|---|---|---|---|---|
-| `GET` | `/api/v1/menu` | guest/staff | — | หมวดหมู่ + สินค้า + option group ที่ผูกกับแต่ละสินค้า + `is_available` | cache ได้ (ISR) revalidate ทันทีที่แอดมินแก้ (US-23 AC) · **ซ่อน option group ที่ `hide_when_empty` และไม่มี value ที่ available เลย** (US-35 AC) |
-| `GET` | `/api/v1/cart` | guest | — | ตะกร้าปัจจุบัน + ยอดรวม | dine-in = ตะกร้าของโต๊ะ (แชร์) · counter = ตะกร้าของ session |
-| `POST` | `/api/v1/cart/items` | guest | `{product_id, qty, option_value_ids[]}` | `{cart_item, cart_total_satang}` | **atomic upsert** ดู §5.1 |
-| `PATCH` | `/api/v1/cart/items/{id}` | guest | `{qty, expected_version}` | `{cart_item}` \| 409 | ตั้งจำนวนแบบระบุค่า (จากปุ่ม +/-) |
-| `DELETE` | `/api/v1/cart/items/{id}` | guest | — | 204 | idempotent — ลบซ้ำก็คืน 204 |
+| `GET` | `/api/v1/menu` | ไม่ต้องล็อกอิน — ต้องมี session ลูกค้า (QR) **หรือ** session พนักงานอย่างใดอย่างหนึ่ง (`readCustomerContext` / `readStaffContext`) | — | หมวดหมู่ + สินค้า + option group ที่ผูกกับแต่ละสินค้า + `is_available` | cache ได้ (ISR) revalidate ทันทีที่แอดมินแก้ (US-23 AC) · **ซ่อน option group ที่ `hide_when_empty` และไม่มี value ที่ available เลย** (US-35 AC) |
+| `GET` | `/api/v1/cart` | ไม่ต้องล็อกอิน — `requireCustomerContext` (session ลูกค้าจาก QR) | — | ตะกร้าปัจจุบัน + ยอดรวม | dine-in = ตะกร้าของโต๊ะ/จุดบริการ (แชร์) · counter = ตะกร้าของ session |
+| `POST` | `/api/v1/cart/items` | ไม่ต้องล็อกอิน — `requireCustomerContext` | `{product_id, qty, option_value_ids[]}` | `{cart_item, cart_total_satang}` | **atomic upsert** ดู §5.1 |
+| `PATCH` | `/api/v1/cart/items/{id}` | ไม่ต้องล็อกอิน — `requireCustomerContext` | `{qty, expected_version}` | `{cart_item}` \| 409 | ตั้งจำนวนแบบระบุค่า (จากปุ่ม +/-) |
+| `DELETE` | `/api/v1/cart/items/{id}` | ไม่ต้องล็อกอิน — `requireCustomerContext` | — | 204 | idempotent — ลบซ้ำก็คืน 204 |
 
 **กฎ authorization:** ทุก endpoint ตรวจว่า `cart_id` ที่ถูกแตะ เป็นของ `tsid`/`sid` ใน token เท่านั้น — ห้ามรับ `cart_id` จาก body
 
 ### 2.3 ยืนยันออเดอร์และติดตามสถานะ
 
-| Method | Path | ผู้เรียก | Input | Output |
+| Method | Path | Auth guard | Input | Output |
 |---|---|---|---|---|
-| `POST` | `/api/v1/orders` | guest | header `Idempotency-Key` · body `{}` (ยืนยันทั้งตะกร้า) | `201 {order, rejected_items[], payment_instruction}` |
-| `GET` | `/api/v1/orders` | guest | — | ออเดอร์ทุกรอบของ session/โต๊ะ + สถานะปัจจุบัน (US-05, US-06) |
-| `GET` | `/api/v1/bill/summary` | guest | — | ทุกออเดอร์ของรอบนี้ + ยอดรวมสุทธิ + ข้อความว่าต้องจ่ายที่ไหน (US-07) |
+| `POST` | `/api/v1/orders` | ไม่ต้องล็อกอิน — `requireCustomerContext` | header `Idempotency-Key` · body `{}` (ยืนยันทั้งตะกร้า) | `201 {order, rejected_items[], payment_instruction}` |
+| `GET` | `/api/v1/orders` | ไม่ต้องล็อกอิน — `requireCustomerContext` | — | ออเดอร์ทุกรอบของ session/โต๊ะ + สถานะปัจจุบัน (US-05, US-06) |
+| `GET` | `/api/v1/bill/summary` | ไม่ต้องล็อกอิน — `requireCustomerContext` | — | ทุกออเดอร์ของรอบนี้ + ยอดรวมสุทธิ + ข้อความว่าต้องจ่ายที่ไหน (US-07) |
+| `POST` | `/api/v1/counter-orders` | ไม่ต้องล็อกอิน — `requireCustomerContext` (บังคับ `channel==='counter'`) | header `Idempotency-Key` · body `{customer_label?}` | `201 {order, ...}` สถานะ `awaiting_payment` (US-28) — 🔴 endpoint นี้ **หายไปทั้งแถวจากร่างเดิมของหัวข้อ 2** ทั้งที่มีอยู่ในโค้ดจริงและมี US-28 อ้างถึงในหัวข้อ 2.1 อยู่แล้ว ลูกค้าซื้อกลับยืนยันออเดอร์ของตัวเองที่นี่ (ยังไม่เข้าครัว — ต้องให้พนักงานยืนยันรับเงินก่อนผ่าน `POST /api/v1/staff/counter/orders/{id}/payment` ดู §3) |
 
 **`payment_instruction` ในผลลัพธ์ — บังคับให้ต่างกันตามช่องทาง (UX-07 / UX-08):**
 
@@ -108,45 +115,117 @@ UX-08 ตั้งเกณฑ์ ≥95% ของผู้ทดสอบต้
 
 ## 3. Endpoint ฝั่งพนักงาน (staff)
 
-| Method | Path | Input | Output / ผล | US |
+> 🔴 **Sync 2026-08-28** — ตารางนี้ไล่จาก `route.ts` จริงทุกไฟล์ใต้ `src/app/api/v1/staff/**` (21 method) แล้วแทนตารางร่างเดิมทั้งตาราง ของเดิมไม่ถูกลบ — ดูแถวสถานะ "[แทนที่ด้วย]" / "[ยังไม่ได้สร้าง]" ในตารางด้านล่างแทน
+>
+> Auth guard ของทุก endpoint ในหัวข้อนี้ (ยกเว้น login/logout) คือ **`requireStaff`** — เขียนซ้ำต่อแถวเพื่อให้ตรงกับสิ่งที่โค้ดเรียกจริง คอลัมน์ "สถานะ" ว่าง = มีอยู่จริงตรงกับที่ร่างเดิมประกาศไว้
+
+### 3.0 เข้า/ออกระบบ
+
+| Method | Path | Auth guard | Input | Output |
 |---|---|---|---|---|
-| `GET` | `/api/v1/staff/orders` | `?status=&channel=` | คิวออเดอร์ที่ยังไม่จบ + `placed_at` + `status_changed_at` + ป้าย channel/origin | US-13, UX-10 |
-| `POST` | `/api/v1/staff/orders/{id}/status` | `{expected_status, to_status}` | 200 `{order}` \| 409 | US-14 · §5.4 |
-| `POST` | `/api/v1/staff/orders/{id}/cancel` | `{reason}` **บังคับ** | 200 · เขียน `order_status_event` | US-20 · BR ข้อ 5 |
-| `POST` | `/api/v1/staff/order-items/{id}/cancel` | `{reason}` **บังคับ** | 200 · คำนวณยอดบิลใหม่ทันที | US-20 |
-| `POST` | `/api/v1/staff/orders/{id}/handover` | — | `ready → completed` (เฉพาะ channel=counter) | US-30 "รอเสิร์ฟ" → ส่งมอบ |
-| `POST` | `/api/v1/staff/products/{id}/availability` | `{is_available}` | 200 · เมนูลูกค้าอัปเดตทันทีผ่าน realtime | US-16 |
-| `POST` | `/api/v1/staff/option-values/{id}/availability` | `{is_available}` | 200 | US-36 · BR ข้อ 4 (ระดับตัวเลือก) |
-| `GET` | `/api/v1/staff/tables` | — | โต๊ะทั้งหมด + สถานะจาก `table_status_v` + ยอดค้างต่อโต๊ะ | US-18 · BR ข้อ 11 |
-| `GET` | `/api/v1/staff/bills/{id}` | — | ทุกออเดอร์ของบิล + ยอดรวมสุทธิ | US-18 |
-| `POST` | `/api/v1/staff/bills/{id}/close` | `{expected_total_satang, method, force?}` | 200 · ปิดบิล + ปิด visit_session + โต๊ะกลับเป็นว่าง \| 409 | US-19 · §5.3 |
-| `POST` | `/api/v1/staff/bills/{id}/payment` | `Idempotency-Key` · `{method, amount_satang}` | 200 · counter: `awaiting_payment → queued` | US-29 · §5.5 |
-| `POST` | `/api/v1/staff/counter-orders` | `Idempotency-Key` · `{items[], method, amount_satang}` | `201 {order}` สถานะ `queued` ทันที | US-30 · §4.2 |
+| `POST` | `/api/v1/staff/login` | ไม่ต้องล็อกอิน (นี่คือ endpoint ล็อกอินเอง) | `{email, password, device_label?}` | `{staff, servicePointLabel}` — เพิ่ม session แถวใหม่ ไม่เด้ง device เก่า |
+| `POST` | `/api/v1/staff/logout` | ไม่ต้องล็อกอิน (ล้าง session ของตัวเอง) | — | `{ok:true}` |
+
+### 3.1 คิวออเดอร์ / สถานะ / ยกเลิก
+
+| Method | Path | Auth guard | Input | Output / ผล | สถานะ |
+|---|---|---|---|---|---|
+| `GET` | `/api/v1/staff/orders` | `requireStaff` | — | คิวออเดอร์ที่ยังไม่จบ (US-13) | |
+| `POST` | `/api/v1/staff/orders/{id}/status` | `requireStaff` + `requireUnlocked` (NFR-11) | `{expected_status, to_status}` | 200 `{order}` \| 409 | US-14 · §5.4 — `STATUSES` รวม `ready`/`completed` ในเซตเดียว ดูหมายเหตุด้านล่างเรื่อง handover |
+| `POST` | `/api/v1/staff/orders/{id}/cancel` | `requireStaff` + `requireUnlocked` | `{reason}` **บังคับ** | 200 · เขียน `order_status_event` | US-20 · BR ข้อ 5 |
+| `POST` | `/api/v1/staff/order-items/{id}/cancel` | `requireStaff` + `requireUnlocked` | `{reason}` **บังคับ** | 200 · คำนวณยอดบิลใหม่ทันที | US-20 |
+| `POST` | `/api/v1/staff/orders/{id}/handover` | — | — | `ready → completed` (เฉพาะ channel=counter) | [ยังไม่ได้สร้าง] **ประกาศไว้แต่ยังไม่ได้สร้าง** — ไม่มีคำว่า `handover` ที่ไหนในโค้ดเลย (grep ทั้ง repo) เท่าที่สืบได้ การเปลี่ยนสถานะ `ready → completed` **ทำได้อยู่แล้ว**ผ่าน endpoint ทั่วไป `POST /api/v1/staff/orders/{id}/status` (ไม่มี endpoint เฉพาะสำหรับ "ส่งมอบ") — ไม่ชัดว่าตั้งใจยุบรวมหรือแค่ยังไม่ได้ทำ ดูหัวข้อ "ต้องคิดต่อ" |
+| `GET` | `/api/v1/staff/availability` | `requireStaff` | — | บอร์ดสินค้า/ตัวเลือกทั้งหมดพร้อมสถานะ (S-07) | ใหม่ — ไม่มีในร่างเดิม |
+| `POST` | `/api/v1/staff/products/{id}/availability` | `requireStaff` + `requireUnlocked` | `{is_available}` | 200 · เมนูลูกค้าอัปเดตทันทีผ่าน realtime | US-16 |
+| `POST` | `/api/v1/staff/option-values/{id}/availability` | `requireStaff` + `requireUnlocked` | `{is_available}` | 200 | US-36 · BR ข้อ 4 (ระดับตัวเลือก) |
+
+### 3.2 โต๊ะ / บิล / รับเงิน
+
+| Method | Path | Auth guard | Input | Output / ผล | สถานะ |
+|---|---|---|---|---|---|
+| `GET` | `/api/v1/staff/tables` | `requireStaff` | — | จุดบริการ (โต๊ะ) ทั้งหมด + สถานะจาก **`service_point_status_v`** (เดิมชื่อ `table_status_v`) + ยอดค้าง | US-18 · BR ข้อ 11 — 🔴 **URL path ยังเป็น `tables` ตรง ๆ ในโค้ดจริง** ไม่ได้เปลี่ยนตามฝั่งแอดมิน (ดูหมายเหตุต้นเอกสาร) |
+| `GET` | `/api/v1/staff/bills/{id}` | — | — | ทุกออเดอร์ของบิล + ยอดรวมสุทธิ | [ยังไม่ได้สร้าง] **ประกาศไว้แต่ยังไม่ได้สร้าง** — ยืนยันแล้วว่าไม่มีไฟล์ `route.ts` ใต้ `staff/bills/[id]/` เลย (มีแค่ `close/`) ที่แปลกกว่านั้นคือฟังก์ชัน `getBillDetail()` **มีอยู่จริง**ใน `src/server/staff/bills.ts` แต่ไม่มีใครเรียกใช้เลยทั้ง route และหน้าจอ — โค้ด server ถูกเขียนไว้แล้วแต่ไม่เคยต่อสาย route ให้ |
+| `POST` | `/api/v1/staff/bills/{id}/close` | `requireStaff` + `requireUnlocked` | header `Idempotency-Key` · `{expected_total_satang, method, force?}` | 200 · ปิดบิล + ปิด visit_session + โต๊ะกลับเป็นว่าง \| 409 | US-19 · §5.3 |
+| `POST` | `/api/v1/staff/bills/{id}/payment` | — | — | `Idempotency-Key` · `{method, amount_satang}` | [ยังไม่ได้สร้าง / แทนที่ด้วย] **ประกาศไว้แต่ไม่มี endpoint นี้ตรง ๆ** — เท่าที่สืบจากโค้ด งานนี้ถูกแยกเป็น 2 endpoint ตามช่องทางแทน: dine-in ใช้ `POST /api/v1/staff/bills/{id}/close` (รับเงิน + ปิดบิลพร้อมกัน) ส่วน counter ใช้ `POST /api/v1/staff/counter/orders/{id}/payment` (รับเงินแล้วดันเข้าคิว ยังไม่ปิดบิล) — ไม่มี endpoint กลางที่ชื่อ "payment" เดี่ยว ๆ เหมือนร่างเดิม |
+| `GET` | `/api/v1/staff/counter/awaiting-payment` | `requireStaff` | — | คิว "รอยืนยันการชำระเงิน" กรอง `channel='counter'` (S-03 · US-29) | ใหม่ — ไม่มีในร่างเดิม |
+| `POST` | `/api/v1/staff/counter/orders/{id}/payment` | `requireStaff` + `requireUnlocked` | header `Idempotency-Key` · `{method, expected_total_satang}` | 200 · `awaiting_payment → queued` | US-29 · §5.5 — คือ endpoint ที่แทน `bills/{id}/payment` ฝั่ง counter |
+| `POST` | `/api/v1/staff/counter-orders` | `requireStaff` + `requireUnlocked` | header `Idempotency-Key` · `{items[], method, expected_total_satang, customer_label?}` | `201 {order}` สถานะ `queued` ทันที | US-30 · §4.2 |
+| `POST` | `/api/v1/staff/table-orders` | `requireStaff` + `requireUnlocked` | header `Idempotency-Key` · `{service_point_id, items[]}` | `201 {order}` เข้าครัวทันที **ไม่รับเงิน** (dine-in จ่ายทีหลังตอนปิดบิล) | ใหม่ — ตอบข้อ 5 ในหัวข้อ 8 เดิม ("ต้องมี endpoint ให้พนักงานคีย์ออเดอร์ dine-in แทนลูกค้าไหม") — **สร้างแล้วตามคำสั่ง Touch 2026-08-23** 🔴 URL ยังใช้คำว่า `table-orders` ตรง ๆ เหมือนกับ `/staff/tables` |
+| `GET` | `/api/v1/staff/promptpay-qr` | `requireStaff` | `?amount_satang=` | SVG พร้อมเพย์ของร้านพร้อมยอดเงิน — `Cache-Control: no-store` เสมอ | ใหม่ — ไม่มีในร่างเดิม |
+
+### 3.3 ล็อกจอ / PIN (NFR-11)
+
+| Method | Path | Auth guard | Input | Output / ผล | สถานะ |
+|---|---|---|---|---|---|
+| `GET` | `/api/v1/staff/lock` | `requireStaff` | — | สถานะล็อกของสถานี | ใหม่ — ไม่มีในร่างเดิม |
+| `POST` | `/api/v1/staff/lock` | `requireStaff` | — | ล็อกด้วยมือก่อนเดินออกจากเครื่อง | ใหม่ |
+| `POST` | `/api/v1/staff/unlock` | `requireStaff` | `{pin}` | `{unlocked:true}` \| error ถ้า PIN ผิด (มี rate limit) | ใหม่ |
+| `PUT` | `/api/v1/staff/pin` | `requireStaff` | `{password, pin}` — ยืนยันด้วยรหัสผ่านเต็ม ไม่ใช่ PIN เดิม | `{ok:true}` | ใหม่ |
+| `POST` | `/api/v1/staff/interaction` | `requireStaff` | — | ต่ออายุการปลดล็อก (ต่างหากจาก `last_seen_at` เพื่อไม่ให้ polling นับเป็น interaction) | ใหม่ |
 
 **หมายเหตุ US-19 (`close`):** ไม่มี endpoint ใดในระบบที่เขียนสถานะโต๊ะได้ — โต๊ะกลับเป็น "ว่าง" เป็น **ผลข้างเคียง**ของการปิด `visit_session` ในทรานแซกชันนี้เท่านั้น (BR ข้อ 11)
 
-**หมายเหตุ US-30 (`counter-orders`):** สร้างออเดอร์ + `payment` + เลื่อนสถานะเป็น `queued` **ในทรานแซกชันเดียว** ตาม AC ที่ระบุว่ารับเงินเป็นส่วนหนึ่งของขั้นตอนเดียวกัน ไม่ใช่ 2 ขั้นแบบ US-28/US-29 · แคชเชียร์เรียกซ้ำต่อเนื่องได้ (คิว walk-in) โดยแต่ละครั้งเป็นคนละ `Idempotency-Key` → ออเดอร์แยกกันไม่ปน
+**หมายเหตุ US-30 (`counter-orders`):** สร้างออเดอร์ + รับเงิน + เลื่อนสถานะเป็น `queued` **ในทรานแซกชันเดียว** ตาม AC ที่ระบุว่ารับเงินเป็นส่วนหนึ่งของขั้นตอนเดียวกัน ไม่ใช่ 2 ขั้นแบบ US-28/US-29 · แคชเชียร์เรียกซ้ำต่อเนื่องได้ (คิว walk-in) โดยแต่ละครั้งเป็นคนละ `Idempotency-Key` → ออเดอร์แยกกันไม่ปน
 
 ---
 
 ## 4. Endpoint ฝั่งแอดมิน (admin)
 
-| Method | Path | หมายเหตุ | US |
-|---|---|---|---|
-| `POST/PATCH` | `/api/v1/admin/categories[/{id}]` | soft delete เท่านั้น (`DELETE` = set `deleted_at`) | US-23 |
-| `POST/PATCH` | `/api/v1/admin/products[/{id}]` | แก้แล้วมีผลกับเมนูลูกค้าทันที (revalidate cache) | US-23 |
-| `POST/PATCH` | `/api/v1/admin/option-groups[/{id}]` | ตั้ง `default_option_value_id`, `source_type`, `hide_when_empty` | US-35, US-43 |
-| `POST/PATCH` | `/api/v1/admin/option-values[/{id}]` | เพิ่ม/แก้/ลบเมล็ดพิเศษใช้ endpoint ชุดนี้ **ไม่มีระบบจัดการแยก** | US-36 |
-| `PUT` | `/api/v1/admin/products/{id}/option-groups` | ผูก/ถอดกลุ่มตัวเลือกของสินค้ารายตัว | US-43 AC ข้อ 4 |
-| `POST` | `/api/v1/admin/tables` | สร้างโต๊ะ **+ สร้าง QR ในทรานแซกชันเดียวกัน** | US-42 + US-24 |
-| `PATCH` | `/api/v1/admin/tables/{id}` | แก้ `display_name` / `zone_id` / `sort_order` — **ไม่แตะ `id` และไม่แตะ QR** | US-42 |
-| `POST` | `/api/v1/admin/tables/{id}/retire` | soft delete · 409 ถ้ามีบิลเปิดค้าง | US-42 · §5.6 |
-| `GET` | `/api/v1/admin/tables/{id}/qr.png` | เรนเดอร์ QR จาก `qr_code.code` ตอนดาวน์โหลด | US-24 |
-| `POST/PATCH` | `/api/v1/admin/zones[/{id}]` | โซนของผังอย่างง่าย | US-42 |
+> 🔴 **Sync 2026-08-28** — ตารางนี้ไล่จาก `route.ts` จริงทุกไฟล์ใต้ `src/app/api/v1/admin/**` (41 method) แล้วแทนตารางร่างเดิมทั้งตาราง Auth guard ของทุก endpoint ในหัวข้อนี้คือ **`requireAdmin`** (ยืนยันแล้วทุกไฟล์ ไม่มีข้อยกเว้น) จึงไม่แยกคอลัมน์ guard รายแถวเหมือนหัวข้อ 3
 
-🔴 **ไม่มี endpoint `POST /tables/{id}/qr/regenerate`** — ตั้งใจไม่มี ตาม BR ข้อ 10 (QR static ตลอดอายุร้าน) การมี endpoint นี้คือการเปิดช่องให้ QR ที่พิมพ์ติดโต๊ะไปแล้วพังโดยไม่ตั้งใจ
+### 4.1 เมนู: หมวดหมู่ / สินค้า / ตัวเลือก / เมล็ดพิเศษ
 
-🔴 **ไม่มี endpoint ที่เขียนสถานะโต๊ะ** — ตาม BR ข้อ 11
+| Method | Path | หมายเหตุ | US | สถานะ |
+|---|---|---|---|---|
+| `GET`, `POST` | `/api/v1/admin/categories` | list / สร้างหมวด | US-23 | |
+| `PATCH`, `DELETE` | `/api/v1/admin/categories/{id}` | soft delete เท่านั้น · `DELETE` รับ `?confirmed=1` เป็นการยืนยันรอบสอง | US-23 | |
+| `POST` | `/api/v1/admin/categories/{id}/move` | เลื่อนลำดับหมวดขึ้น/ลง (`{direction}`) | US-23 | ใหม่ — ไม่มีในร่างเดิม |
+| `PUT` | `/api/v1/admin/categories/{id}/option-defaults` | ตั้งค่าตั้งต้นของหมวดนี้ (`option_group_ids[]`) | US-35, US-43 | ใหม่ |
+| `GET` | `/api/v1/admin/category-option-defaults` | ค่าตั้งต้นของ**ทุกหมวด**ในครั้งเดียว — แยก route จาก PUT รายหมวดโดยเจตนา (กันส่ง id ปลอมอย่าง `all`) | US-35, US-43 | ใหม่ |
+| `GET`, `POST` | `/api/v1/admin/products` | list (`?q=` ค้นหา) / สร้างสินค้า — ราคาเป็น `price_satang` (สตางค์) ตาม §1 | US-23 | |
+| `PUT`, `DELETE` | `/api/v1/admin/products/{id}` | `PUT` รับทั้งก้อนรวม `option_group_ids[]` ในบอดีเดียวกัน — **ไม่มี endpoint แยกสำหรับผูก/ถอด option group** ดูหมายเหตุด้านล่าง | US-23 | |
+| `POST` | `/api/v1/admin/products/{id}/move` | เลื่อนลำดับสินค้าขึ้น/ลงในหมวดเดียวกัน | US-23 | ใหม่ |
+| `POST` | `/api/v1/admin/products/{id}/image` | อัปโหลดรูปสินค้า — `multipart/form-data` (endpoint เดียวในกลุ่ม admin ที่ไม่ใช่ JSON) | A-03 | ใหม่ |
+| `PUT` | `/api/v1/admin/products/{id}/option-groups` | ผูก/ถอดกลุ่มตัวเลือกของสินค้ารายตัว | US-43 AC ข้อ 4 | [แทนที่ด้วย] **ไม่มี endpoint นี้แยกต่างหาก** — ยืนยันแล้วว่าไม่มี route path `option-groups` ใต้ `products/{id}/` เลย ฟิลด์ `option_group_ids` ถูกยุบรวมเข้าไปใน body ของ `PUT /api/v1/admin/products/{id}` (และ `POST /api/v1/admin/products`) โดยตรงแทน |
+| `GET` | `/api/v1/admin/option-groups` | list กลุ่มตัวเลือกที่มีในร้าน | US-35, US-43 | |
+| `POST/PATCH` | `/api/v1/admin/option-groups[/{id}]` | ตั้ง `default_option_value_id`, `source_type`, `hide_when_empty` | US-35, US-43 | [ยังไม่ได้สร้าง] **ประกาศไว้แต่ยังไม่ได้สร้าง** — ยืนยันแล้วว่ามีแค่ `GET` เท่านั้นในโค้ดจริง ไม่มีทั้ง `POST` และ `PATCH`/`[id]` เลย กลุ่มตัวเลือกจึงยังแก้ผ่าน API ไม่ได้ในตอนนี้ (อาจตั้งค่าตรงฐานข้อมูล/seed แทน) |
+| `GET`, `POST` | `/api/v1/admin/option-values` | list ตัวเลือกทุกกลุ่มพร้อมราคาเพิ่ม / เพิ่มตัวเลือกใหม่เข้ากลุ่มไหนก็ได้ | US-36 | |
+| `PATCH`, `DELETE` | `/api/v1/admin/option-values/{id}` | เปลี่ยนชื่อ/ราคาเพิ่ม (ไม่กระทบบิลเปิดค้าง เพราะราคา snapshot ไว้แล้ว) / soft delete | US-36 | |
+| `PUT` | `/api/v1/admin/option-values/{id}/restrictions` | ตั้งว่าตัวเลือกนี้อนุญาตค่าไหนบ้างในกลุ่มลูก (`null`=ไม่จำกัด, `[]`=ไม่มีกลุ่มนี้เลย) | US-35, US-43 | ใหม่ |
+| `GET`, `POST` | `/api/v1/admin/beans` | list / เพิ่มเมล็ดพิเศษ | US-36 | ใหม่ — ใช้กลไก option_value เดียวกับ US-16 |
+| `PATCH`, `DELETE` | `/api/v1/admin/beans/{id}` | เปลี่ยนชื่อ/มาร์กหมด / ลบ | US-36 | ใหม่ |
+
+### 4.2 โต๊ะ (จุดบริการ) / โซน / QR
+
+| Method | Path | หมายเหตุ | US | สถานะ |
+|---|---|---|---|---|
+| `GET`, `POST` | `/api/v1/admin/service-points` | list (`?retired=1` รวมที่ปลดระวางแล้ว) / **สร้างจุดบริการ + สร้าง QR ในทรานแซกชันเดียวกัน** | US-42 + US-24 | [แทนที่ด้วย] **แทน `POST /api/v1/admin/tables` ในร่างเดิม** — path เปลี่ยนชื่อจาก `tables` เป็น `service-points` ตามการเปลี่ยนชื่อ resource (ดูหมายเหตุต้นเอกสาร) |
+| `PATCH` | `/api/v1/admin/service-points/{id}` | แก้ `display_name` / `zone_id` / `sort_order` / `seat_count` — **ไม่แตะ `id` และไม่แตะ QR โดยเจตนา ไม่มี endpoint regenerate QR ที่ไหนเลย** (BR ข้อ 10) | US-42 | [แทนที่ด้วย] แทน `PATCH /api/v1/admin/tables/{id}` |
+| `POST` | `/api/v1/admin/service-points/{id}/retire` | soft delete · 409 `TABLE_HAS_OPEN_BILL` ถ้ามีบิลเปิดค้าง | US-42 · §5.6 | [แทนที่ด้วย] แทน `POST /api/v1/admin/tables/{id}/retire` |
+| `POST` | `/api/v1/admin/service-points/{id}/restore` | กู้คืนจุดบริการที่ปลดระวางแล้ว (retired → available) | US-42 | ใหม่ทั้งหมด — **ไม่มีในร่างเดิมเลย** (ร่างเดิมมีแต่ retire ทางเดียว ไม่มีทางย้อนกลับ) |
+| `GET`, `POST` | `/api/v1/admin/zones` | list / สร้างโซนของผังอย่างง่าย | US-42 | |
+| `GET` | `/api/v1/admin/qr` | QR ทั้งชุดของร้าน (รวมของเคาน์เตอร์) + `baseUrl` — QR เป็นแบบคงที่ไม่มีวันหมดอายุ | A-07 | ใหม่ |
+| `GET` | `/api/v1/admin/qr/{code}` | ป้าย QR **เต็มใบพร้อมพิมพ์** (ไม่ใช่ QR เปล่า) — `?format=svg` (ค่าเริ่มต้น) \| `png` \| `jpeg` ที่ 300dpi | US-44 + US-24 | [แทนที่ด้วย] **แทน `GET /api/v1/admin/tables/{id}/qr.png` ในร่างเดิม** — เปลี่ยนจาก "ต่อ table id" เป็น "ต่อ QR `code`" และคืน **ป้ายเต็มใบ (โลโก้/สี/ชื่อร้าน) เสมอทุกฟอร์แมต** ไม่ใช่ QR ดิบอย่างเดียวเหมือนชื่อไฟล์เดิมที่บอกไว้ (`qr.png`) |
+| `GET` | `/api/v1/admin/qr/sheet` | ป้ายหลายใบในไฟล์เดียว แผ่น A4 เรียง 4 ใบ — `?format=pdf` (ค่าเริ่มต้น) \| `jpeg` (ได้แผ่นแรกแผ่นเดียวโดยเจตนา) · `?codes=a,b,c` เลือกเฉพาะที่ระบุ | US-24 + US-44 | ใหม่ทั้งหมด |
+
+🔴 **ไม่มี endpoint `POST /service-points/{id}/qr/regenerate`** — ตั้งใจไม่มี ตาม BR ข้อ 10 (QR static ตลอดอายุร้าน) การมี endpoint นี้คือการเปิดช่องให้ QR ที่พิมพ์ติดโต๊ะไปแล้วพังโดยไม่ตั้งใจ
+
+🔴 **ไม่มี endpoint ที่เขียนสถานะโต๊ะ** — ตาม BR ข้อ 11 (สถานะมาจาก `service_point_status_v` เท่านั้น)
+
+### 4.3 ตั้งค่าร้าน: พร้อมเพย์ / VAT / หน้าตาป้าย QR
+
+| Method | Path | หมายเหตุ | US | สถานะ |
+|---|---|---|---|---|
+| `GET`, `PUT` | `/api/v1/admin/promptpay` | อ่าน/ตั้งเลขพร้อมเพย์ของร้าน (ส่งค่าว่าง = เลิกรับพร้อมเพย์) | — | ใหม่ — ไม่มีในร่างเดิม |
+| `GET`, `PUT` | `/api/v1/admin/vat` | เปิด/ปิด VAT — **admin เท่านั้น ไม่ใช่ staff** เพราะเป็นการตัดสินใจทางภาษี · ใช้ `PUT` ไม่ใช่ `PATCH` เพราะต้องส่งสถานะทั้งชุดกันค่าครึ่ง ๆ | A-08 | ใหม่ |
+| `GET`, `PUT` | `/api/v1/admin/signage-theme` | อ่าน/ตั้งสีพื้น สีตัวอักษร มุมป้าย ของป้าย QR | US-44 | ใหม่ |
+| `POST`, `DELETE` | `/api/v1/admin/signage-theme/image` | อัปโหลด/ลบโลโก้หรือภาพพื้นหลังของป้าย — `?kind=logo\|background` · `multipart/form-data` · `DELETE` ไม่ลบไฟล์จริงบนดิสก์ (เผื่อกดผิด) | US-44 | ใหม่ |
+
+### 4.4 endpoint ที่จะเพิ่มถัดไป
+
+| Method | Path | Auth guard | หมายเหตุ | US | สถานะ ณ เวลาที่เขียน (2026-08-28) |
+|---|---|---|---|---|---|
+| `GET` | `/api/v1/admin/reports/summary` | `requireAdmin` (คาดการณ์ — ตามรูปแบบ endpoint admin อื่นทั้งหมดในเอกสารนี้) | รายงานยอดขาย — ตอบ US-25 ที่ค้างมาตั้งแต่ Phase 0 (โค้ดมีคอมเมนต์ `🔴 "รายงานเป็น US-25 ของ Phase 1"` และ `app-nav.ts` เตรียมช่อง "แดชบอร์ด" ไว้รอแล้วแต่ปิดไว้) | US-25 | **ยังไม่มีในโค้ด ณ เวลาที่เขียนเอกสารนี้** — ยืนยันแล้วว่าไม่มี path `reports` ที่ไหนใต้ `src/app/api/v1/admin/**` เลย ตามแผนจะสร้างในวันเดียวกันนี้ (2026-08-28) — เมื่อสร้างเสร็จแล้วให้ย้ายแถวนี้ไปหัวข้อ 4.3 และลบสถานะนี้ทิ้ง |
 
 ---
 
@@ -249,6 +328,8 @@ transition ที่ผิดกฎตาม [[data-model-v1|Data Model v1]] §4
 
 ### 5.5 ยืนยันรับเงินซ้ำ / กดปุ่มรัวตอนยุ่ง (US-29)
 
+> 🔴 **sync 2026-08-28:** endpoint จริงของหัวข้อนี้คือ `POST /api/v1/staff/counter/orders/{id}/payment` ไม่ใช่ `POST /bills/{id}/payment` เหมือนร่างเดิม — ดู §3.2 ตรรกะ conditional update ด้านล่างยังใช้ได้เหมือนเดิม
+
 - `Idempotency-Key` บังคับ → กดซ้ำภายใน key เดิมคืนผลเดิม ไม่สร้าง `payment` แถวที่สอง
 - conditional update: `UPDATE bill SET paid_at=now(), status='paid' WHERE id=$1 AND status='awaiting_payment'` → 0 row + จ่ายแล้ว = 200 no-op · 0 row + บิล voided = `409 BILL_VOIDED`
 - ออเดอร์เลื่อนไป `queued` **ในทรานแซกชันเดียวกับการบันทึก payment** — ห้ามแยกเป็น 2 request เพราะถ้า request ที่สองล้ม ลูกค้าจ่ายเงินแล้วแต่ออเดอร์ไม่เข้าคิว (INV-3)
@@ -315,7 +396,7 @@ WHERE id = $1
 | 2 | **ปิดบิลตอนยังมีเครื่องดื่มค้างทำ** ต้องบล็อกหรือแค่เตือน (ซ้ำกับ [[architecture-v1|Architecture v1]] §8 ข้อ 5) | กระทบทั้ง flow เงินและลำดับงานหน้าร้าน | เตือน + ต้องส่ง `force: true` ยืนยันอีกชั้น · ออเดอร์ที่ค้าง auto-complete |
 | 3 | **แก้ชื่อโต๊ะระหว่างมีบิลเปิดค้างได้ไหม** — US-42 AC เขียนรวมว่า "ห้ามลบหรือแก้ไขโต๊ะที่มีบิลเปิดค้าง" แต่การแก้ชื่อไม่ทำให้ข้อมูลเสียหายเลย (QR ผูกกับ id) | ต้องรู้ว่า AC ตั้งใจครอบคลุมการแก้ชื่อด้วยจริงหรือหมายถึงการปลดระวางเป็นหลัก | อนุญาตแก้ชื่อ · บล็อกเฉพาะการปลดระวาง — **ถ้า XAVIER ยืนยันว่าต้องบล็อกทั้งคู่ เปลี่ยนได้ในบรรทัดเดียว** |
 | 4 | **rate limit ของ guest** — QR ทางกายภาพคือ credential (ความเสี่ยง R6) ใครถ่ายรูป QR ไปก็สั่งของเข้าโต๊ะคนอื่นได้ | เกณฑ์ที่เหมาะสมขึ้นกับปริมาณลูกค้าจริงของร้านซึ่งยังไม่เปิด | จำกัด ~30 คำขอเขียน/นาที/session · ยืนยันออเดอร์ ~5 ครั้ง/นาที/session · เกินแล้วคืน 429 พร้อมข้อความสุภาพ ไม่ล็อกถาวร |
-| 5 | **ต้องมี endpoint ให้พนักงานคีย์ออเดอร์ dine-in แทนลูกค้าไหม** — US-30 ครอบคลุมเฉพาะช่องทางเคาน์เตอร์ แต่ UX principle ข้อ 3 + persona P3 (ป้าน้อย) บอกว่าทุก flow ต้องมีทางออกให้พนักงานช่วย ซึ่งฝั่งโต๊ะยังไม่มี | เป็นการเพิ่มสโคปเกิน backlog — ต้องให้ XAVIER เปิด story ใหม่ ไม่ใช่ COULSON เพิ่มเอง | **ไม่ทำใน Phase 0** ตามสโคปที่ backlog กำหนด · fallback ปัจจุบันคือพนักงานเดินไปกดบนมือถือของลูกค้า/สั่งผ่านช่องทางเคาน์เตอร์แทน — **flag ไว้ว่าเป็นช่องว่างจริงของ journey J3** |
+| 5 | **ต้องมี endpoint ให้พนักงานคีย์ออเดอร์ dine-in แทนลูกค้าไหม** — US-30 ครอบคลุมเฉพาะช่องทางเคาน์เตอร์ แต่ UX principle ข้อ 3 + persona P3 (ป้าน้อย) บอกว่าทุก flow ต้องมีทางออกให้พนักงานช่วย ซึ่งฝั่งโต๊ะยังไม่มี | เป็นการเพิ่มสโคปเกิน backlog — ต้องให้ XAVIER เปิด story ใหม่ ไม่ใช่ COULSON เพิ่มเอง | ~~**ไม่ทำใน Phase 0** ตามสโคปที่ backlog กำหนด · fallback ปัจจุบันคือพนักงานเดินไปกดบนมือถือของลูกค้า/สั่งผ่านช่องทางเคาน์เตอร์แทน~~ 🔴 **sync 2026-08-28: สร้างแล้ว** — `POST /api/v1/staff/table-orders` (ดู §3.2) ตามคำสั่ง Touch วันที่ 2026-08-23 (ยืนยันจากคอมเมนต์ในโค้ด) ช่องว่างของ journey J3 นี้ถูกอุดแล้ว แต่ยังไม่พบว่ามีการเปิด story ใหม่ผ่าน XAVIER ตามช่องทางที่คอลัมน์ก่อนหน้ากำหนดไว้หรือไม่ — ควรตรวจสอบย้อนหลังว่าใครเป็นคนเคาะให้เพิ่มสโคปนี้ |
 
 ---
 
