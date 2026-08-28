@@ -103,6 +103,27 @@
 
 ---
 
+### 2.3 US-53 แดชบอร์ดวิเคราะห์ยอดขายเชิงลึก (P2/Phase 2) — สร้างจริงแล้วก่อนกำหนด (2026-08-28)
+
+> เพิ่มแถวนี้ตามคำขอเฉพาะของงานนี้ เช่นเดียวกับ §2.2 ของ US-25 — ตรวจจากโค้ดจริงที่
+> `qr-order-app@df45248` (branch `feat/sales-analytics`) ไม่ใช่จากเอกสาร US-53 เป็น
+> **P2/Phase 2/Could** ตาม [[../../01-requirements/01-spec/product-backlog-v1|Product Backlog v1]]
+> — อยู่นอกขอบเขต Phase 0 ทั้ง 27 US ของหัวข้อ 2 และนอกขอบเขต Phase 1 ของหัวข้อ 2.1 โดยตรง
+> จึงไม่มีแถวใดในสองหัวข้อนั้นที่ต้องแก้ ถูกสร้างก่อนกำหนดตามคำสั่งตรงของ Touch วันที่
+> 2026-08-28 ("ยังไม่รีบเปิดร้าน ให้ปิดแดชบอร์ดให้จบก่อน") — ไม่เปลี่ยน priority/phase เดิม
+
+| หัวข้อ | สถานะที่ตรวจพบจริงวันนี้ |
+|---|---|
+| **AC** | 5 ข้อ ติ๊ก [x] ครบแล้วใน [[../../01-requirements/01-spec/product-backlog-v1|Product Backlog v1]] หัวข้อ US-53 พร้อมหลักฐานต่อท้ายแต่ละข้อ — **ยังไม่มี AC ID ทะเบียนกลาง (AC-53-x) ใน [[../../01-requirements/01-spec/acceptance-criteria-v1|Acceptance Criteria v1]]** เพราะไฟล์นั้นประกาศตัวเองว่าครอบ "US-01 ถึง US-45 และ US-50" เท่านั้น — รูปแบบช่องว่างเดียวกับที่หัวข้อ 5.1 เคยพบกับ US-52 ต้องเปิดงานออก AC ID ให้ US-53/54 แยกต่างหาก |
+| **หน้าจอ** | A-09 แท็บ "วิเคราะห์เชิงลึก" ใน [[../../02-design/01-prototypes/screen-inventory-v1|Screen Inventory v1]] — `src/app/admin/reports/analytics-tab.tsx` ผูกกับ query `?tab=analytics` ของหน้า `/admin/reports` เดิม (ไฟล์เดียวกับ US-25) |
+| **โค้ดฝั่งเซิร์ฟเวอร์** | `src/server/admin/analytics.ts` (`getSalesAnalytics()`) + `src/app/api/v1/admin/reports/analytics/route.ts` (`GET`, หลัง `requireAdmin()`, ใช้ `resolveReportRange`/`PAID_BILL_CTE` ตัวเดียวกับ `/summary` ของ US-25 — ไม่มี validator ซ้อน) |
+| **ไม่มี migration ใหม่** | ยืนยันแล้ว — ใช้ตาราง `orders`/`order_item`/`bill`/`shop.business_day_cutoff` ที่มีอยู่ตั้งแต่ Phase 0 ทั้งหมด ไม่มีไฟล์ migration ใหม่ในชุด `qr-order-app@df45248` |
+| **TC** | ยังไม่มี TC ID ในทะเบียนกลาง (เหตุผลเดียวกับช่อง AC ด้านบน) — เทสอัตโนมัติที่มีจริงคือ `tests/integration/analytics.test.ts` (43 เคสใหม่) |
+| **สถานะหลักฐาน** | **มีเทสอัตโนมัติครบ** — `pnpm test` ทั้ง suite **344 เคสผ่านหมด** (เดิม 301 ของ US-25 และ Phase 0/1 อื่น บวกใหม่ 43 เคสของ US-53) รวมกลุ่มเทส PDPA แบบ recursive key check (BR ข้อ 19/31), กลุ่มเทสขอบวันธุรกิจที่กระทบยอดกันได้ทั้ง trend/peakHeatmap, และกลุ่มเทส tenant isolation ของแดชบอร์ดนี้โดยเฉพาะ — **ยังไม่มีผลรันอย่างเป็นทางการใน [[../../03-testing/02-test-result/test-result-v1|Test Result v1]]** เหตุผลเดียวกับทุกแถวอื่นในเอกสารนี้ (ไฟล์นั้นยังว่างเปล่าทั้งฉบับ) |
+| **ยังไม่ merge เข้า `main`** | branch `feat/sales-analytics` เดียวกับที่ US-25/A-09 ยังค้างอยู่ — สถานะอย่างเป็นทางการยังเป็น "กำลังพัฒนา ยังไม่ deploy" |
+
+---
+
 ## 3. ตารางสืบกลับ — NFR-01 ถึง NFR-20
 
 | NFR | ออกแบบรองรับที่ไหน | วัดผลด้วยอะไร | สถานะ |
