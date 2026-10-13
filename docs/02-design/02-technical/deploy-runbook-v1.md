@@ -219,10 +219,10 @@ Touch (2026-08-23): *"ใส่เป็นเบอร์เราได้ ห
 
 ### 3.6 สมาชิก (US-55) — ภาระ ops ที่สัญญากับลูกค้าไว้ (เพิ่ม 2026-10-13)
 
-> เข้ามาพร้อม `qr-order-app` PR #13 · **ทำตอน deploy รอบที่ merge PR นั้น ไม่ใช่ก่อน**
+> เข้ามาพร้อม `qr-order-app` **PR #14** (PR #13 ถูกปิด รวมเข้า #14 แล้ว 2026-10-13) · **ทำตอน deploy รอบที่ merge PR นั้น ไม่ใช่ก่อน**
 > (ติดตั้ง timer ก่อนโค้ดขึ้น = สคริปต์ไม่มีอยู่จริง แล้ว timer ล้มทุกวัน)
 
-- [ ] `pnpm migrate` ให้ได้ **025_member.sql** (ตามลำดับของหัวข้อ 4)
+- [ ] `pnpm migrate` ให้ได้ **025_member_loyalty.sql** (ตามลำดับของหัวข้อ 4) · ลองก่อนด้วย `pnpm members:expire --dry-run`
 - [ ] 🔴 ติดตั้ง timer ลบข้อมูลตามระยะเก็บ — ข้อความยินยอมสัญญากับลูกค้าว่าจะลบอัตโนมัติ
   ถ้าไม่มีอะไรรัน = **ร้านผิดคำสัญญาเงียบ ๆ** ไม่มี error ให้ใครเห็น
   ```bash
@@ -231,11 +231,12 @@ Touch (2026-08-23): *"ใส่เป็นเบอร์เราได้ ห
   sudo systemctl daemon-reload
   sudo systemctl enable --now thyna-members-expire.timer
   sudo systemctl start thyna-members-expire.service   # รันทันทีหนึ่งรอบเพื่อพิสูจน์ว่าใช้ได้
-  journalctl -u thyna-members-expire.service -n 20     # ต้องเห็น "ครบ N ร้าน · เกิน 24 เดือน ..."
+  journalctl -u thyna-members-expire.service -n 20     # ต้องเห็น "ครบ N ร้าน · รวม X คน"
   systemctl list-timers thyna-members-expire.timer     # ต้องเห็นรอบถัดไป 04:30
   ```
-- [ ] 🔴 **ห้ามเปิดจอสมาชิกให้ลูกค้าจริง** จนกว่าข้อความยินยอม (`src/lib/member-consent.ts`
-  ฉบับ `2026-10-v2`) และระยะเก็บ 24 เดือนผ่านการตรวจของที่ปรึกษากฎหมาย/DPO
+- [ ] 🔴 **ระบบสมาชิกปิดเป็นค่าเริ่มต้น** (`shop.loyalty_enabled = false`) — หลัง deploy ไม่มีใครเห็นปุ่มสะสมแต้ม
+  **ห้ามกด "เปิดระบบ" ที่ `/admin/members`** จนกว่าข้อความยินยอม (`src/app/_components/loyalty-card.tsx`
+  · `CONSENT_VERSION` ใน `src/server/loyalty.ts`) และระยะเก็บ 24 เดือนผ่านการตรวจของที่ปรึกษากฎหมาย/DPO
   — demo ใช้ได้ เพราะไม่ใช่ข้อมูลลูกค้าจริง
 - [ ] เพิ่ม timer นี้เข้าการ monitor ของ R13 (3.1) — ล้มแล้วต้องมีคนรู้ เหมือน backup ใน 3.2
 
